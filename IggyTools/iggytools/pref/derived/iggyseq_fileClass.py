@@ -30,7 +30,7 @@ class Iggyseq_PrefFile(BasePrefFile):
                                varType = dict ),
 
                       PrefVar( name = 'USERS_FILE',
-                               default = '/n/informatics/saved/seqhub_users_list.txt',
+                               default = '/n/informatics/saved/iggyseq_users_list.txt',
                                comment = 'File containing comma-separated email addresses to be sent all iggyseq notifications and demultiplex summaries',
                                varType = str ),
 
@@ -122,7 +122,18 @@ class Iggyseq_PrefFile(BasePrefFile):
                       PrefVar( name = 'SLURM_PARTITION',
                                default = 'general',
                                comment = 'SLURM PARTITION',
+                               varType = str ), 
+
+                      PrefVar( name = 'SEQSTATS_HIST_DIR',
+                               default = '/n/informatics_external/seq/seqstats_bkup',
+                               comment = 'Where Illumina run statistics files are kept',
+                               varType = str ),
+
+                      PrefVar( name = 'SEQSTATS_LOGFILE',
+                               default = '/n/informatics_external/seq/seqstats_log/log.txt',
+                               comment = 'Seqtats log file',
                                varType = str ) ]
+
 
     def getVars(self):
 

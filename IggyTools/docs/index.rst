@@ -19,6 +19,15 @@ The following are a few example calls to seqprep:
 To run an hourly cron job which runs seqprep on new runs, add the following line to your crontab file:
     ``0 * * * * /n/informatics/iggy/IggyTools/iggytools/bin/cron_seqprep.sh``
 
+Once a run has begun processing, seqprep_seen.txt will be written to the run folder. If you want the cron job to process a run again,
+delete this file from the run's primray_data folder.
+
+To see current state of a processing run, look at log.txt in its log folder:
+
+/n/informatics_external/seq/seqprep_log/<run_name>
+
+If you started processing with the seqprep, be sure to add the suffix that you passed to seqprep to the log folder name.
+
 
 Notes
 ------

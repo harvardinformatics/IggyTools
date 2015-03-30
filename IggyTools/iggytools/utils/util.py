@@ -207,7 +207,7 @@ def email(users, subject, message):  #users can be mix of email addresses and lo
     for user in users:
         cmd = Command("echo \"" + message + "\"|  mail -s \"" + subject + "\" " + user)
         for error in cmd.run():
-            raise(error)  #if anything is written to stdout/stderr from this cmd, it is an error
+            raise Exception(error)  #if anything is written to stdout/stderr from this cmd, it is an error
 
 
 def append(text, filename, echo = False):

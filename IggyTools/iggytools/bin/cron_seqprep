@@ -4,6 +4,7 @@ import sys, os, re, time, traceback
 import os.path as path
 from iggytools.utils.util import intersect, touch, email, append
 from iggytools.iggyseq.runClasses import IlluminaNextGen, getSeqPref
+from iggytools.iggyseq.seqUtil import setPermissions
 
 def seqprepOnNew(argv):
 
@@ -41,7 +42,9 @@ def seqprepOnNew(argv):
                     and len(intersect(runItems, runParametersOptions)) == 1 \
                     and len(intersect(os.listdir(path.join(runPath, "InterOp")), interopRequired)) == len(interopRequired):
                 if verbose: print "\nNew run: " + runName
-                touch(path.join(runPath, "seqprep_seen.txt"))  #mark run as seen by seqprep
+                statusFile = path.join(runPath, "seqprep_seen.txt")
+                touch(statusFile)  #mark run as seen by seqprep
+                setPermissions(statusFile)
 
                 #send notification email
                 email(pref.USER_EMAILS, 'Found new run:  %s' % runName, 'Starting seqprep\n')

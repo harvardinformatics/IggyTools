@@ -1,12 +1,13 @@
 #!/usr/bin/env python 
-from illuminate import InteropDataset
 from lxml import etree
 from datetime import date
-from seqstats import settings, stats, util
-from seqstats.models import SeqRun, Lane
+from iggytools.iggyseq.seqstats import stats, util
 from optparse import OptionParser
+from iggytools.iggyapp.models import SeqRun, Lane
 from iggytools.iggyseq.sampleSheetClasses import BaseSampleSheet
-from iggytools.iggyseq.runClasses import IlluminaNextGen
+from iggytools.iggyseq.runClasses import IlluminaNextGen, getSeqPref
+from iggytools.iggyseq.seqUtil import parseRunInfo
+from iggytools.iggyseq.seqstats.illuminate import InteropDataset
 import shutil, time, json, sys, re, os
 import os.path as path
 
@@ -18,6 +19,9 @@ def getRun(runName): #get run from DB (exception raised if does not exist)
 
 
 def add(argv):  #add a new run to DB
+
+    pref = getSeqPref()
+
     parser = OptionParser(usage="usage: %prog [options] <run_name>")
 
     parser.add_option("-f","--force", help="Rewrite current DB contents with new run and associated lanes. Default: %default", 
@@ -31,17 +35,19 @@ def add(argv):  #add a new run to DB
     parser.add_option("-v","--verbose", help="Verbose mode. Default: %default",
                                              default=False, action="store_true", dest="verbose")
     parser.add_option("-d","--dir", help="Directory containing run folder. Default: %default",
-                                             default=hSettings.PRIMARY_PARENT, action="store", type="string",  dest="primaryParent")
+                                             default=pref.PRIMARY_PARENT, action="store", type="string",  dest="primaryParent")
     options, args = parser.parse_args(argv)
     if len(args) != 1:
         parser.error('Expected one input argument, found %s: %s' % (len(args), ' '.join(args)))
+
     runName = args[0]
+
     if not re.match('[0-9]{6}_[0-9A-Za-z]+_', runName):
         parser.error("Expected run name as first argument, got '" + runName + "'. Use -h to see usage.")
     runPath = path.join(options.primaryParent,runName)
 
     #Copy essential files to history dir, if not already present
-    histDir = settings.HIST_DIR
+    histDir = pref.SEQSTATS_HIST_DIR
     runHistDir = path.join(histDir,runName)
     if path.isdir(runHistDir):
         if options.verbose: print "Run " + runName + " already present in seqstats_hist dir: " + histDir
@@ -95,13 +101,13 @@ def add(argv):  #add a new run to DB
     SampleSheet = BaseSampleSheet.getInstance(seqPrepRun)
     SampleSheet.parse()
     specs['SampleSheet'] = SampleSheet.contentString
-    reads, datetext = hUtil.parseRunInfo(path.join(runPath, 'RunInfo.xml'))
+    reads, datetext = parseRunInfo(path.join(runPath, 'RunInfo.xml'))
     specs['Reads'] = reads
 
     #get machine name
     match = re.match('^[0-9]{6}_([0-9A-Za-z]+)_', runName)
     machine_id = match.groups(1)[0]
-    machine_name = settings.MACHINE_NAME[machine_id] + ' (' + machine_id + ')'
+    machine_name = pref.MACHINE_TYPE[machine_id] + ' (' + machine_id + ')'
 
     lanes = stats.byLaneStats(tile.df, quality.df)
     if options.verbose: print "Adding " + str(len(lanes)) + " lanes to database..."

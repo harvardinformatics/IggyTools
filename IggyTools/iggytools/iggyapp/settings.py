@@ -16,7 +16,7 @@ RUN_HOME = '/n/illumina01/primary_data'
 HIST_DIR = '/n/informatics_external/seq/seqstats_bkup'
 LOGFILE = '/n/informatics_external/seq/seqstats_log/log.txt'
 
-TEMPLATE_DIRS = ( BASE_DIR + "/seqstats/templates", )
+TEMPLATE_DIRS = ( BASE_DIR + "/iggyapp/templates", )
 
 MACHINE_NAME = { 'SN343'  : 'HiSeq 2000', #map machine id to human-friendly name
                  'D00365' : 'HiSeq 2500',
@@ -45,8 +45,8 @@ INSTALLED_APPS = (
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'seqstats',
-    'south',
+    'iggytools.iggyapp',
+#    'south',
 )
 
 MIDDLEWARE_CLASSES = (
@@ -58,9 +58,9 @@ MIDDLEWARE_CLASSES = (
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 )
 
-ROOT_URLCONF = 'seqstats.urls'
+ROOT_URLCONF = 'iggytools.iggyapp.urls'
 
-WSGI_APPLICATION = 'seqstats.wsgi.application'
+WSGI_APPLICATION = 'iggytools.iggyapp.wsgi.application'
 
 
 # Database
@@ -69,7 +69,7 @@ WSGI_APPLICATION = 'seqstats.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'seqstats',
+        'NAME': 'iggyapp',
         'USER': 'cwill',
         'PASSWORD': '98smms76',
         'HOST': 'db-internal',
@@ -96,7 +96,7 @@ USE_TZ = True
 
 STATIC_ROOT = ''
 STATIC_URL = '/static/'
-if BASE_DIR == '/Users/williams03/d/django/seqstats':
+if BASE_DIR == '/Users/williams03/d/django/iggyapp':
     STATICFILES_DIRS = ( os.path.join(BASE_DIR, "static"), )
 else: 
-    STATICFILES_DIRS = ( os.path.join(BASE_DIR, "static/seqstats"), )
+    STATICFILES_DIRS = ( os.path.join(BASE_DIR, "static/iggyapp"), )

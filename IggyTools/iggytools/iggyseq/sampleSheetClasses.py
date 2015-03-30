@@ -146,16 +146,19 @@ class SampleSheet_formatA(BaseSampleSheet):
 
             # Extract index strings from index field
             iMatch = re.match('(?P<index1>[AGCTagct]+)(-(?P<index2>[AGCTagct]+))?$', index)
+
             if not iMatch or iMatch.group('index1') is None:
                 self.warnings.append('No index found in samplesheet %s, line %s: %s' % (self.file, i+1, line))
-
-            index1 = iMatch.group('index1')
-            if index1 is None:
                 index1 = ''
-
-            index2 = iMatch.group('index2')
-            if index2 is None:
                 index2 = ''
+            else:    
+                index1 = iMatch.group('index1')
+                if index1 is None:
+                    index1 = ''
+
+                index2 = iMatch.group('index2')
+                if index2 is None:
+                    index2 = ''
 
             if not indexType:  #make indexType label if it was not specified 
                 indexType = str(len(index1))

@@ -47,7 +47,7 @@ def byLaneStats(tile_df, qual_df):
 
     threshold = 30 #threshold quality score 
     # Note: Before changing this threshold consider possible binning of q scores in v.5 format quality metrics file 
-    # (See seqstats/packages/illuminate/quality_metrics.py)
+    # (See seqstats/illuminate/quality_metrics.py)
 
     colnames = qual_df.columns.values.tolist()
     qnames = [x for x in colnames if x.startswith('q')]

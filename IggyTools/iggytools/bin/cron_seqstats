@@ -1,18 +1,24 @@
 #!/usr/bin/env python 
 from optparse import OptionParser
-from seqstats import addSeqRun, settings
-from seqhub import hUtil, hSettings
 import sys, os, re, time, traceback
 import os.path as path
-from seqhub.hUtil import intersect
-from seqhub.hUtil import touch
+from iggytools.utils.util import intersect, touch, append, email
+from iggytools.iggyseq.runClasses import IlluminaNextGen, getSeqPref
+from iggytools.iggyseq.seqstats import addSeqRun
+from iggytools.iggyseq.seqUtil import setPermissions
+
+from django.core.wsgi import get_wsgi_application
+os.environ['DJANGO_SETTINGS_MODULE'] = 'iggytools.iggyapp.settings'
+application = get_wsgi_application()
+
 
 def seqstatsOnNew(argv):
+
+    pref = getSeqPref()
+
     parser = OptionParser(usage="usage: %prog [options]")
     parser.add_option("-d","--dir", help="Set directory searched for new sequencing runs. Default: %default",
-                      default=hSettings.PRIMARY_PARENT, action="store", dest="primaryParent")
-    parser.add_option("-s","--slurm", help="Process new runs on cluster instead of locally. Default: %default",
-                      default=False, action="store_true", dest="slurm")
+                      default=pref.PRIMARY_PARENT, action="store", dest="primaryParent")
     parser.add_option("-v","--verbose", help="Verbose mode. Default: %default",
                       default=False, action="store_true", dest="verbose")
     (options, args) = parser.parse_args(argv)
@@ -37,20 +43,23 @@ def seqstatsOnNew(argv):
                     and len(intersect(items, runParametersOptions)) == 1 \
                     and len(intersect(os.listdir(path.join(runPath, "InterOp")), interopRequired)) == len(interopRequired):
                 if options.verbose: print "\nNew run: " + runName
-                touch(path.join(runPath, "seqstats_seen.txt"))  #mark run as seen
+                statusFile = path.join(runPath, "seqstats_seen.txt")
+                touch(statusFile)  #mark run as seen
+                setPermissions(statusFile)
 
-                try:                
+#                try:                
+                if True:
                     #add run to database if not already present
                      myArgs = [runName, "--force", "-d", options.primaryParent]
                      if options.verbose: myArgs.append("--verbose")
                      logMsg = time.strftime("%c") + "  Running addSeqRun.add() on " + runName + " with args: " + ' '.join(myArgs)
-                     hUtil.append(logMsg, settings.LOGFILE, echo = options.verbose)
+                     append(logMsg, pref.SEQSTATS_LOGFILE, echo = options.verbose)
                      addSeqRun.add(myArgs)  
-                except:
-                     excpStr = runName + "\n\n" + traceback.format_exc()
-                     hUtil.append("Seqstats Exception\n" + excpStr, settings.LOGFILE, echo = options.verbose)
-                     hUtil.email(hSettings.SEQTOOLS_USERS_EMAILS, 'Seqstats Exception for %s' % runName, excpStr)
-                     return
+#                except:
+#                     excpStr = runName + "\n\n" + traceback.format_exc()
+#                     append("Seqstats Exception\n" + excpStr, pref.SEQSTATS_LOGFILE, echo = options.verbose)
+#                     email(pref.USER_EMAILS, 'Seqstats Exception for %s' % runName, excpStr)
+#                     return
 
 if __name__ == "__main__":
     seqstatsOnNew(sys.argv[1:])
