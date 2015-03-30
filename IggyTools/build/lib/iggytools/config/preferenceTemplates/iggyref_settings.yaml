@@ -1,0 +1,22 @@
+
+####
+##  IggyRef preferences
+####
+
+# Directory for genome and database repository
+IGGYREF_REPOSITORY_DIR: <path_to_repository_directory>
+
+# Level of logging detail (info or debug)
+IGGYREF_LOGGING_LEVEL: info
+
+# Database type (sqlite or mysql)
+IGGYREF_DB_TYPE: sqlite
+
+# Note, if IGGYREF_DB_TYPE is sqlite, then the mysql settings below can be ignored:
+IGGYREF_MYSQL_HOST: myhost
+IGGYREF_MYSQL_DB: iggyref_db
+IGGYREF_MYSQL_USER: iggyref
+IGGYREF_MYSQL_PASS: iggyref
+
+# Debug mode (In debug mode, files are not copied from IGGYREF_WORKING_DIR to IGGYREF_REPOSITORY_DIR)
+DEBUG: False

@@ -1,0 +1,45 @@
+{% extends "base.html" %}
+{% load staticfiles %}
+{% block head %}
+{% endblock %}  
+
+{% block body %}
+
+<style>
+  .bpadded {
+     margin-bottom: 15px;
+  }
+</style>
+
+<div id="mychart"></div>
+
+
+<script>
+$(function(){
+  // This page is requested in minilims by an iframe. It displays histograms for cluster_density and percent_pf_clusters 
+
+  var quark = new quarkLib();
+  console.log("quark: " + typeof(quark));
+
+  var params = $.parseJSON( "{{ parameters|escapejs }}" );
+  console.log(params);
+
+//  console.log(params);
+
+  params["plotObj_ppfc"]["plot_title"] = "Histogram of Percent Pass-Filter Clusters";
+  params["plotObj_ppfc"]["subtitles"] = []
+  params["plotObj_ppfc"]["subtitles"][0] = "Machine: " + params["machine_name"];
+  params["plotObj_ppfc"]["subtitles"][1] = "Highlighted: " + params["short_name"];
+  quark.minilimsHistogram("#mychart",params["plotObj_ppfc"],params["selected_names"],"Percent");
+
+  params["plotObj_cd"]["plot_title"] = "Histogram of Cluster Density";
+  params["plotObj_cd"]["subtitles"] = []
+  params["plotObj_cd"]["subtitles"][0] = "Machine: " + params["machine_name"];
+  params["plotObj_cd"]["subtitles"][1] = "Highlighted: " + params["short_name"];
+  quark.minilimsHistogram("#mychart",params["plotObj_cd"],params["selected_names"],"Cluster Density");
+
+
+});
+</script>
+
+{% endblock %}  

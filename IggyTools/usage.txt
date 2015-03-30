@@ -1,0 +1,28 @@
+  iggyref_setup
+    Create Iggyref preferences file if it doesn't already exist
+    usage: ['-h'] [-h] [-d PREFDIR]
+    optional arguments:
+      -h, --help            show this help message and exit
+      -d PREFDIR, --prefDir PREFDIR
+                            Directory where iggyref preferences file will be
+                            created. Default: /n/home00/cdaly/.iggytools
+   
+  iggyref_update
+    Download genome and database repositories, or updates existing repositories.
+    usage: iggyref_update [options] <repos>
+
+    positional arguments:
+      repos                 Space-separated list of repo(s) to update. Choices:
+                            ebi, ensembl, ncbi, ucsc, uniprot, all. If no value
+			    or "all" is specified, all five available repos are
+			    updated.
+
+    optional arguments:
+      -h, --help            show this help message and exit
+      -f, --force           Force download and postprocessing of all files in
+                            repo. Default: False
+      -p, --forceProcess    Force postprocessing only. Default: False
+      -d PREFDIR, --prefDir PREFDIR
+                            Directory where iggyref preferences file is located.
+                            Default is your home directory.
+      -v, --verbose         Verbose mode

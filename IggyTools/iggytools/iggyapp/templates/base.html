@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html>
+
+{% load i18n %}
+{% load staticfiles %}
+
+<head>
+  <title>{% block title %}SeqStats{% endblock %} </title>
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
+  <script type="text/javascript" src="{% static 'seqstats/js/d3.min.js' %}"></script>
+  <script type="text/javascript" src="{% static 'seqstats/js/quark/quark.js' %}"></script>
+  <link rel="stylesheet" type="text/css" href="{% static 'seqstats/js/quark/quark.css' %}">
+  {% block head %}
+  {% endblock %}
+</head>
+
+<body>
+  {% block body %}
+  {% endblock %}
+</body>
+
+</html>
+
+

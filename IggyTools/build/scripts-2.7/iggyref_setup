@@ -1,0 +1,20 @@
+#!python
+
+import os.path as path
+import sys, argparse, re
+from iggytools.config.config import iggytools_prefDir_setup
+from iggytools.utils.util import getUserHome
+
+def main(arg):
+
+    defaultPrefDir = path.join(getUserHome(), '.iggytools')
+    parser = argparse.ArgumentParser(arg)
+    parser.add_argument('-d', '--prefDir', help='Directory where iggyref preferences file will be created. Default: %(default)s', default = defaultPrefDir)
+    args = parser.parse_args()
+
+    print 'Writing template preferences file to %s.' % path.join(args.prefDir, 'iggyref_settings.yaml')
+    iggytools_prefDir_setup(args.prefDir)
+    print 'Edit this file to set Iggyref preferences.'
+
+if __name__ == "__main__":
+    main(sys.argv[1:])

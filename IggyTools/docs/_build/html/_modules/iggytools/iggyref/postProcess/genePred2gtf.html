@@ -1,0 +1,163 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>iggytools.iggyref.postProcess.genePred2gtf &mdash; iggytools 0.1 documentation</title>
+    
+    <link rel="stylesheet" href="../../../../_static/sphinxdoc.css" type="text/css" />
+    <link rel="stylesheet" href="../../../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../../',
+        VERSION:     '0.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../../_static/doctools.js"></script>
+    <link rel="top" title="iggytools 0.1 documentation" href="../../../../index.html" />
+    <link rel="up" title="Module code" href="../../../index.html" /> 
+  </head>
+  <body role="document">
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../../../index.html">iggytools 0.1 documentation</a> &raquo;</li>
+          <li class="nav-item nav-item-1"><a href="../../../index.html" accesskey="U">Module code</a> &raquo;</li> 
+      </ul>
+    </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../../../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for iggytools.iggyref.postProcess.genePred2gtf</h1><div class="highlight"><pre>
+<span class="kn">import</span> <span class="nn">os.path</span> <span class="kn">as</span> <span class="nn">path</span>
+<span class="kn">import</span> <span class="nn">re</span><span class="o">,</span> <span class="nn">glob</span><span class="o">,</span> <span class="nn">logging</span>
+
+<div class="viewcode-block" id="genePred2gtf"><a class="viewcode-back" href="../../../../_rst/iggytools.iggyref.postProcess.html#iggytools.iggyref.postProcess.genePred2gtf.genePred2gtf">[docs]</a><span class="k">def</span> <span class="nf">genePred2gtf</span><span class="p">(</span><span class="n">inFile</span><span class="p">,</span> <span class="n">sourceID</span><span class="p">,</span> <span class="n">outDir</span> <span class="o">=</span> <span class="bp">None</span><span class="p">,</span> <span class="n">outFile</span> <span class="o">=</span> <span class="bp">None</span><span class="p">):</span>
+    <span class="n">log</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="s">&quot;iggyref_&quot;</span> <span class="o">+</span> <span class="n">sourceID</span><span class="p">)</span>
+    <span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s">&#39;Converting </span><span class="si">%s</span><span class="s"> to GTF format&#39;</span> <span class="o">%</span> <span class="n">inFile</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">outFile</span><span class="p">:</span>
+        <span class="n">inFileStem</span> <span class="o">=</span> <span class="n">path</span><span class="o">.</span><span class="n">splitext</span><span class="p">(</span><span class="n">inFile</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="k">if</span> <span class="n">outDir</span><span class="p">:</span>
+            <span class="n">outFile</span> <span class="o">=</span> <span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">outDir</span><span class="p">,</span> <span class="n">inFileStem</span> <span class="o">+</span> <span class="s">&quot;.gtf&quot;</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">outFile</span> <span class="o">=</span> <span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span> <span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="n">inFile</span><span class="p">),</span> <span class="n">inFileStem</span> <span class="o">+</span> <span class="s">&quot;.gtf&quot;</span> <span class="p">)</span>
+
+    <span class="n">fin</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="n">inFile</span><span class="p">,</span> <span class="s">&#39;r&#39;</span><span class="p">)</span>
+    <span class="n">fout</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="n">outFile</span><span class="p">,</span> <span class="s">&#39;w&#39;</span><span class="p">)</span>
+    <span class="n">g</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span> 
+    <span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="n">fin</span><span class="p">:</span>
+        <span class="n">vals</span> <span class="o">=</span> <span class="n">line</span><span class="o">.</span><span class="n">rstrip</span><span class="p">()</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s">&#39;</span><span class="se">\t</span><span class="s">&#39;</span><span class="p">)</span>
+
+        <span class="c">#UCSC genePred fields</span>
+        <span class="n">g</span><span class="p">[</span><span class="s">&#39;name&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">vals</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+        <span class="n">g</span><span class="p">[</span><span class="s">&#39;chrom&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">vals</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span>
+        <span class="n">g</span><span class="p">[</span><span class="s">&#39;strand&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">vals</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span>
+        <span class="n">g</span><span class="p">[</span><span class="s">&#39;txStart&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">vals</span><span class="p">[</span><span class="mi">4</span><span class="p">])</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span>  <span class="c">#add 1 to start to convert from UCSC indexing</span>
+        <span class="n">g</span><span class="p">[</span><span class="s">&#39;txEnd&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">vals</span><span class="p">[</span><span class="mi">5</span><span class="p">]</span>
+        <span class="n">g</span><span class="p">[</span><span class="s">&#39;codingStart&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">vals</span><span class="p">[</span><span class="mi">6</span><span class="p">])</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span>  <span class="c">#add 1 to start to convert from UCSC indexing</span>
+        <span class="n">g</span><span class="p">[</span><span class="s">&#39;codingEnd&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">vals</span><span class="p">[</span><span class="mi">7</span><span class="p">]</span>
+        <span class="n">g</span><span class="p">[</span><span class="s">&#39;exonStarts&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="nb">str</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">vals</span><span class="p">[</span><span class="mi">9</span><span class="p">]</span><span class="o">.</span><span class="n">rstrip</span><span class="p">(</span><span class="s">&#39;,&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s">&#39;,&#39;</span><span class="p">)]</span>  <span class="c">#add 1 to start to convert from UCSC indexing</span>
+        <span class="n">g</span><span class="p">[</span><span class="s">&#39;exonEnds&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">vals</span><span class="p">[</span><span class="mi">10</span><span class="p">]</span><span class="o">.</span><span class="n">rstrip</span><span class="p">(</span><span class="s">&#39;,&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s">&#39;,&#39;</span><span class="p">)</span>
+        <span class="n">g</span><span class="p">[</span><span class="s">&#39;altName&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">vals</span><span class="p">[</span><span class="mi">12</span><span class="p">]</span>
+        <span class="n">g</span><span class="p">[</span><span class="s">&#39;exonFrames&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">vals</span><span class="p">[</span><span class="mi">15</span><span class="p">]</span><span class="o">.</span><span class="n">rstrip</span><span class="p">(</span><span class="s">&#39;,&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s">&#39;,&#39;</span><span class="p">)</span>
+        <span class="n">numExons</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">g</span><span class="p">[</span><span class="s">&#39;exonStarts&#39;</span><span class="p">])</span>
+
+        <span class="c">#GTF fields:</span>
+        <span class="n">chromName</span> <span class="o">=</span> <span class="n">g</span><span class="p">[</span><span class="s">&#39;chrom&#39;</span><span class="p">]</span>
+        <span class="k">if</span> <span class="n">g</span><span class="p">[</span><span class="s">&#39;altName&#39;</span><span class="p">]:</span>
+            <span class="n">attribute</span> <span class="o">=</span> <span class="s">&#39;gene_id &quot;&#39;</span> <span class="o">+</span> <span class="n">g</span><span class="p">[</span><span class="s">&#39;altName&#39;</span><span class="p">]</span> <span class="o">+</span> <span class="s">&#39;&quot;; gene_name &quot;&#39;</span> <span class="o">+</span> <span class="n">g</span><span class="p">[</span><span class="s">&#39;altName&#39;</span><span class="p">]</span> <span class="o">+</span> <span class="s">&#39;&quot;; transcript_id &quot;&#39;</span> <span class="o">+</span> <span class="n">g</span><span class="p">[</span><span class="s">&#39;name&#39;</span><span class="p">]</span> <span class="o">+</span> <span class="s">&#39;&quot;;&#39;</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">attribute</span> <span class="o">=</span> <span class="s">&#39;transcript_id &quot;&#39;</span> <span class="o">+</span> <span class="n">g</span><span class="p">[</span><span class="s">&#39;name&#39;</span><span class="p">]</span> <span class="o">+</span> <span class="s">&#39;&quot;;&#39;</span>
+
+        <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">numExons</span><span class="p">):</span>
+            <span class="c">#write coding sequence line</span>
+            <span class="n">feature</span> <span class="o">=</span> <span class="s">&#39;CDS&#39;</span>
+            <span class="k">if</span> <span class="n">j</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="n">codingStart</span> <span class="o">=</span> <span class="n">g</span><span class="p">[</span><span class="s">&#39;codingStart&#39;</span><span class="p">]</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">codingStart</span> <span class="o">=</span> <span class="n">g</span><span class="p">[</span><span class="s">&#39;exonStarts&#39;</span><span class="p">][</span><span class="n">j</span><span class="p">]</span>
+
+            <span class="k">if</span> <span class="n">j</span> <span class="o">==</span> <span class="n">numExons</span><span class="o">-</span><span class="mi">1</span><span class="p">:</span>
+                <span class="n">codingEnd</span> <span class="o">=</span> <span class="n">g</span><span class="p">[</span><span class="s">&#39;codingEnd&#39;</span><span class="p">]</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">codingEnd</span> <span class="o">=</span> <span class="n">g</span><span class="p">[</span><span class="s">&#39;exonEnds&#39;</span><span class="p">][</span><span class="n">j</span><span class="p">]</span>
+
+            <span class="k">if</span> <span class="n">g</span><span class="p">[</span><span class="s">&#39;exonFrames&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="s">&#39;-1&#39;</span><span class="p">:</span>
+                <span class="n">frame</span> <span class="o">=</span> <span class="s">&#39;.&#39;</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">frame</span> <span class="o">=</span> <span class="n">g</span><span class="p">[</span><span class="s">&#39;exonFrames&#39;</span><span class="p">][</span><span class="n">j</span><span class="p">]</span>
+
+            <span class="c">#format: chromName, source, feature, start, end, score, strand, frame, attribute</span>
+            <span class="n">fout</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s">&#39;</span><span class="se">\t</span><span class="s">&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="n">chromName</span><span class="p">,</span> <span class="s">&#39;unknown&#39;</span><span class="p">,</span> <span class="n">feature</span><span class="p">,</span> <span class="n">codingStart</span><span class="p">,</span> <span class="n">codingEnd</span><span class="p">,</span> <span class="s">&#39;.&#39;</span><span class="p">,</span> <span class="n">g</span><span class="p">[</span><span class="s">&#39;strand&#39;</span><span class="p">],</span> <span class="n">frame</span><span class="p">,</span> <span class="n">attribute</span><span class="p">])</span> <span class="o">+</span> <span class="s">&#39;</span><span class="se">\n</span><span class="s">&#39;</span><span class="p">)</span>
+
+            <span class="c">#now write exon line</span>
+            <span class="n">feature</span> <span class="o">=</span> <span class="s">&#39;exon&#39;</span>
+            <span class="c">#format: chromName, source, feature, start, end, score, strand, frame, attribute</span>
+            <span class="n">fout</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s">&#39;</span><span class="se">\t</span><span class="s">&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="n">chromName</span><span class="p">,</span> <span class="s">&#39;unknown&#39;</span><span class="p">,</span> <span class="n">feature</span><span class="p">,</span> <span class="n">g</span><span class="p">[</span><span class="s">&#39;exonStarts&#39;</span><span class="p">][</span><span class="n">j</span><span class="p">],</span> <span class="n">g</span><span class="p">[</span><span class="s">&#39;exonEnds&#39;</span><span class="p">][</span><span class="n">j</span><span class="p">],</span> <span class="s">&#39;.&#39;</span><span class="p">,</span> <span class="n">g</span><span class="p">[</span><span class="s">&#39;strand&#39;</span><span class="p">],</span> <span class="n">frame</span><span class="p">,</span> <span class="n">attribute</span><span class="p">])</span> <span class="o">+</span> <span class="s">&#39;</span><span class="se">\n</span><span class="s">&#39;</span><span class="p">)</span>
+
+    <span class="n">fin</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+    <span class="n">fout</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+    <span class="k">return</span> <span class="n">outFile</span>
+            </div>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../../../index.html">iggytools 0.1 documentation</a> &raquo;</li>
+          <li class="nav-item nav-item-1"><a href="../../../index.html" >Module code</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &copy; Copyright 2015, Chris Williams.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.3.1.
+    </div>
+  </body>
+</html>

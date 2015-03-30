@@ -1,0 +1,304 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>iggytools.iggypipeline.module.configClasses &mdash; iggytools 0.1 documentation</title>
+    
+    <link rel="stylesheet" href="../../../../_static/sphinxdoc.css" type="text/css" />
+    <link rel="stylesheet" href="../../../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../../',
+        VERSION:     '0.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../../_static/doctools.js"></script>
+    <link rel="top" title="iggytools 0.1 documentation" href="../../../../index.html" />
+    <link rel="up" title="Module code" href="../../../index.html" /> 
+  </head>
+  <body role="document">
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../../../index.html">iggytools 0.1 documentation</a> &raquo;</li>
+          <li class="nav-item nav-item-1"><a href="../../../index.html" accesskey="U">Module code</a> &raquo;</li> 
+      </ul>
+    </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../../../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for iggytools.iggypipeline.module.configClasses</h1><div class="highlight"><pre>
+<span class="kn">from</span> <span class="nn">collections</span> <span class="kn">import</span> <span class="n">OrderedDict</span>
+<span class="kn">import</span> <span class="nn">os</span><span class="o">,</span> <span class="nn">logging</span><span class="o">,</span> <span class="nn">re</span><span class="o">,</span> <span class="nn">traceback</span><span class="o">,</span> <span class="nn">argparse</span><span class="o">,</span> <span class="nn">json</span><span class="o">,</span> <span class="nn">getpass</span><span class="o">,</span> <span class="nn">copy</span>
+<span class="kn">import</span> <span class="nn">os.path</span> <span class="kn">as</span> <span class="nn">path</span>
+<span class="kn">from</span> <span class="nn">iggytools.utils.util</span> <span class="kn">import</span> <span class="n">mkdir_p</span>
+<span class="kn">from</span> <span class="nn">iggytools.iggypipeline.module.argDefClass</span> <span class="kn">import</span> <span class="n">ArgDef</span>
+<span class="kn">from</span> <span class="nn">abc</span> <span class="kn">import</span> <span class="n">ABCMeta</span><span class="p">,</span> <span class="n">abstractmethod</span>
+
+
+<div class="viewcode-block" id="BaseConfig"><a class="viewcode-back" href="../../../../_rst/iggytools.iggypipeline.module.html#iggytools.iggypipeline.module.configClasses.BaseConfig">[docs]</a><span class="k">class</span> <span class="nc">BaseConfig</span><span class="p">:</span>
+
+    <span class="n">__metaclass__</span> <span class="o">=</span> <span class="n">ABCMeta</span>
+
+    <span class="nd">@classmethod</span>
+<div class="viewcode-block" id="BaseConfig.getInstance"><a class="viewcode-back" href="../../../../_rst/iggytools.iggypipeline.module.html#iggytools.iggypipeline.module.configClasses.BaseConfig.getInstance">[docs]</a>    <span class="k">def</span> <span class="nf">getInstance</span><span class="p">(</span><span class="n">cls</span><span class="p">,</span> <span class="n">cType</span><span class="p">,</span> <span class="n">mod</span><span class="p">,</span> <span class="n">argDefs</span> <span class="o">=</span> <span class="bp">None</span><span class="p">):</span>
+
+        <span class="k">if</span> <span class="n">cType</span> <span class="o">==</span> <span class="s">&#39;module&#39;</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">ModConfig</span><span class="p">(</span><span class="n">mod</span><span class="p">,</span> <span class="n">argDefs</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">cType</span> <span class="o">==</span> <span class="s">&#39;slurm&#39;</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">SlurmConfig</span><span class="p">(</span><span class="n">mod</span><span class="p">,</span> <span class="n">slurmArgDefs</span><span class="p">)</span>
+
+</div>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">mod</span><span class="p">,</span> <span class="n">argDefs</span><span class="p">):</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">mod</span> <span class="o">=</span> <span class="n">mod</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">pipe</span> <span class="o">=</span> <span class="n">mod</span><span class="o">.</span><span class="n">pipe</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">args</span> <span class="o">=</span> <span class="n">OrderedDict</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">argsJson</span> <span class="o">=</span> <span class="bp">None</span>
+
+        <span class="c">#create parser from arg definitions</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">parser</span> <span class="o">=</span> <span class="n">argparse</span><span class="o">.</span><span class="n">ArgumentParser</span><span class="p">()</span>
+        <span class="k">for</span> <span class="n">argDef</span> <span class="ow">in</span> <span class="n">argDefs</span><span class="o">.</span><span class="n">itervalues</span><span class="p">():</span>
+            <span class="n">argDef</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">parser</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">argDefs</span> <span class="o">=</span> <span class="n">argDefs</span>
+        
+
+<div class="viewcode-block" id="BaseConfig.setValues"><a class="viewcode-back" href="../../../../_rst/iggytools.iggypipeline.module.html#iggytools.iggypipeline.module.configClasses.BaseConfig.setValues">[docs]</a>    <span class="k">def</span> <span class="nf">setValues</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">namedArgs</span><span class="p">):</span> 
+
+        <span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="n">arg</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">argDefs</span><span class="o">.</span><span class="n">iteritems</span><span class="p">():</span> <span class="c">#to namedArgs, add any missing args that had default values</span>
+
+            <span class="k">if</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">namedArgs</span><span class="p">:</span>
+                <span class="n">inputValue</span> <span class="o">=</span> <span class="n">namedArgs</span><span class="p">[</span><span class="n">name</span><span class="p">]</span>
+
+                <span class="k">if</span> <span class="s">&#39;type&#39;</span> <span class="ow">in</span> <span class="n">arg</span><span class="o">.</span><span class="n">kwargs</span> <span class="ow">and</span> <span class="n">arg</span><span class="o">.</span><span class="n">kwargs</span><span class="p">[</span><span class="s">&#39;type&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="nb">list</span> <span class="ow">and</span> <span class="nb">type</span><span class="p">(</span><span class="n">inputValue</span><span class="p">)</span> <span class="o">!=</span> <span class="nb">list</span><span class="p">:</span> <span class="c">#if list is required, &#39;cast&#39; non-lists nicely</span>
+                    
+                        <span class="n">inputValue</span> <span class="o">=</span> <span class="p">[</span><span class="n">inputValue</span><span class="p">]</span>
+
+                <span class="n">arg</span><span class="o">.</span><span class="n">value</span> <span class="o">=</span> <span class="n">inputValue</span>
+
+            <span class="k">elif</span> <span class="n">arg</span><span class="o">.</span><span class="n">default</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span> <span class="ow">and</span> <span class="n">arg</span><span class="o">.</span><span class="n">default</span> <span class="o">!=</span> <span class="n">arg</span><span class="o">.</span><span class="n">value</span><span class="p">:</span>
+                <span class="n">arg</span><span class="o">.</span><span class="n">value</span> <span class="o">=</span> <span class="n">arg</span><span class="o">.</span><span class="n">default</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">argsJson</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span> <span class="p">[(</span><span class="n">arg</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">arg</span><span class="o">.</span><span class="n">value</span><span class="p">)</span> <span class="k">for</span> <span class="n">arg</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">argDefs</span><span class="o">.</span><span class="n">itervalues</span><span class="p">()</span> <span class="k">if</span> <span class="n">arg</span><span class="o">.</span><span class="n">value</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">]</span> <span class="p">)</span>
+
+</div>
+<div class="viewcode-block" id="BaseConfig.showValues"><a class="viewcode-back" href="../../../../_rst/iggytools.iggypipeline.module.html#iggytools.iggypipeline.module.configClasses.BaseConfig.showValues">[docs]</a>    <span class="k">def</span> <span class="nf">showValues</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">indent</span> <span class="o">=</span> <span class="mi">0</span><span class="p">):</span> <span class="c">#display current settings</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">any</span><span class="p">([</span><span class="n">x</span><span class="o">.</span><span class="n">value</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">argDefs</span><span class="o">.</span><span class="n">itervalues</span><span class="p">()]):</span>
+            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s">&#39;No input arguments set. Use module.input() to set inputs, or module.help() for more information.&#39;</span><span class="p">)</span>
+
+        <span class="k">print</span> <span class="bp">self</span><span class="o">.</span><span class="n">args2str</span><span class="p">(</span><span class="n">indent</span><span class="p">)</span>
+</div>
+    <span class="nd">@abstractmethod</span>
+<div class="viewcode-block" id="BaseConfig.showDefs"><a class="viewcode-back" href="../../../../_rst/iggytools.iggypipeline.module.html#iggytools.iggypipeline.module.configClasses.BaseConfig.showDefs">[docs]</a>    <span class="k">def</span> <span class="nf">showDefs</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">pass</span>
+
+</div>
+<div class="viewcode-block" id="BaseConfig.args2str"><a class="viewcode-back" href="../../../../_rst/iggytools.iggypipeline.module.html#iggytools.iggypipeline.module.configClasses.BaseConfig.args2str">[docs]</a>    <span class="k">def</span> <span class="nf">args2str</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">indent</span> <span class="o">=</span> <span class="mi">0</span><span class="p">):</span>
+
+        <span class="n">argStr</span> <span class="o">=</span> <span class="s">&#39;&#39;</span>
+        <span class="n">indentStr</span> <span class="o">=</span> <span class="s">&#39; &#39;</span> <span class="o">*</span> <span class="n">indent</span>
+
+        <span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="n">arg</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">argDefs</span><span class="o">.</span><span class="n">iteritems</span><span class="p">():</span>
+            <span class="k">if</span> <span class="n">arg</span><span class="o">.</span><span class="n">value</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+                <span class="n">nameLabel</span> <span class="o">=</span> <span class="s">&#39;</span><span class="si">%s</span><span class="s">:&#39;</span> <span class="o">%</span> <span class="n">name</span>
+                <span class="n">argStr</span> <span class="o">+=</span> <span class="s">&#39;</span><span class="si">%s%s</span><span class="s"> </span><span class="si">%s</span><span class="se">\n</span><span class="s">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">indentStr</span><span class="p">,</span> <span class="n">nameLabel</span><span class="o">.</span><span class="n">ljust</span><span class="p">(</span><span class="mi">20</span><span class="p">),</span><span class="n">arg</span><span class="o">.</span><span class="n">value</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">argStr</span>
+
+</div></div>
+<div class="viewcode-block" id="ModConfig"><a class="viewcode-back" href="../../../../_rst/iggytools.iggypipeline.module.html#iggytools.iggypipeline.module.configClasses.ModConfig">[docs]</a><span class="k">class</span> <span class="nc">ModConfig</span><span class="p">(</span><span class="n">BaseConfig</span><span class="p">):</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">mod</span><span class="p">,</span> <span class="n">argDefs</span><span class="p">):</span>
+
+        <span class="n">BaseConfig</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">mod</span><span class="p">,</span> <span class="n">argDefs</span><span class="p">)</span>
+
+
+<div class="viewcode-block" id="ModConfig.showDefs"><a class="viewcode-back" href="../../../../_rst/iggytools.iggypipeline.module.html#iggytools.iggypipeline.module.configClasses.ModConfig.showDefs">[docs]</a>    <span class="k">def</span> <span class="nf">showDefs</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+
+        <span class="k">print</span> <span class="s">&#39;</span><span class="se">\n</span><span class="si">%s</span><span class="s"> Inputs:</span><span class="se">\n</span><span class="s">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">mod</span><span class="o">.</span><span class="n">name</span><span class="o">.</span><span class="n">capitalize</span><span class="p">())</span>
+
+        <span class="k">for</span> <span class="n">arg</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">argDefs</span><span class="o">.</span><span class="n">itervalues</span><span class="p">():</span>
+            <span class="n">arg</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+            <span class="k">print</span> <span class="s">&#39;&#39;</span>
+        <span class="k">print</span> <span class="s">&#39;&#39;</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">mod</span><span class="o">.</span><span class="n">outputHelp</span><span class="p">:</span>
+            <span class="k">print</span> <span class="s">&#39;</span><span class="se">\n</span><span class="si">%s</span><span class="s"> Output Attributes:</span><span class="se">\n</span><span class="s">&#39;</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">mod</span><span class="o">.</span><span class="n">name</span><span class="o">.</span><span class="n">capitalize</span><span class="p">()</span>
+            <span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">mod</span><span class="o">.</span><span class="n">outputHelp</span><span class="p">:</span>
+                <span class="k">print</span> <span class="s">&quot;    </span><span class="si">%s</span><span class="s">&quot;</span> <span class="o">%</span> <span class="n">line</span>
+            <span class="k">print</span> <span class="s">&#39;&#39;</span>
+
+
+</div></div>
+<div class="viewcode-block" id="SlurmConfig"><a class="viewcode-back" href="../../../../_rst/iggytools.iggypipeline.module.html#iggytools.iggypipeline.module.configClasses.SlurmConfig">[docs]</a><span class="k">class</span> <span class="nc">SlurmConfig</span><span class="p">(</span><span class="n">BaseConfig</span><span class="p">):</span>
+
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">mod</span><span class="p">,</span> <span class="n">argDefs</span><span class="p">):</span>
+
+        <span class="n">BaseConfig</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">mod</span><span class="p">,</span> <span class="n">argDefs</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">slurmScript</span> <span class="o">=</span> <span class="bp">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">slurmScriptFile</span> <span class="o">=</span> <span class="bp">None</span>
+
+<div class="viewcode-block" id="SlurmConfig.showDefs"><a class="viewcode-back" href="../../../../_rst/iggytools.iggypipeline.module.html#iggytools.iggypipeline.module.configClasses.SlurmConfig.showDefs">[docs]</a>    <span class="k">def</span> <span class="nf">showDefs</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>  <span class="c">#display slurm param definitions</span>
+
+        <span class="k">print</span> <span class="s">&#39;</span><span class="se">\n</span><span class="s">Slurm Inputs:</span><span class="se">\n</span><span class="s">&#39;</span>
+        <span class="k">for</span> <span class="n">arg</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">argDefs</span><span class="o">.</span><span class="n">itervalues</span><span class="p">():</span>
+            <span class="n">arg</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+            <span class="k">print</span> <span class="s">&#39;&#39;</span>
+
+        <span class="k">print</span> <span class="s">&quot;</span><span class="se">\n</span><span class="s">Use module.input() to set module inputs, then module.slurmShow() to view default/recommended slurm parameters&quot;</span>
+
+</div>
+<div class="viewcode-block" id="SlurmConfig.showValues"><a class="viewcode-back" href="../../../../_rst/iggytools.iggypipeline.module.html#iggytools.iggypipeline.module.configClasses.SlurmConfig.showValues">[docs]</a>    <span class="k">def</span> <span class="nf">showValues</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">indent</span> <span class="o">=</span> <span class="mi">0</span><span class="p">):</span> <span class="c">#display current slurm params</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">any</span><span class="p">([</span><span class="n">x</span><span class="o">.</span><span class="n">value</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">argDefs</span><span class="o">.</span><span class="n">itervalues</span><span class="p">()]):</span>
+            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s">&quot;No slurm parameters set. Use module.input() to set module inputs, then module.slurmHelp() and module.slurmShow() to view slurm parameters&quot;</span><span class="p">)</span>
+
+        <span class="n">BaseConfig</span><span class="o">.</span><span class="n">showValues</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">indent</span><span class="p">)</span> 
+
+</div>
+<div class="viewcode-block" id="SlurmConfig.buildSlurmScript"><a class="viewcode-back" href="../../../../_rst/iggytools.iggypipeline.module.html#iggytools.iggypipeline.module.configClasses.SlurmConfig.buildSlurmScript">[docs]</a>    <span class="k">def</span> <span class="nf">buildSlurmScript</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+
+        <span class="n">s</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">argDefs</span>
+
+        <span class="n">script</span> <span class="o">=</span> <span class="s">&#39;#!/bin/bash</span><span class="se">\n\n</span><span class="s">&#39;</span>
+        <span class="n">script</span> <span class="o">+=</span><span class="s">&#39;#SBATCH --nodes=</span><span class="si">%s</span><span class="se">\n</span><span class="s">&#39;</span> <span class="o">%</span> <span class="n">s</span><span class="p">[</span><span class="s">&#39;nodes&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">value</span>
+
+        <span class="k">if</span> <span class="n">s</span><span class="p">[</span><span class="s">&#39;ntasks&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">value</span><span class="p">:</span>     <span class="n">script</span> <span class="o">+=</span> <span class="s">&#39;#SBATCH --tasks-per-node=</span><span class="si">%s</span><span class="se">\n</span><span class="s">&#39;</span>  <span class="o">%</span> <span class="n">s</span><span class="p">[</span><span class="s">&#39;ntasks&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">value</span>
+        <span class="k">if</span> <span class="n">s</span><span class="p">[</span><span class="s">&#39;mem&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">value</span><span class="p">:</span>        <span class="n">script</span> <span class="o">+=</span> <span class="s">&#39;#SBATCH --mem=</span><span class="si">%s</span><span class="se">\n</span><span class="s">&#39;</span>             <span class="o">%</span> <span class="n">s</span><span class="p">[</span><span class="s">&#39;mem&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">value</span>
+        <span class="k">if</span> <span class="n">s</span><span class="p">[</span><span class="s">&#39;time&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">value</span><span class="p">:</span>       <span class="n">script</span> <span class="o">+=</span> <span class="s">&#39;#SBATCH --time=</span><span class="si">%s</span><span class="se">\n</span><span class="s">&#39;</span>            <span class="o">%</span> <span class="n">s</span><span class="p">[</span><span class="s">&#39;time&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">value</span>
+        <span class="k">if</span> <span class="n">s</span><span class="p">[</span><span class="s">&#39;partition&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">value</span><span class="p">:</span>  <span class="n">script</span> <span class="o">+=</span> <span class="s">&#39;#SBATCH --partition=</span><span class="si">%s</span><span class="se">\n</span><span class="s">&#39;</span>       <span class="o">%</span> <span class="n">s</span><span class="p">[</span><span class="s">&#39;partition&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">value</span>
+        <span class="k">if</span> <span class="n">s</span><span class="p">[</span><span class="s">&#39;job_name&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">value</span><span class="p">:</span>   <span class="n">script</span> <span class="o">+=</span> <span class="s">&#39;#SBATCH --job-name=</span><span class="si">%s</span><span class="se">\n</span><span class="s">&#39;</span>        <span class="o">%</span> <span class="n">s</span><span class="p">[</span><span class="s">&#39;job_name&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">value</span>
+        <span class="k">if</span> <span class="n">s</span><span class="p">[</span><span class="s">&#39;output&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">value</span><span class="p">:</span>     <span class="n">script</span> <span class="o">+=</span> <span class="s">&#39;#SBATCH --output=</span><span class="si">%s</span><span class="se">\n</span><span class="s">&#39;</span>          <span class="o">%</span> <span class="n">s</span><span class="p">[</span><span class="s">&#39;output&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">value</span>
+        <span class="k">if</span> <span class="n">s</span><span class="p">[</span><span class="s">&#39;error&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">value</span><span class="p">:</span>      <span class="n">script</span> <span class="o">+=</span> <span class="s">&#39;#SBATCH --error=</span><span class="si">%s</span><span class="se">\n</span><span class="s">&#39;</span>           <span class="o">%</span> <span class="n">s</span><span class="p">[</span><span class="s">&#39;error&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">value</span>
+        <span class="k">if</span> <span class="n">s</span><span class="p">[</span><span class="s">&#39;mail-type&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">value</span><span class="p">:</span>  <span class="n">script</span> <span class="o">+=</span> <span class="s">&#39;#SBATCH --mail-type=</span><span class="si">%s</span><span class="se">\n</span><span class="s">&#39;</span>       <span class="o">%</span> <span class="s">&#39;,&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">s</span><span class="p">[</span><span class="s">&#39;mail-type&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">value</span><span class="p">)</span>
+
+        <span class="n">script</span> <span class="o">+=</span> <span class="s">&#39;</span><span class="se">\n</span><span class="s">set -eu</span><span class="se">\n\n</span><span class="s">&#39;</span>
+        <span class="n">script</span> <span class="o">+=</span> <span class="bp">self</span><span class="o">.</span><span class="n">mod</span><span class="o">.</span><span class="n">command</span> <span class="o">+</span> <span class="s">&#39;</span><span class="se">\n</span><span class="s">&#39;</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">slurmScript</span> <span class="o">=</span> <span class="n">script</span>
+
+</div>
+<div class="viewcode-block" id="SlurmConfig.writeSlurmScript"><a class="viewcode-back" href="../../../../_rst/iggytools.iggypipeline.module.html#iggytools.iggypipeline.module.configClasses.SlurmConfig.writeSlurmScript">[docs]</a>    <span class="k">def</span> <span class="nf">writeSlurmScript</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+
+        <span class="n">fname</span> <span class="o">=</span> <span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">mod</span><span class="o">.</span><span class="n">modDir</span><span class="p">,</span> <span class="s">&#39;slurm_</span><span class="si">%s</span><span class="s">_</span><span class="si">%s</span><span class="s">.sh&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">mod</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">pipe</span><span class="o">.</span><span class="n">name</span><span class="p">))</span>
+        <span class="n">mkdir_p</span><span class="p">(</span> <span class="bp">self</span><span class="o">.</span><span class="n">mod</span><span class="o">.</span><span class="n">modDir</span> <span class="p">)</span>
+
+        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">fname</span><span class="p">,</span> <span class="s">&#39;w&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+            <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span> <span class="bp">self</span><span class="o">.</span><span class="n">slurmScript</span> <span class="p">)</span>
+            <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span> <span class="s">&#39;#This script was generated by iggypipe</span><span class="se">\n</span><span class="s">&#39;</span> <span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">slurmScriptFile</span> <span class="o">=</span> <span class="n">fname</span>            
+
+
+</div></div>
+<div class="viewcode-block" id="get_slurmArgDefs"><a class="viewcode-back" href="../../../../_rst/iggytools.iggypipeline.module.html#iggytools.iggypipeline.module.configClasses.get_slurmArgDefs">[docs]</a><span class="k">def</span> <span class="nf">get_slurmArgDefs</span><span class="p">():</span>
+<span class="c"># See sbatch man page for doc on these slurm parameters:</span>
+
+    <span class="k">return</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span>
+               <span class="n">OrderedDict</span><span class="p">([</span> <span class="p">(</span><span class="s">&#39;nodes&#39;</span><span class="p">,</span>   <span class="n">ArgDef</span><span class="p">(</span> <span class="s">&#39;-N&#39;</span><span class="p">,</span> <span class="s">&#39;--nodes&#39;</span><span class="p">,</span>
+                                                    <span class="n">help</span> <span class="o">=</span> <span class="s">&#39;Request that a minimum of _nodes_ nodes be allocated to this job.&#39;</span><span class="p">,</span>
+                                                    <span class="nb">type</span> <span class="o">=</span> <span class="nb">int</span><span class="p">,</span> 
+                                                    <span class="n">default</span> <span class="o">=</span> <span class="mi">1</span> <span class="p">)),</span>
+                                                                         
+                             <span class="p">(</span><span class="s">&#39;ntasks&#39;</span><span class="p">,</span>     <span class="n">ArgDef</span><span class="p">(</span> <span class="s">&#39;--tasks-per-node&#39;</span><span class="p">,</span>   
+                                                    <span class="n">help</span> <span class="o">=</span> <span class="s">&#39;Specify the number of tasks to be launched per node.&#39;</span><span class="p">,</span>
+                                                    <span class="nb">type</span> <span class="o">=</span> <span class="nb">int</span><span class="p">)),</span>
+
+                             <span class="p">(</span><span class="s">&#39;mem&#39;</span><span class="p">,</span>        <span class="n">ArgDef</span><span class="p">(</span> <span class="s">&#39;--mem&#39;</span><span class="p">,</span>
+                                                    <span class="n">help</span> <span class="o">=</span> <span class="s">&#39;Specify the real memory required per node in MB.&#39;</span><span class="p">,</span>
+                                                    <span class="nb">type</span> <span class="o">=</span> <span class="nb">int</span><span class="p">)),</span>
+                                                                         
+                             <span class="p">(</span><span class="s">&#39;time&#39;</span><span class="p">,</span>       <span class="n">ArgDef</span><span class="p">(</span> <span class="s">&#39;-t&#39;</span><span class="p">,</span> <span class="s">&#39;--time&#39;</span><span class="p">,</span>
+                                                    <span class="n">help</span> <span class="o">=</span> <span class="s">&#39;Run time limit. Accepted formats: min, min:sec, hrs:min:sec, &#39;</span> \
+                                                              <span class="o">+</span> <span class="s">&#39;days-hrs, days-hrs:min and days-hrs:min:sec.&#39;</span><span class="p">,</span>
+                                                    <span class="nb">type</span> <span class="o">=</span> <span class="nb">str</span><span class="p">)),</span>
+                                                                         
+                             <span class="p">(</span><span class="s">&#39;partition&#39;</span><span class="p">,</span>  <span class="n">ArgDef</span><span class="p">(</span> <span class="s">&#39;-p&#39;</span><span class="p">,</span> <span class="s">&#39;--partition&#39;</span><span class="p">,</span>  
+                                                    <span class="n">help</span> <span class="o">=</span> <span class="s">&#39;Request a specific partition.&#39;</span><span class="p">,</span>
+                                                    <span class="nb">type</span> <span class="o">=</span> <span class="nb">str</span><span class="p">)),</span>
+                                                                         
+                             <span class="p">(</span><span class="s">&#39;job_name&#39;</span><span class="p">,</span>   <span class="n">ArgDef</span><span class="p">(</span> <span class="s">&#39;-J&#39;</span><span class="p">,</span> <span class="s">&#39;--job-name&#39;</span><span class="p">,</span> 
+                                                    <span class="n">help</span> <span class="o">=</span> <span class="s">&#39;Specify a name for the job allocation.&#39;</span><span class="p">,</span>
+                                                    <span class="nb">type</span> <span class="o">=</span> <span class="nb">str</span><span class="p">)),</span>
+                                                                         
+                             <span class="p">(</span><span class="s">&#39;output&#39;</span><span class="p">,</span>     <span class="n">ArgDef</span><span class="p">(</span> <span class="s">&#39;-o&#39;</span><span class="p">,</span> <span class="s">&#39;--output&#39;</span><span class="p">,</span>
+                                                    <span class="n">help</span> <span class="o">=</span> <span class="s">&quot;Connect the batch script&#39;s stdout to a file named _output_. %j is replaced &quot;</span> \
+                                                               <span class="o">+</span> <span class="s">&quot;by the job ID. Unless a stderr file is specified &quot;</span> \
+                                                               <span class="o">+</span> <span class="s">&quot;with -e/--error, both stdout and stderr is written to _output_.&quot;</span><span class="p">,</span> 
+                                                    <span class="nb">type</span> <span class="o">=</span> <span class="nb">str</span><span class="p">)),</span>
+
+                             <span class="p">(</span><span class="s">&#39;error&#39;</span><span class="p">,</span>      <span class="n">ArgDef</span><span class="p">(</span> <span class="s">&#39;-e&#39;</span><span class="p">,</span> <span class="s">&#39;--error&#39;</span><span class="p">,</span>
+                                                    <span class="n">help</span> <span class="o">=</span> <span class="s">&quot;Connect the batch script&#39;s stder to a file named _error_. %j is replaced by the job ID.&quot;</span><span class="p">,</span>
+                                                    <span class="nb">type</span> <span class="o">=</span> <span class="nb">str</span><span class="p">)),</span>
+
+                             <span class="p">(</span><span class="s">&#39;mail-type&#39;</span><span class="p">,</span>  <span class="n">ArgDef</span><span class="p">(</span> <span class="s">&#39;--mail-type&#39;</span><span class="p">,</span>
+                                                    <span class="n">help</span> <span class="o">=</span> <span class="s">&#39;Events triggering slurm notficaiton. Accepted values include: &#39;</span> \
+                                                               <span class="o">+</span> <span class="s">&#39;BEGIN, END, FAIL, TIME_LIMIT_80, TIME_LIMIT_90.&#39;</span><span class="p">,</span>
+                                                    <span class="nb">type</span> <span class="o">=</span> <span class="nb">list</span><span class="p">))</span> <span class="p">])</span> <span class="p">)</span>
+</pre></div></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../../../index.html">iggytools 0.1 documentation</a> &raquo;</li>
+          <li class="nav-item nav-item-1"><a href="../../../index.html" >Module code</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &copy; Copyright 2015, Chris Williams.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.3.1.
+    </div>
+  </body>
+</html>

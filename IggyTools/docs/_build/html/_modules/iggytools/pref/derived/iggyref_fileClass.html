@@ -1,0 +1,194 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>iggytools.pref.derived.iggyref_fileClass &mdash; iggytools 0.1 documentation</title>
+    
+    <link rel="stylesheet" href="../../../../_static/sphinxdoc.css" type="text/css" />
+    <link rel="stylesheet" href="../../../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../../',
+        VERSION:     '0.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../../_static/doctools.js"></script>
+    <link rel="top" title="iggytools 0.1 documentation" href="../../../../index.html" />
+    <link rel="up" title="Module code" href="../../../index.html" /> 
+  </head>
+  <body role="document">
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../../../index.html">iggytools 0.1 documentation</a> &raquo;</li>
+          <li class="nav-item nav-item-1"><a href="../../../index.html" accesskey="U">Module code</a> &raquo;</li> 
+      </ul>
+    </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../../../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for iggytools.pref.derived.iggyref_fileClass</h1><div class="highlight"><pre>
+<span class="kn">import</span> <span class="nn">os.path</span> <span class="kn">as</span> <span class="nn">path</span>
+<span class="kn">from</span> <span class="nn">iggytools.utils.util</span> <span class="kn">import</span> <span class="n">getUserHome</span><span class="p">,</span> <span class="n">dict2namedtuple</span>
+<span class="kn">from</span> <span class="nn">iggytools.pref.fileClass</span> <span class="kn">import</span> <span class="n">BasePrefFile</span>
+<span class="kn">from</span> <span class="nn">iggytools.pref.varClass</span> <span class="kn">import</span> <span class="n">PrefVar</span>
+
+<div class="viewcode-block" id="Iggyref_PrefFile"><a class="viewcode-back" href="../../../../_rst/iggytools.pref.derived.html#iggytools.pref.derived.iggyref_fileClass.Iggyref_PrefFile">[docs]</a><span class="k">class</span> <span class="nc">Iggyref_PrefFile</span><span class="p">(</span><span class="n">BasePrefFile</span><span class="p">):</span>
+
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">prefDir</span><span class="p">):</span>
+
+        <span class="n">BasePrefFile</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> 
+                              <span class="n">ID</span> <span class="o">=</span> <span class="s">&#39;iggyref&#39;</span><span class="p">,</span> 
+                              <span class="n">filePath</span> <span class="o">=</span> <span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">prefDir</span><span class="p">,</span> <span class="s">&#39;iggyref_settings.yaml&#39;</span><span class="p">),</span> 
+                              <span class="n">iggytool</span> <span class="o">=</span> <span class="s">&#39;iggyref&#39;</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">vars</span> <span class="o">=</span> <span class="p">[</span> <span class="n">PrefVar</span><span class="p">(</span> <span class="n">name</span> <span class="o">=</span> <span class="s">&#39;IGGYREF_REPOSITORY_DIR&#39;</span><span class="p">,</span>
+                               <span class="n">default</span> <span class="o">=</span> <span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">getUserHome</span><span class="p">(),</span> <span class="s">&#39;iggyref&#39;</span><span class="p">),</span>
+                               <span class="n">comment</span> <span class="o">=</span> <span class="s">&#39;Directory for genomes and databases&#39;</span><span class="p">,</span>
+                               <span class="n">varType</span> <span class="o">=</span> <span class="nb">str</span> <span class="p">),</span>
+
+                      <span class="n">PrefVar</span><span class="p">(</span> <span class="n">name</span> <span class="o">=</span> <span class="s">&#39;LOGGING_LEVEL&#39;</span><span class="p">,</span>
+                               <span class="n">default</span> <span class="o">=</span> <span class="s">&#39;info&#39;</span><span class="p">,</span>
+                               <span class="n">choices</span> <span class="o">=</span> <span class="p">[</span><span class="s">&#39;info&#39;</span><span class="p">,</span> <span class="s">&#39;debug&#39;</span><span class="p">],</span>
+                               <span class="n">comment</span> <span class="o">=</span> <span class="s">&#39;Level of logging detail&#39;</span><span class="p">,</span>
+                               <span class="n">varType</span> <span class="o">=</span> <span class="nb">str</span> <span class="p">),</span>
+
+                      <span class="n">PrefVar</span><span class="p">(</span> <span class="n">name</span> <span class="o">=</span> <span class="s">&#39;DB_TYPE&#39;</span><span class="p">,</span>
+                               <span class="n">default</span> <span class="o">=</span> <span class="s">&#39;sqlite&#39;</span><span class="p">,</span>
+                               <span class="n">choices</span> <span class="o">=</span> <span class="p">[</span><span class="s">&#39;sqlite&#39;</span><span class="p">,</span> <span class="s">&#39;mysql&#39;</span><span class="p">],</span>
+                               <span class="n">comment</span> <span class="o">=</span> <span class="s">&#39;Database type&#39;</span><span class="p">,</span>
+                               <span class="n">varType</span> <span class="o">=</span> <span class="nb">str</span> <span class="p">),</span>
+
+                      <span class="n">PrefVar</span><span class="p">(</span> <span class="n">name</span> <span class="o">=</span> <span class="s">&#39;MYSQL_HOST&#39;</span><span class="p">,</span>
+                               <span class="n">default</span> <span class="o">=</span> <span class="s">&#39;localhost&#39;</span><span class="p">,</span>
+                               <span class="n">comment</span> <span class="o">=</span> <span class="s">&#39;If DB_TYPE is sqlite, mysql settings can be ignored&#39;</span><span class="p">,</span>
+                               <span class="n">varType</span> <span class="o">=</span> <span class="nb">str</span> <span class="p">),</span>
+
+                      <span class="n">PrefVar</span><span class="p">(</span> <span class="n">name</span> <span class="o">=</span> <span class="s">&#39;MYSQL_DB&#39;</span><span class="p">,</span>
+                               <span class="n">default</span> <span class="o">=</span> <span class="s">&#39;iggypipe_db&#39;</span><span class="p">,</span>
+                               <span class="n">varType</span> <span class="o">=</span> <span class="nb">str</span> <span class="p">),</span>
+
+                      <span class="n">PrefVar</span><span class="p">(</span> <span class="n">name</span> <span class="o">=</span> <span class="s">&#39;MYSQL_USER&#39;</span><span class="p">,</span>
+                               <span class="n">default</span> <span class="o">=</span> <span class="s">&#39;iggypipe&#39;</span><span class="p">,</span>
+                               <span class="n">varType</span> <span class="o">=</span> <span class="nb">str</span> <span class="p">),</span>
+
+                      <span class="n">PrefVar</span><span class="p">(</span> <span class="n">name</span> <span class="o">=</span> <span class="s">&#39;MYSQL_PASS&#39;</span><span class="p">,</span>
+                               <span class="n">default</span> <span class="o">=</span> <span class="s">&#39;iggypipe&#39;</span><span class="p">,</span>
+                               <span class="n">varType</span> <span class="o">=</span> <span class="nb">str</span> <span class="p">),</span>
+
+                      <span class="n">PrefVar</span><span class="p">(</span> <span class="n">name</span> <span class="o">=</span> <span class="s">&#39;DEBUG&#39;</span><span class="p">,</span>
+                               <span class="n">default</span> <span class="o">=</span> <span class="bp">False</span><span class="p">,</span>
+                               <span class="n">comment</span> <span class="o">=</span> <span class="s">&#39;Debug mode (In debug mode, files are not copied to IGGYREF_REPOSITORY_DIR&#39;</span><span class="p">,</span>
+                               <span class="n">varType</span> <span class="o">=</span> <span class="nb">bool</span> <span class="p">),</span>
+
+                      <span class="n">PrefVar</span><span class="p">(</span> <span class="n">name</span> <span class="o">=</span> <span class="s">&#39;EBI_COLLECTIONS&#39;</span><span class="p">,</span>
+                               <span class="n">default</span> <span class="o">=</span> <span class="p">[</span><span class="s">&#39;interpro&#39;</span><span class="p">,</span> <span class="s">&#39;pfam&#39;</span><span class="p">],</span>
+                               <span class="n">choices</span> <span class="o">=</span> <span class="p">[</span><span class="s">&#39;interpro&#39;</span><span class="p">,</span> <span class="s">&#39;pfam&#39;</span><span class="p">],</span>
+                               <span class="n">comment</span> <span class="o">=</span> <span class="s">&#39;EBI collections&#39;</span><span class="p">,</span>
+                               <span class="n">varType</span> <span class="o">=</span> <span class="nb">list</span> <span class="p">),</span>
+
+                      <span class="n">PrefVar</span><span class="p">(</span> <span class="n">name</span> <span class="o">=</span> <span class="s">&#39;ENSEMBL_COLLECTIONS&#39;</span><span class="p">,</span>
+                               <span class="n">default</span> <span class="o">=</span> <span class="p">[</span><span class="s">&#39;human&#39;</span><span class="p">,</span> <span class="s">&#39;fruitfly&#39;</span><span class="p">,</span> <span class="s">&#39;worm&#39;</span><span class="p">,</span> <span class="s">&#39;yeast&#39;</span><span class="p">],</span>
+                               <span class="n">choices</span> <span class="o">=</span> <span class="p">[</span><span class="s">&#39;human&#39;</span><span class="p">,</span> <span class="s">&#39;fruitfly&#39;</span><span class="p">,</span> <span class="s">&#39;worm&#39;</span><span class="p">,</span> <span class="s">&#39;yeast&#39;</span><span class="p">],</span>
+                               <span class="n">comment</span> <span class="o">=</span> <span class="s">&#39;Ensembl collections&#39;</span><span class="p">,</span>
+                               <span class="n">varType</span> <span class="o">=</span> <span class="nb">list</span> <span class="p">),</span>
+
+                      <span class="n">PrefVar</span><span class="p">(</span> <span class="n">name</span> <span class="o">=</span> <span class="s">&#39;NCBI_COLLECTIONS&#39;</span><span class="p">,</span>
+                               <span class="n">default</span> <span class="o">=</span> <span class="p">[</span><span class="s">&#39;nr&#39;</span><span class="p">,</span> <span class="s">&#39;nt&#39;</span><span class="p">,</span> <span class="s">&#39;refseq_genomic&#39;</span><span class="p">,</span> <span class="s">&#39;refseq_protein&#39;</span><span class="p">,</span> <span class="s">&#39;refseq_rna&#39;</span><span class="p">,</span> <span class="s">&#39;swissprot&#39;</span><span class="p">],</span>
+                               <span class="n">choices</span> <span class="o">=</span> <span class="p">[</span><span class="s">&#39;nr&#39;</span><span class="p">,</span> <span class="s">&#39;nt&#39;</span><span class="p">,</span> <span class="s">&#39;refseq_genomic&#39;</span><span class="p">,</span> <span class="s">&#39;refseq_protein&#39;</span><span class="p">,</span> <span class="s">&#39;refseq_rna&#39;</span><span class="p">,</span> <span class="s">&#39;swissprot&#39;</span><span class="p">],</span>
+                               <span class="n">comment</span> <span class="o">=</span> <span class="s">&#39;NCBI collections&#39;</span><span class="p">,</span>
+                               <span class="n">varType</span> <span class="o">=</span> <span class="nb">list</span> <span class="p">),</span>
+
+                      <span class="n">PrefVar</span><span class="p">(</span> <span class="n">name</span> <span class="o">=</span> <span class="s">&#39;UCSC_COLLECTIONS&#39;</span><span class="p">,</span>
+                               <span class="n">default</span> <span class="o">=</span> <span class="p">[</span><span class="s">&#39;chicken_galGal3&#39;</span><span class="p">,</span> <span class="s">&#39;chicken&#39;</span><span class="p">,</span> <span class="s">&#39;fruitfly&#39;</span><span class="p">,</span> <span class="s">&#39;human&#39;</span><span class="p">,</span> <span class="s">&#39;mouse&#39;</span><span class="p">,</span> <span class="s">&#39;rat&#39;</span><span class="p">,</span> <span class="s">&#39;worm&#39;</span><span class="p">,</span> <span class="s">&#39;yeast&#39;</span><span class="p">,</span> <span class="s">&#39;zebrafinch&#39;</span><span class="p">],</span>
+                               <span class="n">choices</span> <span class="o">=</span> <span class="p">[</span><span class="s">&#39;chicken_galGal3&#39;</span><span class="p">,</span> <span class="s">&#39;chicken&#39;</span><span class="p">,</span> <span class="s">&#39;fruitfly&#39;</span><span class="p">,</span> <span class="s">&#39;human&#39;</span><span class="p">,</span> <span class="s">&#39;mouse&#39;</span><span class="p">,</span> <span class="s">&#39;rat&#39;</span><span class="p">,</span> <span class="s">&#39;worm&#39;</span><span class="p">,</span> <span class="s">&#39;yeast&#39;</span><span class="p">,</span> <span class="s">&#39;zebrafinch&#39;</span><span class="p">],</span>
+                               <span class="n">comment</span> <span class="o">=</span> <span class="s">&#39;UCSC collections&#39;</span><span class="p">,</span>
+                               <span class="n">varType</span> <span class="o">=</span> <span class="nb">list</span> <span class="p">),</span>
+
+                      <span class="n">PrefVar</span><span class="p">(</span> <span class="n">name</span> <span class="o">=</span> <span class="s">&#39;UNIPROT_COLLECTIONS&#39;</span><span class="p">,</span>
+                               <span class="n">default</span> <span class="o">=</span> <span class="p">[</span><span class="s">&#39;uniref100&#39;</span><span class="p">],</span>
+                               <span class="n">choices</span> <span class="o">=</span> <span class="p">[</span><span class="s">&#39;uniref100&#39;</span><span class="p">],</span>
+                               <span class="n">comment</span> <span class="o">=</span> <span class="s">&#39;Uniprot collections&#39;</span><span class="p">,</span>
+                               <span class="n">varType</span> <span class="o">=</span> <span class="nb">list</span> <span class="p">)</span> <span class="p">]</span>
+
+<div class="viewcode-block" id="Iggyref_PrefFile.getVars"><a class="viewcode-back" href="../../../../_rst/iggytools.pref.derived.html#iggytools.pref.derived.iggyref_fileClass.Iggyref_PrefFile.getVars">[docs]</a>    <span class="k">def</span> <span class="nf">getVars</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">fileSetup</span><span class="p">()</span>  <span class="c">#ensure pref file exists</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">load</span><span class="p">()</span>  <span class="c">#read and process preferences </span>
+
+        <span class="n">vDict</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span> <span class="p">[(</span><span class="n">x</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">x</span><span class="o">.</span><span class="n">value</span><span class="p">)</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">vars</span><span class="p">]</span> <span class="p">)</span>
+
+        <span class="n">vDict</span><span class="p">[</span><span class="s">&#39;REPO_DIR&#39;</span><span class="p">]</span>      <span class="o">=</span> <span class="n">vDict</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s">&#39;IGGYREF_REPOSITORY_DIR&#39;</span><span class="p">)</span>   <span class="c">#rename key</span>
+
+        <span class="n">vDict</span><span class="p">[</span><span class="s">&#39;WORK_DIR&#39;</span><span class="p">]</span>      <span class="o">=</span> <span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span> <span class="n">vDict</span><span class="p">[</span><span class="s">&#39;REPO_DIR&#39;</span><span class="p">],</span> <span class="s">&#39;.work&#39;</span> <span class="p">)</span>
+
+        <span class="n">vDict</span><span class="p">[</span><span class="s">&#39;LOG_DIR&#39;</span><span class="p">]</span>       <span class="o">=</span> <span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span> <span class="n">vDict</span><span class="p">[</span><span class="s">&#39;WORK_DIR&#39;</span><span class="p">],</span> <span class="s">&#39;log&#39;</span> <span class="p">)</span>
+        <span class="n">vDict</span><span class="p">[</span><span class="s">&#39;DOWNLOAD_DIR&#39;</span><span class="p">]</span>  <span class="o">=</span> <span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span> <span class="n">vDict</span><span class="p">[</span><span class="s">&#39;WORK_DIR&#39;</span><span class="p">],</span> <span class="s">&#39;download&#39;</span> <span class="p">)</span>
+        <span class="n">vDict</span><span class="p">[</span><span class="s">&#39;INTERMED_DIR&#39;</span><span class="p">]</span>  <span class="o">=</span> <span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span> <span class="n">vDict</span><span class="p">[</span><span class="s">&#39;WORK_DIR&#39;</span><span class="p">],</span> <span class="s">&#39;intermed&#39;</span> <span class="p">)</span>
+        <span class="n">vDict</span><span class="p">[</span><span class="s">&#39;TEMP_DIR&#39;</span><span class="p">]</span>      <span class="o">=</span> <span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span> <span class="n">vDict</span><span class="p">[</span><span class="s">&#39;WORK_DIR&#39;</span><span class="p">],</span> <span class="s">&#39;temp&#39;</span> <span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">dict2namedtuple</span><span class="p">(</span> <span class="nb">dict</span><span class="p">(</span> <span class="p">[(</span><span class="n">name</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span> <span class="k">for</span> <span class="n">name</span><span class="p">,</span><span class="n">value</span> <span class="ow">in</span> <span class="n">vDict</span><span class="o">.</span><span class="n">iteritems</span><span class="p">()]</span> <span class="p">)</span> <span class="p">)</span>
+</pre></div></div></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../../../index.html">iggytools 0.1 documentation</a> &raquo;</li>
+          <li class="nav-item nav-item-1"><a href="../../../index.html" >Module code</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &copy; Copyright 2015, Chris Williams.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.3.1.
+    </div>
+  </body>
+</html>

@@ -1,0 +1,471 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>iggytools.iggyref package &mdash; iggytools 0.1 documentation</title>
+    
+    <link rel="stylesheet" href="../_static/sphinxdoc.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../',
+        VERSION:     '0.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <link rel="top" title="iggytools 0.1 documentation" href="../index.html" /> 
+  </head>
+  <body role="document">
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../index.html">iggytools 0.1 documentation</a> &raquo;</li> 
+      </ul>
+    </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="../index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">iggytools.iggyref package</a><ul>
+<li><a class="reference internal" href="#subpackages">Subpackages</a></li>
+<li><a class="reference internal" href="#submodules">Submodules</a></li>
+<li><a class="reference internal" href="#iggytools-iggyref-dbclass-module">iggytools.iggyref.DBclass module</a></li>
+<li><a class="reference internal" href="#module-iggytools.iggyref.FTPclass">iggytools.iggyref.FTPclass module</a></li>
+<li><a class="reference internal" href="#module-iggytools.iggyref.baseCollectionClass">iggytools.iggyref.baseCollectionClass module</a></li>
+<li><a class="reference internal" href="#module-iggytools.iggyref.rFileClass">iggytools.iggyref.rFileClass module</a></li>
+<li><a class="reference internal" href="#iggytools-iggyref-repoclass-module">iggytools.iggyref.repoClass module</a></li>
+<li><a class="reference internal" href="#iggytools-iggyref-sqlalchemy-models-module">iggytools.iggyref.sqlalchemy_models module</a></li>
+<li><a class="reference internal" href="#module-iggytools.iggyref.taskClasses">iggytools.iggyref.taskClasses module</a></li>
+<li><a class="reference internal" href="#iggytools-iggyref-update-module">iggytools.iggyref.update module</a></li>
+<li><a class="reference internal" href="#module-iggytools.iggyref">Module contents</a></li>
+</ul>
+</li>
+</ul>
+
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="../_sources/_rst/iggytools.iggyref.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="iggytools-iggyref-package">
+<h1>iggytools.iggyref package<a class="headerlink" href="#iggytools-iggyref-package" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="subpackages">
+<h2>Subpackages<a class="headerlink" href="#subpackages" title="Permalink to this headline">¶</a></h2>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="iggytools.iggyref.depGraph.html">iggytools.iggyref.depGraph package</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="iggytools.iggyref.depGraph.html#submodules">Submodules</a></li>
+<li class="toctree-l2"><a class="reference internal" href="iggytools.iggyref.depGraph.html#module-iggytools.iggyref.depGraph.graphClasses">iggytools.iggyref.depGraph.graphClasses module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="iggytools.iggyref.depGraph.html#module-iggytools.iggyref.depGraph">Module contents</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="iggytools.iggyref.postProcess.html">iggytools.iggyref.postProcess package</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="iggytools.iggyref.postProcess.html#submodules">Submodules</a></li>
+<li class="toctree-l2"><a class="reference internal" href="iggytools.iggyref.postProcess.html#module-iggytools.iggyref.postProcess.dbsnp2vcfClass">iggytools.iggyref.postProcess.dbsnp2vcfClass module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="iggytools.iggyref.postProcess.html#module-iggytools.iggyref.postProcess.fasta2index">iggytools.iggyref.postProcess.fasta2index module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="iggytools.iggyref.postProcess.html#module-iggytools.iggyref.postProcess.genePred2gtf">iggytools.iggyref.postProcess.genePred2gtf module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="iggytools.iggyref.postProcess.html#module-iggytools.iggyref.postProcess.gtf2transcriptome">iggytools.iggyref.postProcess.gtf2transcriptome module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="iggytools.iggyref.postProcess.html#module-iggytools.iggyref.postProcess.util">iggytools.iggyref.postProcess.util module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="iggytools.iggyref.postProcess.html#module-iggytools.iggyref.postProcess">Module contents</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="iggytools.iggyref.sources.html">iggytools.iggyref.sources package</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="iggytools.iggyref.sources.html#subpackages">Subpackages</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="iggytools.iggyref.sources.ebi.html">iggytools.iggyref.sources.ebi package</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="iggytools.iggyref.sources.ebi.html#subpackages">Subpackages</a><ul>
+<li class="toctree-l5"><a class="reference internal" href="iggytools.iggyref.sources.ebi.collections.html">iggytools.iggyref.sources.ebi.collections package</a><ul>
+<li class="toctree-l6"><a class="reference internal" href="iggytools.iggyref.sources.ebi.collections.html#submodules">Submodules</a></li>
+<li class="toctree-l6"><a class="reference internal" href="iggytools.iggyref.sources.ebi.collections.html#module-iggytools.iggyref.sources.ebi.collections.interpro">iggytools.iggyref.sources.ebi.collections.interpro module</a></li>
+<li class="toctree-l6"><a class="reference internal" href="iggytools.iggyref.sources.ebi.collections.html#module-iggytools.iggyref.sources.ebi.collections.pfam">iggytools.iggyref.sources.ebi.collections.pfam module</a></li>
+<li class="toctree-l6"><a class="reference internal" href="iggytools.iggyref.sources.ebi.collections.html#module-iggytools.iggyref.sources.ebi.collections">Module contents</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l4"><a class="reference internal" href="iggytools.iggyref.sources.ebi.html#submodules">Submodules</a></li>
+<li class="toctree-l4"><a class="reference internal" href="iggytools.iggyref.sources.ebi.html#module-iggytools.iggyref.sources.ebi.ebiCollectionClass">iggytools.iggyref.sources.ebi.ebiCollectionClass module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="iggytools.iggyref.sources.ebi.html#module-iggytools.iggyref.sources.ebi.properties">iggytools.iggyref.sources.ebi.properties module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="iggytools.iggyref.sources.ebi.html#module-iggytools.iggyref.sources.ebi">Module contents</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="iggytools.iggyref.sources.ensembl.html">iggytools.iggyref.sources.ensembl package</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="iggytools.iggyref.sources.ensembl.html#subpackages">Subpackages</a><ul>
+<li class="toctree-l5"><a class="reference internal" href="iggytools.iggyref.sources.ensembl.collections.html">iggytools.iggyref.sources.ensembl.collections package</a><ul>
+<li class="toctree-l6"><a class="reference internal" href="iggytools.iggyref.sources.ensembl.collections.html#submodules">Submodules</a></li>
+<li class="toctree-l6"><a class="reference internal" href="iggytools.iggyref.sources.ensembl.collections.html#module-iggytools.iggyref.sources.ensembl.collections.fruitfly">iggytools.iggyref.sources.ensembl.collections.fruitfly module</a></li>
+<li class="toctree-l6"><a class="reference internal" href="iggytools.iggyref.sources.ensembl.collections.html#module-iggytools.iggyref.sources.ensembl.collections.human">iggytools.iggyref.sources.ensembl.collections.human module</a></li>
+<li class="toctree-l6"><a class="reference internal" href="iggytools.iggyref.sources.ensembl.collections.html#module-iggytools.iggyref.sources.ensembl.collections.worm">iggytools.iggyref.sources.ensembl.collections.worm module</a></li>
+<li class="toctree-l6"><a class="reference internal" href="iggytools.iggyref.sources.ensembl.collections.html#module-iggytools.iggyref.sources.ensembl.collections.yeast">iggytools.iggyref.sources.ensembl.collections.yeast module</a></li>
+<li class="toctree-l6"><a class="reference internal" href="iggytools.iggyref.sources.ensembl.collections.html#module-iggytools.iggyref.sources.ensembl.collections">Module contents</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l4"><a class="reference internal" href="iggytools.iggyref.sources.ensembl.html#submodules">Submodules</a></li>
+<li class="toctree-l4"><a class="reference internal" href="iggytools.iggyref.sources.ensembl.html#module-iggytools.iggyref.sources.ensembl.ensemblCollectionClass">iggytools.iggyref.sources.ensembl.ensemblCollectionClass module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="iggytools.iggyref.sources.ensembl.html#module-iggytools.iggyref.sources.ensembl.properties">iggytools.iggyref.sources.ensembl.properties module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="iggytools.iggyref.sources.ensembl.html#module-iggytools.iggyref.sources.ensembl">Module contents</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="iggytools.iggyref.sources.ncbi.html">iggytools.iggyref.sources.ncbi package</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="iggytools.iggyref.sources.ncbi.html#subpackages">Subpackages</a><ul>
+<li class="toctree-l5"><a class="reference internal" href="iggytools.iggyref.sources.ncbi.collections.html">iggytools.iggyref.sources.ncbi.collections package</a><ul>
+<li class="toctree-l6"><a class="reference internal" href="iggytools.iggyref.sources.ncbi.collections.html#submodules">Submodules</a></li>
+<li class="toctree-l6"><a class="reference internal" href="iggytools.iggyref.sources.ncbi.collections.html#module-iggytools.iggyref.sources.ncbi.collections.nr">iggytools.iggyref.sources.ncbi.collections.nr module</a></li>
+<li class="toctree-l6"><a class="reference internal" href="iggytools.iggyref.sources.ncbi.collections.html#module-iggytools.iggyref.sources.ncbi.collections.nt">iggytools.iggyref.sources.ncbi.collections.nt module</a></li>
+<li class="toctree-l6"><a class="reference internal" href="iggytools.iggyref.sources.ncbi.collections.html#module-iggytools.iggyref.sources.ncbi.collections.refseq_genomic">iggytools.iggyref.sources.ncbi.collections.refseq_genomic module</a></li>
+<li class="toctree-l6"><a class="reference internal" href="iggytools.iggyref.sources.ncbi.collections.html#module-iggytools.iggyref.sources.ncbi.collections.refseq_protein">iggytools.iggyref.sources.ncbi.collections.refseq_protein module</a></li>
+<li class="toctree-l6"><a class="reference internal" href="iggytools.iggyref.sources.ncbi.collections.html#module-iggytools.iggyref.sources.ncbi.collections.refseq_rna">iggytools.iggyref.sources.ncbi.collections.refseq_rna module</a></li>
+<li class="toctree-l6"><a class="reference internal" href="iggytools.iggyref.sources.ncbi.collections.html#module-iggytools.iggyref.sources.ncbi.collections.swissprot">iggytools.iggyref.sources.ncbi.collections.swissprot module</a></li>
+<li class="toctree-l6"><a class="reference internal" href="iggytools.iggyref.sources.ncbi.collections.html#module-iggytools.iggyref.sources.ncbi.collections">Module contents</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l4"><a class="reference internal" href="iggytools.iggyref.sources.ncbi.html#submodules">Submodules</a></li>
+<li class="toctree-l4"><a class="reference internal" href="iggytools.iggyref.sources.ncbi.html#module-iggytools.iggyref.sources.ncbi.ncbiCollectionClass">iggytools.iggyref.sources.ncbi.ncbiCollectionClass module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="iggytools.iggyref.sources.ncbi.html#module-iggytools.iggyref.sources.ncbi.properties">iggytools.iggyref.sources.ncbi.properties module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="iggytools.iggyref.sources.ncbi.html#module-iggytools.iggyref.sources.ncbi">Module contents</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="iggytools.iggyref.sources.ucsc.html">iggytools.iggyref.sources.ucsc package</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="iggytools.iggyref.sources.ucsc.html#subpackages">Subpackages</a><ul>
+<li class="toctree-l5"><a class="reference internal" href="iggytools.iggyref.sources.ucsc.collections.html">iggytools.iggyref.sources.ucsc.collections package</a><ul>
+<li class="toctree-l6"><a class="reference internal" href="iggytools.iggyref.sources.ucsc.collections.html#submodules">Submodules</a></li>
+<li class="toctree-l6"><a class="reference internal" href="iggytools.iggyref.sources.ucsc.collections.html#module-iggytools.iggyref.sources.ucsc.collections.chicken">iggytools.iggyref.sources.ucsc.collections.chicken module</a></li>
+<li class="toctree-l6"><a class="reference internal" href="iggytools.iggyref.sources.ucsc.collections.html#module-iggytools.iggyref.sources.ucsc.collections.chicken_galGal3">iggytools.iggyref.sources.ucsc.collections.chicken_galGal3 module</a></li>
+<li class="toctree-l6"><a class="reference internal" href="iggytools.iggyref.sources.ucsc.collections.html#module-iggytools.iggyref.sources.ucsc.collections.fruitfly">iggytools.iggyref.sources.ucsc.collections.fruitfly module</a></li>
+<li class="toctree-l6"><a class="reference internal" href="iggytools.iggyref.sources.ucsc.collections.html#module-iggytools.iggyref.sources.ucsc.collections.human">iggytools.iggyref.sources.ucsc.collections.human module</a></li>
+<li class="toctree-l6"><a class="reference internal" href="iggytools.iggyref.sources.ucsc.collections.html#module-iggytools.iggyref.sources.ucsc.collections.mouse">iggytools.iggyref.sources.ucsc.collections.mouse module</a></li>
+<li class="toctree-l6"><a class="reference internal" href="iggytools.iggyref.sources.ucsc.collections.html#module-iggytools.iggyref.sources.ucsc.collections.rat">iggytools.iggyref.sources.ucsc.collections.rat module</a></li>
+<li class="toctree-l6"><a class="reference internal" href="iggytools.iggyref.sources.ucsc.collections.html#module-iggytools.iggyref.sources.ucsc.collections.worm">iggytools.iggyref.sources.ucsc.collections.worm module</a></li>
+<li class="toctree-l6"><a class="reference internal" href="iggytools.iggyref.sources.ucsc.collections.html#module-iggytools.iggyref.sources.ucsc.collections.yeast">iggytools.iggyref.sources.ucsc.collections.yeast module</a></li>
+<li class="toctree-l6"><a class="reference internal" href="iggytools.iggyref.sources.ucsc.collections.html#module-iggytools.iggyref.sources.ucsc.collections.zebrafinch">iggytools.iggyref.sources.ucsc.collections.zebrafinch module</a></li>
+<li class="toctree-l6"><a class="reference internal" href="iggytools.iggyref.sources.ucsc.collections.html#module-iggytools.iggyref.sources.ucsc.collections">Module contents</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l4"><a class="reference internal" href="iggytools.iggyref.sources.ucsc.html#submodules">Submodules</a></li>
+<li class="toctree-l4"><a class="reference internal" href="iggytools.iggyref.sources.ucsc.html#module-iggytools.iggyref.sources.ucsc.properties">iggytools.iggyref.sources.ucsc.properties module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="iggytools.iggyref.sources.ucsc.html#module-iggytools.iggyref.sources.ucsc.ucscCollectionClass">iggytools.iggyref.sources.ucsc.ucscCollectionClass module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="iggytools.iggyref.sources.ucsc.html#module-iggytools.iggyref.sources.ucsc">Module contents</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="iggytools.iggyref.sources.uniprot.html">iggytools.iggyref.sources.uniprot package</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="iggytools.iggyref.sources.uniprot.html#subpackages">Subpackages</a><ul>
+<li class="toctree-l5"><a class="reference internal" href="iggytools.iggyref.sources.uniprot.collections.html">iggytools.iggyref.sources.uniprot.collections package</a><ul>
+<li class="toctree-l6"><a class="reference internal" href="iggytools.iggyref.sources.uniprot.collections.html#submodules">Submodules</a></li>
+<li class="toctree-l6"><a class="reference internal" href="iggytools.iggyref.sources.uniprot.collections.html#module-iggytools.iggyref.sources.uniprot.collections.uniref100">iggytools.iggyref.sources.uniprot.collections.uniref100 module</a></li>
+<li class="toctree-l6"><a class="reference internal" href="iggytools.iggyref.sources.uniprot.collections.html#module-iggytools.iggyref.sources.uniprot.collections">Module contents</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l4"><a class="reference internal" href="iggytools.iggyref.sources.uniprot.html#submodules">Submodules</a></li>
+<li class="toctree-l4"><a class="reference internal" href="iggytools.iggyref.sources.uniprot.html#module-iggytools.iggyref.sources.uniprot.properties">iggytools.iggyref.sources.uniprot.properties module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="iggytools.iggyref.sources.uniprot.html#module-iggytools.iggyref.sources.uniprot.uniprotCollectionClass">iggytools.iggyref.sources.uniprot.uniprotCollectionClass module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="iggytools.iggyref.sources.uniprot.html#module-iggytools.iggyref.sources.uniprot">Module contents</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="iggytools.iggyref.sources.html#module-iggytools.iggyref.sources">Module contents</a></li>
+</ul>
+</li>
+</ul>
+</div>
+</div>
+<div class="section" id="submodules">
+<h2>Submodules<a class="headerlink" href="#submodules" title="Permalink to this headline">¶</a></h2>
+</div>
+<div class="section" id="iggytools-iggyref-dbclass-module">
+<h2>iggytools.iggyref.DBclass module<a class="headerlink" href="#iggytools-iggyref-dbclass-module" title="Permalink to this headline">¶</a></h2>
+</div>
+<div class="section" id="module-iggytools.iggyref.FTPclass">
+<span id="iggytools-iggyref-ftpclass-module"></span><h2>iggytools.iggyref.FTPclass module<a class="headerlink" href="#module-iggytools.iggyref.FTPclass" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="iggytools.iggyref.FTPclass.iggyrefFTP">
+<em class="property">class </em><code class="descclassname">iggytools.iggyref.FTPclass.</code><code class="descname">iggyrefFTP</code><span class="sig-paren">(</span><em>site</em>, <em>tempDir</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/iggytools/iggyref/FTPclass.html#iggyrefFTP"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#iggytools.iggyref.FTPclass.iggyrefFTP" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="method">
+<dt id="iggytools.iggyref.FTPclass.iggyrefFTP.closeFtp">
+<code class="descname">closeFtp</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/iggytools/iggyref/FTPclass.html#iggyrefFTP.closeFtp"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#iggytools.iggyref.FTPclass.iggyrefFTP.closeFtp" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="iggytools.iggyref.FTPclass.iggyrefFTP.copyFile">
+<code class="descname">copyFile</code><span class="sig-paren">(</span><em>srcFile</em>, <em>destFile</em>, <em>overwrite=True</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/iggytools/iggyref/FTPclass.html#iggyrefFTP.copyFile"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#iggytools.iggyref.FTPclass.iggyrefFTP.copyFile" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="iggytools.iggyref.FTPclass.iggyrefFTP.getChecksum">
+<code class="descname">getChecksum</code><span class="sig-paren">(</span><em>File</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/iggytools/iggyref/FTPclass.html#iggyrefFTP.getChecksum"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#iggytools.iggyref.FTPclass.iggyrefFTP.getChecksum" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="iggytools.iggyref.FTPclass.iggyrefFTP.getDirContents">
+<code class="descname">getDirContents</code><span class="sig-paren">(</span><em>ftpPath</em>, <em>pattern=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/iggytools/iggyref/FTPclass.html#iggyrefFTP.getDirContents"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#iggytools.iggyref.FTPclass.iggyrefFTP.getDirContents" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="iggytools.iggyref.FTPclass.iggyrefFTP.getTimeString">
+<code class="descname">getTimeString</code><span class="sig-paren">(</span><em>remoteFile</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/iggytools/iggyref/FTPclass.html#iggyrefFTP.getTimeString"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#iggytools.iggyref.FTPclass.iggyrefFTP.getTimeString" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="iggytools.iggyref.FTPclass.iggyrefFTP.nlst">
+<code class="descname">nlst</code><span class="sig-paren">(</span><em>pwd</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/iggytools/iggyref/FTPclass.html#iggyrefFTP.nlst"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#iggytools.iggyref.FTPclass.iggyrefFTP.nlst" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-iggytools.iggyref.baseCollectionClass">
+<span id="iggytools-iggyref-basecollectionclass-module"></span><h2>iggytools.iggyref.baseCollectionClass module<a class="headerlink" href="#module-iggytools.iggyref.baseCollectionClass" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="iggytools.iggyref.baseCollectionClass.baseCollection">
+<em class="property">class </em><code class="descclassname">iggytools.iggyref.baseCollectionClass.</code><code class="descname">baseCollection</code><span class="sig-paren">(</span><em>primaryID</em>, <em>repo</em>, <em>ftpConn=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/iggytools/iggyref/baseCollectionClass.html#baseCollection"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#iggytools.iggyref.baseCollectionClass.baseCollection" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference external" href="http://docs.python.org/2.7/library/functions.html#object" title="(in Python v2.7)"><code class="xref py py-class docutils literal"><span class="pre">object</span></code></a></p>
+<dl class="method">
+<dt id="iggytools.iggyref.baseCollectionClass.baseCollection.allFiles">
+<code class="descname">allFiles</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/iggytools/iggyref/baseCollectionClass.html#baseCollection.allFiles"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#iggytools.iggyref.baseCollectionClass.baseCollection.allFiles" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="iggytools.iggyref.baseCollectionClass.baseCollection.collectionSetup">
+<code class="descname">collectionSetup</code><span class="sig-paren">(</span><em>fileMap=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/iggytools/iggyref/baseCollectionClass.html#baseCollection.collectionSetup"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#iggytools.iggyref.baseCollectionClass.baseCollection.collectionSetup" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="classmethod">
+<dt id="iggytools.iggyref.baseCollectionClass.baseCollection.getInstance">
+<em class="property">classmethod </em><code class="descname">getInstance</code><span class="sig-paren">(</span><em>primaryID</em>, <em>repo</em>, <em>ftpConn=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/iggytools/iggyref/baseCollectionClass.html#baseCollection.getInstance"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#iggytools.iggyref.baseCollectionClass.baseCollection.getInstance" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="iggytools.iggyref.baseCollectionClass.baseCollection.getRawFilenames">
+<code class="descname">getRawFilenames</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/iggytools/iggyref/baseCollectionClass.html#baseCollection.getRawFilenames"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#iggytools.iggyref.baseCollectionClass.baseCollection.getRawFilenames" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="iggytools.iggyref.baseCollectionClass.baseCollection.setChecksumFtpFilePath">
+<code class="descname">setChecksumFtpFilePath</code><span class="sig-paren">(</span><em>File</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/iggytools/iggyref/baseCollectionClass.html#baseCollection.setChecksumFtpFilePath"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#iggytools.iggyref.baseCollectionClass.baseCollection.setChecksumFtpFilePath" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="iggytools.iggyref.baseCollectionClass.baseCollection.setDownloadFiles">
+<code class="descname">setDownloadFiles</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/iggytools/iggyref/baseCollectionClass.html#baseCollection.setDownloadFiles"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#iggytools.iggyref.baseCollectionClass.baseCollection.setDownloadFiles" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="iggytools.iggyref.baseCollectionClass.baseCollection.setFtpFilePath">
+<code class="descname">setFtpFilePath</code><span class="sig-paren">(</span><em>File</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/iggytools/iggyref/baseCollectionClass.html#baseCollection.setFtpFilePath"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#iggytools.iggyref.baseCollectionClass.baseCollection.setFtpFilePath" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="iggytools.iggyref.baseCollectionClass.baseCollection.setLocalDirs">
+<code class="descname">setLocalDirs</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/iggytools/iggyref/baseCollectionClass.html#baseCollection.setLocalDirs"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#iggytools.iggyref.baseCollectionClass.baseCollection.setLocalDirs" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="iggytools.iggyref.baseCollectionClass.baseCollection.setLocalFilePath">
+<code class="descname">setLocalFilePath</code><span class="sig-paren">(</span><em>File</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/iggytools/iggyref/baseCollectionClass.html#baseCollection.setLocalFilePath"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#iggytools.iggyref.baseCollectionClass.baseCollection.setLocalFilePath" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="iggytools.iggyref.baseCollectionClass.baseCollection.setRemoteChecksum">
+<code class="descname">setRemoteChecksum</code><span class="sig-paren">(</span><em>File</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/iggytools/iggyref/baseCollectionClass.html#baseCollection.setRemoteChecksum"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#iggytools.iggyref.baseCollectionClass.baseCollection.setRemoteChecksum" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="iggytools.iggyref.baseCollectionClass.baseCollection.setRemoteTimeString">
+<code class="descname">setRemoteTimeString</code><span class="sig-paren">(</span><em>File</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/iggytools/iggyref/baseCollectionClass.html#baseCollection.setRemoteTimeString"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#iggytools.iggyref.baseCollectionClass.baseCollection.setRemoteTimeString" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="iggytools.iggyref.baseCollectionClass.baseCollection.setTasks">
+<code class="descname">setTasks</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/iggytools/iggyref/baseCollectionClass.html#baseCollection.setTasks"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#iggytools.iggyref.baseCollectionClass.baseCollection.setTasks" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="iggytools.iggyref.baseCollectionClass.baseCollection.translateRawFilenames">
+<code class="descname">translateRawFilenames</code><span class="sig-paren">(</span><em>fileMap</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/iggytools/iggyref/baseCollectionClass.html#baseCollection.translateRawFilenames"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#iggytools.iggyref.baseCollectionClass.baseCollection.translateRawFilenames" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-iggytools.iggyref.rFileClass">
+<span id="iggytools-iggyref-rfileclass-module"></span><h2>iggytools.iggyref.rFileClass module<a class="headerlink" href="#module-iggytools.iggyref.rFileClass" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="iggytools.iggyref.rFileClass.rFile">
+<em class="property">class </em><code class="descclassname">iggytools.iggyref.rFileClass.</code><code class="descname">rFile</code><span class="sig-paren">(</span><em>name</em>, <em>fprop=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/iggytools/iggyref/rFileClass.html#rFile"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#iggytools.iggyref.rFileClass.rFile" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference external" href="http://docs.python.org/2.7/library/functions.html#object" title="(in Python v2.7)"><code class="xref py py-class docutils literal"><span class="pre">object</span></code></a></p>
+<dl class="method">
+<dt id="iggytools.iggyref.rFileClass.rFile.setLocalChecksum">
+<code class="descname">setLocalChecksum</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/iggytools/iggyref/rFileClass.html#rFile.setLocalChecksum"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#iggytools.iggyref.rFileClass.rFile.setLocalChecksum" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="iggytools-iggyref-repoclass-module">
+<h2>iggytools.iggyref.repoClass module<a class="headerlink" href="#iggytools-iggyref-repoclass-module" title="Permalink to this headline">¶</a></h2>
+</div>
+<div class="section" id="iggytools-iggyref-sqlalchemy-models-module">
+<h2>iggytools.iggyref.sqlalchemy_models module<a class="headerlink" href="#iggytools-iggyref-sqlalchemy-models-module" title="Permalink to this headline">¶</a></h2>
+</div>
+<div class="section" id="module-iggytools.iggyref.taskClasses">
+<span id="iggytools-iggyref-taskclasses-module"></span><h2>iggytools.iggyref.taskClasses module<a class="headerlink" href="#module-iggytools.iggyref.taskClasses" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="iggytools.iggyref.taskClasses.Fasta2index">
+<em class="property">class </em><code class="descclassname">iggytools.iggyref.taskClasses.</code><code class="descname">Fasta2index</code><span class="sig-paren">(</span><em>taskDict</em>, <em>C</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/iggytools/iggyref/taskClasses.html#Fasta2index"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#iggytools.iggyref.taskClasses.Fasta2index" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#iggytools.iggyref.taskClasses.baseTask" title="iggytools.iggyref.taskClasses.baseTask"><code class="xref py py-class docutils literal"><span class="pre">iggytools.iggyref.taskClasses.baseTask</span></code></a></p>
+<dl class="method">
+<dt id="iggytools.iggyref.taskClasses.Fasta2index.run">
+<code class="descname">run</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/iggytools/iggyref/taskClasses.html#Fasta2index.run"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#iggytools.iggyref.taskClasses.Fasta2index.run" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="iggytools.iggyref.taskClasses.Txt2gtf">
+<em class="property">class </em><code class="descclassname">iggytools.iggyref.taskClasses.</code><code class="descname">Txt2gtf</code><span class="sig-paren">(</span><em>taskDict</em>, <em>C</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/iggytools/iggyref/taskClasses.html#Txt2gtf"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#iggytools.iggyref.taskClasses.Txt2gtf" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#iggytools.iggyref.taskClasses.baseTask" title="iggytools.iggyref.taskClasses.baseTask"><code class="xref py py-class docutils literal"><span class="pre">iggytools.iggyref.taskClasses.baseTask</span></code></a></p>
+<dl class="method">
+<dt id="iggytools.iggyref.taskClasses.Txt2gtf.run">
+<code class="descname">run</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/iggytools/iggyref/taskClasses.html#Txt2gtf.run"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#iggytools.iggyref.taskClasses.Txt2gtf.run" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="iggytools.iggyref.taskClasses.Unzip">
+<em class="property">class </em><code class="descclassname">iggytools.iggyref.taskClasses.</code><code class="descname">Unzip</code><span class="sig-paren">(</span><em>taskDict</em>, <em>C</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/iggytools/iggyref/taskClasses.html#Unzip"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#iggytools.iggyref.taskClasses.Unzip" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#iggytools.iggyref.taskClasses.baseTask" title="iggytools.iggyref.taskClasses.baseTask"><code class="xref py py-class docutils literal"><span class="pre">iggytools.iggyref.taskClasses.baseTask</span></code></a></p>
+<dl class="method">
+<dt id="iggytools.iggyref.taskClasses.Unzip.run">
+<code class="descname">run</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/iggytools/iggyref/taskClasses.html#Unzip.run"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#iggytools.iggyref.taskClasses.Unzip.run" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="iggytools.iggyref.taskClasses.Unzip_untar">
+<em class="property">class </em><code class="descclassname">iggytools.iggyref.taskClasses.</code><code class="descname">Unzip_untar</code><span class="sig-paren">(</span><em>taskDict</em>, <em>C</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/iggytools/iggyref/taskClasses.html#Unzip_untar"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#iggytools.iggyref.taskClasses.Unzip_untar" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#iggytools.iggyref.taskClasses.baseTask" title="iggytools.iggyref.taskClasses.baseTask"><code class="xref py py-class docutils literal"><span class="pre">iggytools.iggyref.taskClasses.baseTask</span></code></a></p>
+<dl class="method">
+<dt id="iggytools.iggyref.taskClasses.Unzip_untar.run">
+<code class="descname">run</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/iggytools/iggyref/taskClasses.html#Unzip_untar.run"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#iggytools.iggyref.taskClasses.Unzip_untar.run" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="iggytools.iggyref.taskClasses.Unzip_untar_merge">
+<em class="property">class </em><code class="descclassname">iggytools.iggyref.taskClasses.</code><code class="descname">Unzip_untar_merge</code><span class="sig-paren">(</span><em>taskDict</em>, <em>C</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/iggytools/iggyref/taskClasses.html#Unzip_untar_merge"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#iggytools.iggyref.taskClasses.Unzip_untar_merge" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#iggytools.iggyref.taskClasses.baseTask" title="iggytools.iggyref.taskClasses.baseTask"><code class="xref py py-class docutils literal"><span class="pre">iggytools.iggyref.taskClasses.baseTask</span></code></a></p>
+<dl class="method">
+<dt id="iggytools.iggyref.taskClasses.Unzip_untar_merge.run">
+<code class="descname">run</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/iggytools/iggyref/taskClasses.html#Unzip_untar_merge.run"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#iggytools.iggyref.taskClasses.Unzip_untar_merge.run" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="iggytools.iggyref.taskClasses.baseTask">
+<em class="property">class </em><code class="descclassname">iggytools.iggyref.taskClasses.</code><code class="descname">baseTask</code><span class="sig-paren">(</span><em>taskDict</em>, <em>C</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/iggytools/iggyref/taskClasses.html#baseTask"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#iggytools.iggyref.taskClasses.baseTask" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference external" href="http://docs.python.org/2.7/library/functions.html#object" title="(in Python v2.7)"><code class="xref py py-class docutils literal"><span class="pre">object</span></code></a></p>
+<dl class="method">
+<dt id="iggytools.iggyref.taskClasses.baseTask.getFileObj">
+<code class="descname">getFileObj</code><span class="sig-paren">(</span><em>filename</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/iggytools/iggyref/taskClasses.html#baseTask.getFileObj"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#iggytools.iggyref.taskClasses.baseTask.getFileObj" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="classmethod">
+<dt id="iggytools.iggyref.taskClasses.baseTask.getInstance">
+<em class="property">classmethod </em><code class="descname">getInstance</code><span class="sig-paren">(</span><em>taskDict</em>, <em>C</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/iggytools/iggyref/taskClasses.html#baseTask.getInstance"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#iggytools.iggyref.taskClasses.baseTask.getInstance" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="iggytools.iggyref.taskClasses.baseTask.validateExt">
+<code class="descname">validateExt</code><span class="sig-paren">(</span><em>filename</em>, <em>extensions</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/iggytools/iggyref/taskClasses.html#baseTask.validateExt"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#iggytools.iggyref.taskClasses.baseTask.validateExt" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="iggytools.iggyref.taskClasses.baseTask.validateInOut">
+<code class="descname">validateInOut</code><span class="sig-paren">(</span><em>numIn</em>, <em>numOut</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/iggytools/iggyref/taskClasses.html#baseTask.validateInOut"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#iggytools.iggyref.taskClasses.baseTask.validateInOut" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="iggytools-iggyref-update-module">
+<h2>iggytools.iggyref.update module<a class="headerlink" href="#iggytools-iggyref-update-module" title="Permalink to this headline">¶</a></h2>
+</div>
+<div class="section" id="module-iggytools.iggyref">
+<span id="module-contents"></span><h2>Module contents<a class="headerlink" href="#module-iggytools.iggyref" title="Permalink to this headline">¶</a></h2>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../index.html">iggytools 0.1 documentation</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &copy; Copyright 2015, Chris Williams.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.3.1.
+    </div>
+  </body>
+</html>

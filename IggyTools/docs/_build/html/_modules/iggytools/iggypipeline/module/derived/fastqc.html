@@ -1,0 +1,263 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>iggytools.iggypipeline.module.derived.fastqc &mdash; iggytools 0.1 documentation</title>
+    
+    <link rel="stylesheet" href="../../../../../_static/sphinxdoc.css" type="text/css" />
+    <link rel="stylesheet" href="../../../../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../../../',
+        VERSION:     '0.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../../../_static/doctools.js"></script>
+    <link rel="top" title="iggytools 0.1 documentation" href="../../../../../index.html" />
+    <link rel="up" title="Module code" href="../../../../index.html" /> 
+  </head>
+  <body role="document">
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../../../../index.html">iggytools 0.1 documentation</a> &raquo;</li>
+          <li class="nav-item nav-item-1"><a href="../../../../index.html" accesskey="U">Module code</a> &raquo;</li> 
+      </ul>
+    </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../../../../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for iggytools.iggypipeline.module.derived.fastqc</h1><div class="highlight"><pre>
+<span class="kn">import</span> <span class="nn">os</span><span class="o">,</span> <span class="nn">sys</span><span class="o">,</span> <span class="nn">re</span> 
+<span class="kn">import</span> <span class="nn">os.path</span> <span class="kn">as</span> <span class="nn">path</span>
+<span class="kn">from</span> <span class="nn">collections</span> <span class="kn">import</span> <span class="n">OrderedDict</span>
+<span class="kn">from</span> <span class="nn">iggytools.iggypipeline.module.iggyMod</span> <span class="kn">import</span> <span class="n">IggyMod</span>
+<span class="kn">from</span> <span class="nn">iggytools.iggypipeline.module.argDefClass</span> <span class="kn">import</span> <span class="n">ArgDef</span>
+<span class="kn">from</span> <span class="nn">iggytools.iggypipeline.module.configClasses</span> <span class="kn">import</span> <span class="n">BaseConfig</span>
+<span class="kn">from</span> <span class="nn">iggytools.utils.util</span> <span class="kn">import</span> <span class="n">mkdir_p</span><span class="p">,</span> <span class="n">dict2namedtuple</span>
+
+
+<div class="viewcode-block" id="Fastqc"><a class="viewcode-back" href="../../../../../_rst/iggytools.iggypipeline.module.derived.html#iggytools.iggypipeline.module.derived.fastqc.Fastqc">[docs]</a><span class="k">class</span> <span class="nc">Fastqc</span><span class="p">(</span><span class="n">IggyMod</span><span class="p">):</span>
+
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">pipe</span><span class="p">):</span>
+        
+        <span class="n">IggyMod</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s">&#39;Fastqc&#39;</span><span class="p">,</span> <span class="n">pipe</span><span class="p">)</span>  <span class="c">#set self.pref, and do other module initialization</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">modConfig</span> <span class="o">=</span> <span class="n">BaseConfig</span><span class="o">.</span><span class="n">getInstance</span><span class="p">(</span><span class="s">&#39;module&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">getArgDefs</span><span class="p">())</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">outputHelp</span> <span class="o">=</span> <span class="p">[</span><span class="s">&quot;outputs.fileList               List of zip file paths (one per input file)&quot;</span><span class="p">]</span>
+
+
+<div class="viewcode-block" id="Fastqc.argSetup"><a class="viewcode-back" href="../../../../../_rst/iggytools.iggypipeline.module.derived.html#iggytools.iggypipeline.module.derived.fastqc.Fastqc.argSetup">[docs]</a>    <span class="k">def</span> <span class="nf">argSetup</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+
+        <span class="n">a</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">modConfig</span><span class="o">.</span><span class="n">argDefs</span>
+
+        <span class="k">if</span> <span class="s">&#39;inFiles&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">a</span> <span class="ow">or</span> <span class="ow">not</span> <span class="n">a</span><span class="p">[</span><span class="s">&#39;inFiles&#39;</span><span class="p">]:</span>
+            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s">&#39;At least one input file must be specified&#39;</span><span class="p">)</span>
+
+        <span class="c"># Setup input files arg</span>
+
+        <span class="n">files</span> <span class="o">=</span> <span class="n">a</span><span class="p">[</span><span class="s">&#39;inFiles&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">value</span>
+
+        <span class="k">if</span> <span class="nb">type</span><span class="p">(</span> <span class="n">files</span> <span class="p">)</span> <span class="o">!=</span> <span class="nb">list</span><span class="p">:</span>
+            <span class="n">files</span> <span class="o">=</span> <span class="n">files</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s">&#39;,&#39;</span><span class="p">)</span> 
+
+        <span class="k">if</span> <span class="n">a</span><span class="p">[</span><span class="s">&#39;inputdir&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">value</span><span class="p">:</span>
+            <span class="n">files</span> <span class="o">=</span> <span class="p">[</span> <span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">a</span><span class="p">[</span><span class="s">&#39;inputdir&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">value</span><span class="p">,</span> <span class="n">x</span><span class="p">)</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">files</span> <span class="p">]</span>
+        <span class="n">a</span><span class="p">[</span><span class="s">&#39;inFiles&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">value</span> <span class="o">=</span> <span class="n">files</span>
+
+        <span class="c"># Setup outdir arg, update self.modDir</span>
+
+        <span class="k">if</span> <span class="s">&#39;outdir&#39;</span> <span class="ow">in</span> <span class="n">a</span> <span class="ow">and</span> <span class="n">a</span><span class="p">[</span><span class="s">&#39;outdir&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">value</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">modDir</span> <span class="o">=</span> <span class="n">a</span><span class="p">[</span><span class="s">&#39;outdir&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">value</span>  <span class="c">#set new module output directory</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">a</span><span class="p">[</span><span class="s">&#39;outdir&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">value</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">modDir</span>
+
+        <span class="c"># Setup module outputs</span>
+
+        <span class="n">outItems</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
+        <span class="n">outItems</span><span class="p">[</span><span class="s">&#39;fileList&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">list</span><span class="p">()</span>
+
+        <span class="k">for</span> <span class="n">inFile</span> <span class="ow">in</span> <span class="n">a</span><span class="p">[</span><span class="s">&#39;inFiles&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">value</span><span class="p">:</span>
+            <span class="n">outItems</span><span class="p">[</span><span class="s">&#39;fileList&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span> <span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">a</span><span class="p">[</span><span class="s">&#39;outdir&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">value</span><span class="p">,</span> <span class="n">re</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="s">r&#39;\.fastq(\.gz)?$&#39;</span><span class="p">,</span> <span class="s">&#39;.zip&#39;</span><span class="p">,</span> <span class="n">inFile</span><span class="p">))</span> <span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">outputs</span> <span class="o">=</span> <span class="n">dict2namedtuple</span><span class="p">(</span><span class="n">outItems</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">modConfig</span><span class="o">.</span><span class="n">argDefs</span> <span class="o">=</span> <span class="n">a</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">buildCommand</span><span class="p">()</span>
+
+</div>
+<div class="viewcode-block" id="Fastqc.modSetup"><a class="viewcode-back" href="../../../../../_rst/iggytools.iggypipeline.module.derived.html#iggytools.iggypipeline.module.derived.fastqc.Fastqc.modSetup">[docs]</a>    <span class="k">def</span> <span class="nf">modSetup</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+
+        <span class="n">a</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">modConfig</span><span class="o">.</span><span class="n">argDefs</span>
+
+        <span class="k">for</span> <span class="n">inFile</span> <span class="ow">in</span> <span class="n">a</span><span class="p">[</span><span class="s">&#39;inFiles&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">value</span><span class="p">:</span>  
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="n">inFile</span><span class="p">):</span>
+                <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s">&#39;Cannot find input file </span><span class="si">%s</span><span class="s">&#39;</span> <span class="o">%</span> <span class="n">inFile</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">path</span><span class="o">.</span><span class="n">isdir</span><span class="p">(</span><span class="n">a</span><span class="p">[</span><span class="s">&#39;outdir&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">value</span><span class="p">):</span>  <span class="c">#create output dir</span>
+            <span class="n">mkdir_p</span><span class="p">(</span><span class="n">a</span><span class="p">[</span><span class="s">&#39;outdir&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">value</span><span class="p">)</span>
+
+</div>
+<div class="viewcode-block" id="Fastqc.buildCommand"><a class="viewcode-back" href="../../../../../_rst/iggytools.iggypipeline.module.derived.html#iggytools.iggypipeline.module.derived.fastqc.Fastqc.buildCommand">[docs]</a>    <span class="k">def</span> <span class="nf">buildCommand</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+
+        <span class="c">#example command: fastqc --threads 3 --noextract --nogroup --outdir $outdir $fastqfile</span>
+
+        <span class="n">a</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">modConfig</span><span class="o">.</span><span class="n">argDefs</span>
+
+        <span class="n">command</span> <span class="o">=</span> <span class="s">&#39;source new-modules.sh; module load fastqc/0.11.2-fasrc01 </span><span class="se">\n</span><span class="s">&#39;</span>
+        <span class="n">command</span> <span class="o">+=</span> <span class="s">&#39;fastqc </span><span class="se">\\\n</span><span class="s">&#39;</span>
+
+        <span class="k">if</span> <span class="n">a</span><span class="p">[</span><span class="s">&#39;outdir&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">value</span><span class="p">:</span>
+            <span class="n">command</span> <span class="o">+=</span> <span class="s">&#39;  --outdir </span><span class="si">%s</span><span class="s"> </span><span class="se">\\\n</span><span class="s">&#39;</span> <span class="o">%</span> <span class="n">a</span><span class="p">[</span><span class="s">&#39;outdir&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">value</span>
+
+        <span class="k">if</span> <span class="n">a</span><span class="p">[</span><span class="s">&#39;threads&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">value</span><span class="p">:</span>
+            <span class="n">command</span> <span class="o">+=</span> <span class="s">&#39;  --threads </span><span class="si">%s</span><span class="s"> </span><span class="se">\\\n</span><span class="s">&#39;</span> <span class="o">%</span> <span class="n">a</span><span class="p">[</span><span class="s">&#39;threads&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">value</span>
+
+        <span class="k">if</span> <span class="n">a</span><span class="p">[</span><span class="s">&#39;quiet&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">value</span><span class="p">:</span>
+            <span class="n">command</span> <span class="o">+=</span> <span class="s">&#39;  --quiet </span><span class="se">\\\n</span><span class="s">&#39;</span>
+
+        <span class="k">if</span> <span class="n">a</span><span class="p">[</span><span class="s">&#39;noextract&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">value</span><span class="p">:</span>
+            <span class="n">command</span> <span class="o">+=</span> <span class="s">&#39;  --noextract </span><span class="se">\\\n</span><span class="s">&#39;</span>
+
+        <span class="k">if</span> <span class="n">a</span><span class="p">[</span><span class="s">&#39;nogroup&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">value</span><span class="p">:</span>
+            <span class="n">command</span> <span class="o">+=</span> <span class="s">&#39;  --nogroup </span><span class="se">\\\n</span><span class="s">&#39;</span>
+
+        <span class="k">if</span> <span class="n">a</span><span class="p">[</span><span class="s">&#39;inputdir&#39;</span><span class="p">]:</span>
+            <span class="n">inputFilePaths</span> <span class="o">=</span> <span class="p">[</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">a</span><span class="p">[</span><span class="s">&#39;inputdir&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">value</span><span class="p">,</span><span class="n">x</span><span class="p">)</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">a</span><span class="p">[</span><span class="s">&#39;inFiles&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">value</span><span class="p">]</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">inputFilePaths</span> <span class="o">=</span> <span class="n">a</span><span class="p">[</span><span class="s">&#39;inFiles&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">value</span>
+
+        <span class="n">command</span> <span class="o">+=</span> <span class="s">&#39;  </span><span class="si">%s</span><span class="s">&#39;</span> <span class="o">%</span> <span class="s">&#39; &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">inputFilePaths</span><span class="p">)</span>
+        <span class="n">command</span> <span class="o">+=</span> <span class="s">&#39;</span><span class="se">\n</span><span class="s">&#39;</span>  <span class="c">#end line continuation</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">command</span> <span class="o">=</span> <span class="n">command</span>
+
+</div>
+<div class="viewcode-block" id="Fastqc.getArgDefs"><a class="viewcode-back" href="../../../../../_rst/iggytools.iggypipeline.module.derived.html#iggytools.iggypipeline.module.derived.fastqc.Fastqc.getArgDefs">[docs]</a>    <span class="k">def</span> <span class="nf">getArgDefs</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        
+        <span class="n">argDefs</span> <span class="o">=</span> <span class="n">OrderedDict</span><span class="p">(</span> <span class="p">[</span>
+            <span class="p">(</span><span class="s">&#39;inFiles&#39;</span><span class="p">,</span> <span class="n">ArgDef</span><span class="p">(</span><span class="s">&#39;inFiles&#39;</span><span class="p">,</span>        <span class="n">help</span> <span class="o">=</span> <span class="s">&#39;Comma-separted list of input files.&#39;</span><span class="p">,</span> 
+                                                       <span class="nb">type</span> <span class="o">=</span> <span class="nb">list</span><span class="p">)),</span>
+
+            <span class="p">(</span><span class="s">&#39;inputdir&#39;</span><span class="p">,</span>   <span class="n">ArgDef</span><span class="p">(</span><span class="s">&#39;-d&#39;</span><span class="p">,</span> <span class="s">&#39;--inputdir&#39;</span><span class="p">,</span>  <span class="n">help</span> <span class="o">=</span> <span class="s">&#39;Directory containing input files. Default: current directory.&#39;</span><span class="p">,</span>
+                                                       <span class="nb">type</span> <span class="o">=</span> <span class="nb">str</span><span class="p">)),</span>
+
+            <span class="p">(</span><span class="s">&#39;outdir&#39;</span><span class="p">,</span>     <span class="n">ArgDef</span><span class="p">(</span><span class="s">&#39;-o&#39;</span><span class="p">,</span> <span class="s">&#39;--outdir&#39;</span><span class="p">,</span>    <span class="n">help</span> <span class="o">=</span><span class="s">&#39;Directory where output files should be written. Default: &lt;projDir&gt;/fastqc: </span><span class="si">%(default)s</span><span class="s">.&#39;</span><span class="p">,</span>
+                                                       <span class="nb">type</span> <span class="o">=</span> <span class="nb">str</span><span class="p">,</span> 
+                                                       <span class="n">default</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">modDir</span><span class="p">)),</span>
+     
+            <span class="p">(</span><span class="s">&#39;threads&#39;</span><span class="p">,</span>    <span class="n">ArgDef</span><span class="p">(</span><span class="s">&#39;-t&#39;</span><span class="p">,</span> <span class="s">&#39;--threads&#39;</span><span class="p">,</span>   <span class="n">help</span> <span class="o">=</span><span class="s">&#39;Number of threads. Note: FastQC uses at most 3 threads per input file. Default: </span><span class="si">%(default)s</span><span class="s">.&#39;</span><span class="p">,</span>
+                                                       <span class="nb">type</span> <span class="o">=</span> <span class="nb">int</span><span class="p">,</span> 
+                                                       <span class="n">default</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">pref</span><span class="o">.</span><span class="n">THREADS</span><span class="p">)),</span>
+
+            <span class="p">(</span><span class="s">&#39;quiet&#39;</span><span class="p">,</span>      <span class="n">ArgDef</span><span class="p">(</span><span class="s">&#39;-q&#39;</span><span class="p">,</span> <span class="s">&#39;--quiet&#39;</span><span class="p">,</span>     <span class="n">help</span> <span class="o">=</span> <span class="s">&#39;Suppress FastQC progress messages to stdout. Default: </span><span class="si">%(default)s</span><span class="s">.&#39;</span><span class="p">,</span>
+                                                       <span class="nb">type</span> <span class="o">=</span> <span class="nb">bool</span><span class="p">,</span>
+                                                       <span class="n">default</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">pref</span><span class="o">.</span><span class="n">QUIET</span><span class="p">)),</span>
+
+            <span class="p">(</span><span class="s">&#39;noextract&#39;</span><span class="p">,</span>  <span class="n">ArgDef</span><span class="p">(</span><span class="s">&#39;-x&#39;</span><span class="p">,</span> <span class="s">&#39;--noextract&#39;</span><span class="p">,</span> <span class="n">help</span> <span class="o">=</span><span class="s">&#39;Do not uncompress the output file after creating it.&#39;</span><span class="p">,</span>
+                                                       <span class="nb">type</span> <span class="o">=</span> <span class="nb">bool</span><span class="p">,</span>
+                                                       <span class="n">default</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">pref</span><span class="o">.</span><span class="n">NOEXTRACT</span><span class="p">)),</span>
+
+            <span class="p">(</span><span class="s">&#39;nogroup&#39;</span><span class="p">,</span>    <span class="n">ArgDef</span><span class="p">(</span><span class="s">&#39;-n&#39;</span><span class="p">,</span> <span class="s">&#39;--nogroup&#39;</span><span class="p">,</span>   <span class="n">help</span> <span class="o">=</span><span class="s">&#39;Disable grouping of bases for reads &gt;50bp. Reports show data for every base in read.&#39;</span><span class="p">,</span>
+                                                       <span class="nb">type</span> <span class="o">=</span> <span class="nb">bool</span><span class="p">,</span>
+                                                       <span class="n">default</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">pref</span><span class="o">.</span><span class="n">NOGROUP</span><span class="p">))</span> <span class="p">])</span>
+
+        <span class="k">return</span> <span class="n">argDefs</span>
+
+</div>
+<div class="viewcode-block" id="Fastqc.setSlurmDefaults_from_modConfig"><a class="viewcode-back" href="../../../../../_rst/iggytools.iggypipeline.module.derived.html#iggytools.iggypipeline.module.derived.fastqc.Fastqc.setSlurmDefaults_from_modConfig">[docs]</a>    <span class="k">def</span> <span class="nf">setSlurmDefaults_from_modConfig</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>  <span class="c">#update slurm settings based on module inputs</span>
+
+        <span class="n">args</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">modConfig</span><span class="o">.</span><span class="n">argDefs</span>  
+        <span class="n">sargs</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">slurmConfig</span><span class="o">.</span><span class="n">argDefs</span>
+
+        <span class="c"># Threads: three per input file</span>
+        <span class="n">sargs</span><span class="p">[</span><span class="s">&#39;ntasks&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">default</span> <span class="o">=</span> <span class="mi">3</span> <span class="o">*</span> <span class="nb">len</span><span class="p">(</span><span class="n">args</span><span class="p">[</span><span class="s">&#39;inFiles&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">value</span><span class="p">)</span>
+
+        <span class="c"># Memory: 500 MB per input file</span>
+        <span class="n">sargs</span><span class="p">[</span><span class="s">&#39;mem&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">default</span> <span class="o">=</span> <span class="mi">500</span> <span class="o">*</span> <span class="nb">len</span><span class="p">(</span><span class="n">args</span><span class="p">[</span><span class="s">&#39;inFiles&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">value</span><span class="p">)</span>
+
+        <span class="c"># Time: 30 minutes per gigabyte of the largest input file</span>
+        <span class="n">maxBytes</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="k">for</span> <span class="n">inFile</span> <span class="ow">in</span> <span class="n">args</span><span class="p">[</span><span class="s">&#39;inFiles&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">value</span><span class="p">:</span>
+            <span class="nb">bytes</span> <span class="o">=</span> <span class="n">path</span><span class="o">.</span><span class="n">getsize</span><span class="p">(</span><span class="n">inFile</span><span class="p">)</span>
+            <span class="k">if</span> <span class="nb">bytes</span> <span class="o">&gt;</span> <span class="n">maxBytes</span><span class="p">:</span>
+                <span class="n">maxBytes</span> <span class="o">=</span> <span class="nb">bytes</span>
+
+        <span class="n">sargs</span><span class="p">[</span><span class="s">&#39;time&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">default</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">getTime</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span> <span class="n">maxBytes</span> <span class="o">*</span> <span class="mi">3</span> <span class="o">*</span> <span class="mi">10</span><span class="o">^-</span><span class="mi">8</span> <span class="p">))</span>  
+
+        <span class="c"># Other param defaults</span>
+        <span class="n">sargs</span><span class="p">[</span><span class="s">&#39;job_name&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">default</span> <span class="o">=</span> <span class="s">&#39;</span><span class="si">%s</span><span class="s">_</span><span class="si">%s</span><span class="s">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">pipe</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">pref</span><span class="o">.</span><span class="n">SLURM_PARTITION</span><span class="p">:</span>
+            <span class="n">sargs</span><span class="p">[</span><span class="s">&#39;partition&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">default</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">pref</span><span class="o">.</span><span class="n">SLURM_PARTITION</span>
+
+        <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="n">sargs</span><span class="o">.</span><span class="n">itervalues</span><span class="p">():</span>
+            <span class="k">if</span> <span class="n">s</span><span class="o">.</span><span class="n">default</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+                <span class="n">s</span><span class="o">.</span><span class="n">value</span> <span class="o">=</span> <span class="n">s</span><span class="o">.</span><span class="n">default</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">slurmConfig</span><span class="o">.</span><span class="n">argDefs</span> <span class="o">=</span> <span class="n">sargs</span>
+</pre></div></div></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../../../../index.html">iggytools 0.1 documentation</a> &raquo;</li>
+          <li class="nav-item nav-item-1"><a href="../../../../index.html" >Module code</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &copy; Copyright 2015, Chris Williams.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.3.1.
+    </div>
+  </body>
+</html>

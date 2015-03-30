@@ -1,0 +1,279 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>iggytools.iggyref.repoClass &mdash; iggytools 0.1 documentation</title>
+    
+    <link rel="stylesheet" href="../../../_static/sphinxdoc.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../',
+        VERSION:     '0.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../_static/doctools.js"></script>
+    <link rel="top" title="iggytools 0.1 documentation" href="../../../index.html" />
+    <link rel="up" title="Module code" href="../../index.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../../index.html">iggytools 0.1 documentation</a> &raquo;</li>
+          <li><a href="../../index.html" accesskey="U">Module code</a> &raquo;</li> 
+      </ul>
+    </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <h1>Source code for iggytools.iggyref.repoClass</h1><div class="highlight"><pre>
+<span class="kn">import</span> <span class="nn">os</span><span class="o">,</span> <span class="nn">glob</span><span class="o">,</span> <span class="nn">sys</span><span class="o">,</span> <span class="nn">logging</span><span class="o">,</span> <span class="nn">re</span><span class="o">,</span> <span class="nn">traceback</span>
+<span class="kn">import</span> <span class="nn">os.path</span> <span class="kn">as</span> <span class="nn">path</span>
+<span class="kn">from</span> <span class="nn">iggytools.config.config</span> <span class="kn">import</span> <span class="n">get_iggyref_preferences</span>
+<span class="kn">from</span> <span class="nn">iggytools.iggyref.FTPclass</span> <span class="kn">import</span> <span class="n">iggyrefFTP</span>
+<span class="kn">from</span> <span class="nn">iggytools.iggyref.DBclass</span> <span class="kn">import</span> <span class="n">iggyrefDB</span>
+<span class="kn">from</span> <span class="nn">iggytools.iggyref.rFileClass</span> <span class="kn">import</span> <span class="n">rFile</span>
+<span class="kn">from</span> <span class="nn">iggytools.iggyref.baseCollectionClass</span> <span class="kn">import</span> <span class="n">baseCollection</span>
+<span class="kn">from</span> <span class="nn">iggytools.iggyref.depGraph.graphClasses</span> <span class="kn">import</span> <span class="n">depGraph</span>
+<span class="kn">from</span> <span class="nn">iggytools.utils.util</span> <span class="kn">import</span> <span class="n">intersect</span><span class="p">,</span> <span class="n">flatten</span><span class="p">,</span> <span class="n">rsync</span><span class="p">,</span> <span class="n">mkdir_p</span><span class="p">,</span> <span class="n">unique</span><span class="p">,</span> <span class="n">insert</span>
+
+<div class="viewcode-block" id="Repo"><a class="viewcode-back" href="../../../_rst/iggytools.iggyref.html#iggytools.iggyref.repoClass.Repo">[docs]</a><span class="k">class</span> <span class="nc">Repo</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">source</span><span class="p">,</span> <span class="n">customPrefDir</span> <span class="o">=</span> <span class="bp">None</span><span class="p">):</span>
+        <span class="n">config</span> <span class="o">=</span> <span class="n">get_iggyref_preferences</span><span class="p">(</span><span class="n">customPrefDir</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">source</span> <span class="o">=</span> <span class="n">source</span>
+        <span class="n">repoPropertiesMod</span> <span class="o">=</span> <span class="nb">__import__</span><span class="p">(</span><span class="s">&#39;iggytools.iggyref.sources.</span><span class="si">%s</span><span class="s">.properties&#39;</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">source</span><span class="p">,</span><span class="n">fromlist</span><span class="o">=</span><span class="p">[</span><span class="s">&#39;properties&#39;</span><span class="p">])</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">properties</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">repoPropertiesMod</span><span class="p">,</span><span class="s">&#39;repoProperties&#39;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">logDir</span> <span class="o">=</span> <span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">config</span><span class="o">.</span><span class="n">LOG_DIR</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">source</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">tempDir</span> <span class="o">=</span> <span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">config</span><span class="o">.</span><span class="n">TEMP_DIR</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">source</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">downloadDir</span> <span class="o">=</span> <span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">config</span><span class="o">.</span><span class="n">DOWNLOAD_DIR</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">source</span><span class="p">)</span> 
+        <span class="bp">self</span><span class="o">.</span><span class="n">intermedDir</span> <span class="o">=</span> <span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">config</span><span class="o">.</span><span class="n">INTERMED_DIR</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">source</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">config</span><span class="o">.</span><span class="n">DEBUG</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">intermedDir</span> <span class="o">=</span> <span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">config</span><span class="o">.</span><span class="n">DEBUG_DIR</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">source</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">finalDir</span> <span class="o">=</span> <span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">config</span><span class="o">.</span><span class="n">REPO_DIR</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">source</span><span class="p">)</span> 
+        <span class="n">mkdir_p</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">logDir</span><span class="p">)</span>
+        <span class="n">mkdir_p</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">tempDir</span><span class="p">)</span>
+        <span class="n">mkdir_p</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">downloadDir</span><span class="p">)</span>
+        <span class="n">mkdir_p</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">finalDir</span><span class="p">)</span>
+
+        <span class="n">logging</span><span class="o">.</span><span class="n">basicConfig</span><span class="p">(</span><span class="n">filename</span> <span class="o">=</span> <span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">config</span><span class="o">.</span><span class="n">LOG_DIR</span><span class="p">,</span> <span class="s">&#39;iggyref.log&#39;</span><span class="p">),</span>
+                            <span class="n">format</span> <span class="o">=</span> <span class="s">&#39;</span><span class="si">%(asctime)s</span><span class="s"> - </span><span class="si">%(name)s</span><span class="s"> - </span><span class="si">%(funcName)s</span><span class="s"> - </span><span class="si">%(levelname)s</span><span class="s"> - </span><span class="si">%(message)s</span><span class="s">&#39;</span><span class="p">,</span>
+                            <span class="n">datefmt</span> <span class="o">=</span> <span class="s">&#39;%m/</span><span class="si">%d</span><span class="s">/%Y %I:%M:%S %p&#39;</span><span class="p">,</span>
+                            <span class="n">level</span> <span class="o">=</span> <span class="n">config</span><span class="o">.</span><span class="n">LOG_LEVEL</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">log</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="s">&#39;iggyref&#39;</span><span class="p">)</span>
+        <span class="n">sh</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">StreamHandler</span><span class="p">(</span><span class="n">sys</span><span class="o">.</span><span class="n">stdout</span><span class="p">)</span>
+        <span class="n">sh</span><span class="o">.</span><span class="n">setLevel</span><span class="p">(</span><span class="n">config</span><span class="o">.</span><span class="n">LOG_LEVEL</span><span class="p">)</span>
+        <span class="n">sh</span><span class="o">.</span><span class="n">setFormatter</span><span class="p">(</span><span class="n">logging</span><span class="o">.</span><span class="n">Formatter</span><span class="p">(</span><span class="s">&#39;</span><span class="si">%(asctime)s</span><span class="s"> - </span><span class="si">%(name)s</span><span class="s"> - </span><span class="si">%(funcName)s</span><span class="s"> - </span><span class="si">%(levelname)s</span><span class="s"> - </span><span class="si">%(message)s</span><span class="s">&#39;</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">log</span><span class="o">.</span><span class="n">addHandler</span><span class="p">(</span><span class="n">sh</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">config</span> <span class="o">=</span> <span class="n">config</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">Collections</span> <span class="o">=</span> <span class="nb">list</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">modifiedCollections</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">db</span> <span class="o">=</span> <span class="bp">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ftp</span> <span class="o">=</span> <span class="bp">None</span>
+
+<div class="viewcode-block" id="Repo.updateSpeciesTable"><a class="viewcode-back" href="../../../_rst/iggytools.iggyref.html#iggytools.iggyref.repoClass.Repo.updateSpeciesTable">[docs]</a>    <span class="k">def</span> <span class="nf">updateSpeciesTable</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">C</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">C</span><span class="o">.</span><span class="n">type</span> <span class="o">==</span> <span class="s">&#39;genome&#39;</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">db</span><span class="o">.</span><span class="n">addSpeciesCommonName</span><span class="p">(</span><span class="n">C</span><span class="o">.</span><span class="n">secondaryID</span><span class="p">,</span> <span class="n">C</span><span class="o">.</span><span class="n">properties</span><span class="p">[</span><span class="s">&#39;commonName&#39;</span><span class="p">])</span>
+</div>
+<div class="viewcode-block" id="Repo.downloadCollections"><a class="viewcode-back" href="../../../_rst/iggytools.iggyref.html#iggytools.iggyref.repoClass.Repo.downloadCollections">[docs]</a>    <span class="k">def</span> <span class="nf">downloadCollections</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">force</span><span class="o">=</span><span class="bp">False</span><span class="p">):</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">db</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">db</span> <span class="o">=</span>  <span class="n">iggyrefDB</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">ftp</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">ftp</span> <span class="o">=</span> <span class="n">iggyrefFTP</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">properties</span><span class="p">[</span><span class="s">&#39;ftpSite&#39;</span><span class="p">],</span> <span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">tempDir</span><span class="p">,</span> <span class="s">&#39;temp_ftp&#39;</span><span class="p">))</span>
+
+        <span class="k">for</span> <span class="n">primaryID</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">properties</span><span class="p">[</span><span class="s">&#39;selectedCollections&#39;</span><span class="p">]:</span>
+            <span class="n">C</span> <span class="o">=</span> <span class="n">baseCollection</span><span class="o">.</span><span class="n">getInstance</span><span class="p">(</span><span class="n">primaryID</span><span class="p">,</span> <span class="bp">self</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">ftp</span><span class="p">)</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">C</span><span class="p">:</span> <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s">&#39;Unable to instantiate Collection object for </span><span class="si">%s</span><span class="s"> from </span><span class="si">%s</span><span class="s">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">primaryID</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">source</span><span class="p">))</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">Collections</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">C</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">updateSpeciesTable</span><span class="p">(</span><span class="n">C</span><span class="p">)</span>
+
+            <span class="bp">self</span><span class="o">.</span><span class="n">log</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s">&#39;Collection to download: &#39;</span> <span class="o">+</span> <span class="n">primaryID</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">log</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s">&#39;Filenames: &#39;</span> <span class="o">+</span> <span class="s">&#39;, &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="nb">map</span><span class="p">(</span><span class="nb">str</span><span class="p">,</span><span class="n">C</span><span class="o">.</span><span class="n">Files</span><span class="p">)))</span>
+
+            <span class="k">for</span> <span class="n">File</span> <span class="ow">in</span> <span class="n">C</span><span class="o">.</span><span class="n">Files</span><span class="p">:</span>
+                <span class="n">C</span><span class="o">.</span><span class="n">setFtpFilePath</span><span class="p">(</span><span class="n">File</span><span class="p">)</span>
+                <span class="c">#get remote timestamp. Get checksum from any previous download of this file</span>
+                <span class="n">C</span><span class="o">.</span><span class="n">setRemoteTimeString</span><span class="p">(</span><span class="n">File</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">log</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s">&#39;Remote TimeString for file </span><span class="si">%s</span><span class="s">: </span><span class="si">%s</span><span class="s">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">File</span><span class="o">.</span><span class="n">ftpPath</span><span class="p">,</span> <span class="n">File</span><span class="o">.</span><span class="n">remoteTimeString</span><span class="p">))</span>
+                <span class="n">C</span><span class="o">.</span><span class="n">setRemoteChecksum</span><span class="p">(</span><span class="n">File</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">log</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s">&#39;Remote checksum for file </span><span class="si">%s</span><span class="s">: </span><span class="si">%s</span><span class="s">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">File</span><span class="o">.</span><span class="n">ftpPath</span><span class="p">,</span> <span class="n">File</span><span class="o">.</span><span class="n">remoteChecksum</span><span class="p">))</span>
+                <span class="n">File</span><span class="o">.</span><span class="n">prevChecksum</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">db</span><span class="o">.</span><span class="n">getFileAttribute</span><span class="p">(</span><span class="n">File</span><span class="p">,</span> <span class="n">C</span><span class="p">,</span> <span class="s">&#39;download_ended&#39;</span><span class="p">,</span> <span class="s">&#39;checksum&#39;</span><span class="p">)</span>  <span class="c">#checksum of file the last time it was downloaded</span>
+
+                <span class="c">#check if we need to download this file, based on timestamps and checksums</span>
+                <span class="k">if</span> <span class="ow">not</span> <span class="n">force</span> <span class="ow">and</span> <span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="n">File</span><span class="o">.</span><span class="n">localPath</span><span class="p">):</span>
+                    <span class="c">#compare stored timestring to remote timestring:</span>
+                    <span class="n">prevTimeString</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">db</span><span class="o">.</span><span class="n">getFileAttribute</span><span class="p">(</span><span class="n">File</span><span class="p">,</span> <span class="n">C</span><span class="p">,</span> <span class="s">&#39;download_ended&#39;</span><span class="p">,</span> <span class="s">&#39;remoteTimeString&#39;</span><span class="p">)</span> <span class="c">#remote timestamp from previous download</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">log</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s">&#39;TimeString of </span><span class="si">%s</span><span class="s"> in DB: </span><span class="si">%s</span><span class="s">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">File</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">prevTimeString</span><span class="p">))</span>
+                    <span class="k">if</span> <span class="n">prevTimeString</span> <span class="ow">and</span> <span class="n">File</span><span class="o">.</span><span class="n">remoteTimeString</span> <span class="o">==</span> <span class="n">prevTimeString</span><span class="p">:</span>  <span class="c">#then do not download this file</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">log</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s">&#39;Not downloading </span><span class="si">%s</span><span class="s"> since remote, local timestrings match (</span><span class="si">%s</span><span class="s">).&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">File</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">prevTimeString</span><span class="p">))</span>
+                        <span class="k">continue</span>
+
+                    <span class="c">#check if remote checksum has changed since previous download</span>
+                    <span class="k">if</span> <span class="n">File</span><span class="o">.</span><span class="n">prevChecksum</span> <span class="ow">and</span> <span class="n">File</span><span class="o">.</span><span class="n">prevChecksum</span> <span class="o">==</span> <span class="n">File</span><span class="o">.</span><span class="n">remoteChecksum</span><span class="p">:</span> <span class="c">#then file has not changed. Update timestring in DB and do not download file.</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">db</span><span class="o">.</span><span class="n">writeFileRecord</span><span class="p">(</span><span class="n">File</span><span class="p">,</span> <span class="n">C</span><span class="p">,</span> <span class="n">status</span><span class="o">=</span><span class="s">&#39;download_ended&#39;</span><span class="p">,</span> <span class="n">addendum</span><span class="o">=</span><span class="s">&#39;timestring_updated&#39;</span><span class="p">)</span>
+                        <span class="k">continue</span>
+
+                <span class="bp">self</span><span class="o">.</span><span class="n">downloadFile</span><span class="p">(</span><span class="n">File</span><span class="p">,</span> <span class="n">C</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">db</span><span class="o">.</span><span class="n">writeCollectionRecord</span><span class="p">(</span><span class="n">C</span><span class="p">,</span> <span class="s">&#39;download_complete&#39;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ftp</span><span class="o">.</span><span class="n">closeFtp</span><span class="p">()</span>
+</div>
+<div class="viewcode-block" id="Repo.downloadFile"><a class="viewcode-back" href="../../../_rst/iggytools.iggyref.html#iggytools.iggyref.repoClass.Repo.downloadFile">[docs]</a>    <span class="k">def</span> <span class="nf">downloadFile</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">File</span><span class="p">,</span> <span class="n">C</span><span class="p">):</span>
+        <span class="n">fileIsModified</span> <span class="o">=</span> <span class="bp">True</span>
+        <span class="n">downloadAttempts</span> <span class="o">=</span> <span class="mi">0</span>
+
+        <span class="k">while</span> <span class="bp">True</span><span class="p">:</span> <span class="c">#attempt to download file</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">db</span><span class="o">.</span><span class="n">writeFileRecord</span><span class="p">(</span><span class="n">File</span><span class="p">,</span> <span class="n">C</span><span class="p">,</span> <span class="n">status</span><span class="o">=</span><span class="s">&#39;downloading&#39;</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s">&#39;Downloading </span><span class="si">%s</span><span class="s"> to </span><span class="si">%s</span><span class="s"> ...&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">File</span><span class="o">.</span><span class="n">ftpPath</span><span class="p">,</span> <span class="n">File</span><span class="o">.</span><span class="n">localPath</span><span class="p">))</span>
+            <span class="n">downloadAttempts</span> <span class="o">+=</span> <span class="mi">1</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">ftp</span><span class="o">.</span><span class="n">copyFile</span><span class="p">(</span><span class="n">File</span><span class="o">.</span><span class="n">ftpPath</span><span class="p">,</span> <span class="n">File</span><span class="o">.</span><span class="n">localPath</span><span class="p">)</span>  <span class="c"># copyFile() will attempt to download file three times, then raise an exception.</span>
+            <span class="k">except</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">db</span><span class="o">.</span><span class="n">writeFileRecord</span><span class="p">(</span><span class="n">File</span><span class="p">,</span> <span class="n">C</span><span class="p">,</span> <span class="n">status</span><span class="o">=</span><span class="s">&#39;download_fail&#39;</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">db</span><span class="o">.</span><span class="n">writeCollectionRecord</span><span class="p">(</span><span class="n">C</span><span class="p">,</span> <span class="s">&#39;download_fail&#39;</span><span class="p">,</span> <span class="n">addendum</span><span class="o">=</span><span class="n">File</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+                <span class="n">errStr</span> <span class="o">=</span> <span class="s">&quot;Unable to download </span><span class="si">%s</span><span class="s">: </span><span class="si">%s</span><span class="s">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">File</span><span class="o">.</span><span class="n">ftpPath</span><span class="p">,</span> <span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">log</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">errStr</span><span class="p">)</span>
+                <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="n">errStr</span><span class="p">)</span>
+
+            <span class="n">File</span><span class="o">.</span><span class="n">setLocalChecksum</span><span class="p">()</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">log</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s">&#39;Download ended.&#39;</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">db</span><span class="o">.</span><span class="n">writeFileRecord</span><span class="p">(</span><span class="n">File</span><span class="p">,</span> <span class="n">C</span><span class="p">,</span> <span class="n">status</span><span class="o">=</span><span class="s">&#39;download_ended&#39;</span><span class="p">)</span>
+
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">File</span><span class="o">.</span><span class="n">remoteChecksum</span><span class="p">:</span> <span class="c">#if no remote checksum exists, determine if file has changed based on comparison to checksum from previous download</span>
+                <span class="k">if</span> <span class="n">File</span><span class="o">.</span><span class="n">prevChecksum</span> <span class="ow">and</span> <span class="n">File</span><span class="o">.</span><span class="n">prevChecksum</span> <span class="o">==</span> <span class="n">File</span><span class="o">.</span><span class="n">localChecksum</span><span class="p">:</span> <span class="c">#then file has not changed, so no postprocessing is needed. Update checksum in DB.</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">db</span><span class="o">.</span><span class="n">writeFileRecord</span><span class="p">(</span><span class="n">File</span><span class="p">,</span> <span class="n">C</span><span class="p">,</span> <span class="n">status</span><span class="o">=</span><span class="s">&#39;download_ended&#39;</span><span class="p">,</span> <span class="n">addendum</span><span class="o">=</span><span class="s">&#39;checksum_updated&#39;</span><span class="p">)</span>
+                    <span class="n">fileIsModified</span> <span class="o">=</span> <span class="bp">False</span>
+                <span class="k">break</span>
+            <span class="k">elif</span> <span class="n">File</span><span class="o">.</span><span class="n">remoteChecksum</span> <span class="o">==</span> <span class="n">File</span><span class="o">.</span><span class="n">localChecksum</span><span class="p">:</span> <span class="c">#download successful</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">log</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s">&quot;Local and remote checksums for </span><span class="si">%s</span><span class="s"> agree.&quot;</span> <span class="o">%</span> <span class="n">File</span><span class="o">.</span><span class="n">ftpPath</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">db</span><span class="o">.</span><span class="n">writeFileRecord</span><span class="p">(</span><span class="n">File</span><span class="p">,</span> <span class="n">C</span><span class="p">,</span> <span class="n">status</span><span class="o">=</span><span class="s">&#39;download_ended&#39;</span><span class="p">,</span> <span class="n">addendum</span><span class="o">=</span><span class="s">&#39;remote_checksum_verified&#39;</span><span class="p">)</span>
+                <span class="k">break</span>
+
+            <span class="k">if</span> <span class="n">downloadAttempts</span> <span class="o">&gt;</span> <span class="mi">2</span><span class="p">:</span> <span class="c">#report failure</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">db</span><span class="o">.</span><span class="n">writeFileRecord</span><span class="p">(</span><span class="n">File</span><span class="p">,</span> <span class="n">C</span><span class="p">,</span> <span class="n">status</span><span class="o">=</span><span class="s">&#39;remote_checksum_fail&#39;</span><span class="p">,</span> <span class="n">addendum</span><span class="o">=</span><span class="s">&#39;local:</span><span class="si">%s</span><span class="s">, remote:</span><span class="si">%s</span><span class="s">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">File</span><span class="o">.</span><span class="n">localChecksum</span><span class="p">,</span><span class="n">File</span><span class="o">.</span><span class="n">remoteChecksum</span><span class="p">))</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">db</span><span class="o">.</span><span class="n">writeCollectionRecord</span><span class="p">(</span><span class="n">C</span><span class="p">,</span> <span class="s">&#39;download_fail&#39;</span><span class="p">,</span> <span class="n">addendum</span><span class="o">=</span><span class="n">File</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+                <span class="n">errStr</span> <span class="o">=</span> <span class="s">&quot;Downloaded file &#39;</span><span class="si">%s</span><span class="s">&#39; failed remote/local checksum comparison</span><span class="se">\n</span><span class="s">&quot;</span> <span class="o">%</span> <span class="n">File</span><span class="o">.</span><span class="n">ftpPath</span> <span class="o">+</span> \
+                        <span class="s">&#39;Local checksum: _</span><span class="si">%s</span><span class="s">_</span><span class="se">\n</span><span class="s">&#39;</span> <span class="o">%</span> <span class="n">File</span><span class="o">.</span><span class="n">localChecksum</span> <span class="o">+</span> \
+                        <span class="s">&#39;Remote checksum: _</span><span class="si">%s</span><span class="s">_</span><span class="se">\n</span><span class="s">&#39;</span>  <span class="o">%</span> <span class="n">File</span><span class="o">.</span><span class="n">remoteChecksum</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">log</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">errStr</span><span class="p">)</span>
+                <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="n">errStr</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">fileIsModified</span><span class="p">:</span>
+            <span class="n">C</span><span class="o">.</span><span class="n">modifiedFiles</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">File</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="Repo.postProcessCollections"><a class="viewcode-back" href="../../../_rst/iggytools.iggyref.html#iggytools.iggyref.repoClass.Repo.postProcessCollections">[docs]</a>    <span class="k">def</span> <span class="nf">postProcessCollections</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">force</span><span class="o">=</span><span class="bp">False</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">Collections</span><span class="p">:</span>  <span class="c">#self.Collections will exist if self.downloadCollections() was run</span>
+            <span class="k">for</span> <span class="n">C</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">Collections</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">postProcess</span><span class="p">(</span><span class="n">C</span><span class="p">,</span> <span class="n">force</span><span class="o">=</span><span class="n">force</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">primaryID</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">properties</span><span class="p">[</span><span class="s">&#39;selectedCollections&#39;</span><span class="p">]:</span>
+                <span class="n">C</span> <span class="o">=</span> <span class="n">baseCollection</span><span class="o">.</span><span class="n">getInstance</span><span class="p">(</span><span class="n">primaryID</span><span class="p">,</span> <span class="bp">self</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">ftp</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">postProcess</span><span class="p">(</span><span class="n">C</span><span class="p">,</span> <span class="n">force</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+
+        <span class="c">#update final repository</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s">&#39;Rsyncing </span><span class="si">%s</span><span class="s"> to </span><span class="si">%s</span><span class="s">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">downloadDir</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">intermedDir</span><span class="p">))</span>
+        <span class="n">rsync</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">downloadDir</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">intermedDir</span><span class="p">,</span> <span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">logDir</span><span class="p">,</span> <span class="s">&#39;rsync.log&#39;</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s">&#39;Inserting </span><span class="si">%s</span><span class="s"> contents to </span><span class="si">%s</span><span class="s">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">intermedDir</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">finalDir</span><span class="p">))</span>
+        <span class="n">insert</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">intermedDir</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">finalDir</span><span class="p">)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">db</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">db</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+</div>
+<div class="viewcode-block" id="Repo.postProcess"><a class="viewcode-back" href="../../../_rst/iggytools.iggyref.html#iggytools.iggyref.repoClass.Repo.postProcess">[docs]</a>    <span class="k">def</span> <span class="nf">postProcess</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">C</span><span class="p">,</span> <span class="n">force</span><span class="o">=</span><span class="bp">False</span><span class="p">):</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">db</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">db</span> <span class="o">=</span> <span class="n">iggyrefDB</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">updateSpeciesTable</span><span class="p">(</span><span class="n">C</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">force</span><span class="p">:</span> <span class="c">#force post-postprocessing of all files</span>
+            <span class="n">C</span><span class="o">.</span><span class="n">modifiedFiles</span> <span class="o">=</span> <span class="n">C</span><span class="o">.</span><span class="n">Files</span>
+        <span class="k">elif</span> <span class="ow">not</span> <span class="n">C</span><span class="o">.</span><span class="n">modifiedFiles</span> <span class="ow">or</span> <span class="ow">not</span> <span class="n">C</span><span class="o">.</span><span class="n">Tasks</span><span class="p">:</span> <span class="c"># then no post-processsing to be done</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">db</span><span class="o">.</span><span class="n">writeCollectionRecord</span><span class="p">(</span><span class="n">C</span><span class="p">,</span><span class="s">&#39;postprocessing_complete&#39;</span><span class="p">)</span>
+            <span class="k">return</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">db</span><span class="o">.</span><span class="n">writeCollectionRecord</span><span class="p">(</span><span class="n">C</span><span class="p">,</span> <span class="s">&#39;postprocessing&#39;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">log</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s">&#39;Collection to post-process: &#39;</span> <span class="o">+</span> <span class="n">C</span><span class="o">.</span><span class="n">primaryID</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">log</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s">&#39;Modified files (all files if force=True): &#39;</span> <span class="o">+</span> <span class="s">&#39;, &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="nb">map</span><span class="p">(</span><span class="nb">str</span><span class="p">,</span><span class="n">C</span><span class="o">.</span><span class="n">modifiedFiles</span><span class="p">)))</span>
+
+        <span class="n">G</span> <span class="o">=</span> <span class="n">depGraph</span><span class="p">()</span>
+        <span class="k">for</span> <span class="n">T</span> <span class="ow">in</span> <span class="n">C</span><span class="o">.</span><span class="n">Tasks</span><span class="p">:</span>
+            <span class="n">G</span><span class="o">.</span><span class="n">addTask</span><span class="p">(</span><span class="n">T</span><span class="p">)</span> <span class="c">#add task to dependency graph</span>
+
+        <span class="n">G</span><span class="o">.</span><span class="n">setExpired</span><span class="p">(</span><span class="n">C</span><span class="o">.</span><span class="n">modifiedFiles</span><span class="p">)</span>  <span class="c">#mark descendants of modified files as expired.</span>
+        <span class="k">for</span> <span class="n">File</span> <span class="ow">in</span> <span class="n">unique</span><span class="p">(</span><span class="n">flatten</span><span class="p">([</span><span class="n">t</span><span class="o">.</span><span class="n">outFiles</span> <span class="k">for</span> <span class="n">t</span> <span class="ow">in</span> <span class="n">C</span><span class="o">.</span><span class="n">Tasks</span><span class="p">])):</span> <span class="c">#mark any missing output files as expired.</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">File</span><span class="o">.</span><span class="n">localPath</span><span class="p">):</span>
+                <span class="n">G</span><span class="o">.</span><span class="n">setExpired</span><span class="p">(</span><span class="n">File</span><span class="p">)</span>
+
+        <span class="k">for</span> <span class="n">T</span> <span class="ow">in</span> <span class="n">G</span><span class="o">.</span><span class="n">orderedTasks</span><span class="p">():</span> <span class="c">#run tasks, ordered by dependancy</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s">&#39;Postprocessing </span><span class="si">%s</span><span class="s">, </span><span class="si">%s</span><span class="s">, </span><span class="si">%s</span><span class="s">. Task: </span><span class="si">%s</span><span class="s"> -- </span><span class="si">%s</span><span class="s"> -- </span><span class="si">%s</span><span class="s"> ...&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">C</span><span class="o">.</span><span class="n">primaryID</span><span class="p">,</span> <span class="n">C</span><span class="o">.</span><span class="n">secondaryID</span><span class="p">,</span> <span class="n">C</span><span class="o">.</span><span class="n">repo</span><span class="o">.</span><span class="n">source</span><span class="p">,</span>
+                                                                               <span class="n">T</span><span class="o">.</span><span class="n">taskName</span><span class="p">,</span> <span class="s">&#39;,&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="nb">map</span><span class="p">(</span><span class="nb">str</span><span class="p">,</span><span class="n">T</span><span class="o">.</span><span class="n">inFiles</span><span class="p">)),</span> <span class="s">&#39;,&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="nb">map</span><span class="p">(</span><span class="nb">str</span><span class="p">,</span><span class="n">T</span><span class="o">.</span><span class="n">outFiles</span><span class="p">))))</span>
+            <span class="k">for</span> <span class="n">outFile</span> <span class="ow">in</span> <span class="n">T</span><span class="o">.</span><span class="n">outFiles</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">db</span><span class="o">.</span><span class="n">writeFileRecord</span><span class="p">(</span><span class="n">outFile</span><span class="p">,</span> <span class="n">C</span><span class="p">,</span> <span class="n">status</span><span class="o">=</span><span class="s">&#39;postprocessing&#39;</span><span class="p">)</span>
+            <span class="n">T</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">C</span><span class="p">)</span>
+            <span class="k">for</span> <span class="n">outFile</span> <span class="ow">in</span> <span class="n">T</span><span class="o">.</span><span class="n">outFiles</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">db</span><span class="o">.</span><span class="n">writeFileRecord</span><span class="p">(</span><span class="n">outFile</span><span class="p">,</span> <span class="n">C</span><span class="p">,</span> <span class="n">status</span><span class="o">=</span><span class="s">&#39;postprocessing_complete&#39;</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">db</span><span class="o">.</span><span class="n">writeCollectionRecord</span><span class="p">(</span><span class="n">C</span><span class="p">,</span><span class="s">&#39;postprocessing_complete&#39;</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="Repo.update"><a class="viewcode-back" href="../../../_rst/iggytools.iggyref.html#iggytools.iggyref.repoClass.Repo.update">[docs]</a>    <span class="k">def</span> <span class="nf">update</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">downloadCollections</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">postProcessCollections</span><span class="p">()</span>
+</div>
+    <span class="k">def</span> <span class="nf">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="s">&#39;&lt;Repo(</span><span class="si">%s</span><span class="s">)&gt;&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">source</span><span class="p">)</span></div>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../../index.html">iggytools 0.1 documentation</a> &raquo;</li>
+          <li><a href="../../index.html" >Module code</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2015, Chris Williams.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.3.
+    </div>
+  </body>
+</html>

@@ -1,0 +1,265 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>iggytools.iggypipeline.module.derived.trimmomatic &mdash; iggytools 0.1 documentation</title>
+    
+    <link rel="stylesheet" href="../../../../../_static/sphinxdoc.css" type="text/css" />
+    <link rel="stylesheet" href="../../../../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../../../',
+        VERSION:     '0.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../../../_static/doctools.js"></script>
+    <link rel="top" title="iggytools 0.1 documentation" href="../../../../../index.html" />
+    <link rel="up" title="Module code" href="../../../../index.html" /> 
+  </head>
+  <body role="document">
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../../../../index.html">iggytools 0.1 documentation</a> &raquo;</li>
+          <li class="nav-item nav-item-1"><a href="../../../../index.html" accesskey="U">Module code</a> &raquo;</li> 
+      </ul>
+    </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../../../../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for iggytools.iggypipeline.module.derived.trimmomatic</h1><div class="highlight"><pre>
+<span class="kn">import</span> <span class="nn">os</span><span class="o">,</span> <span class="nn">sys</span><span class="o">,</span> <span class="nn">re</span> 
+<span class="kn">import</span> <span class="nn">os.path</span> <span class="kn">as</span> <span class="nn">path</span>
+<span class="kn">from</span> <span class="nn">collections</span> <span class="kn">import</span> <span class="n">OrderedDict</span>
+<span class="kn">from</span> <span class="nn">iggytools.iggypipeline.module.iggyMod</span> <span class="kn">import</span> <span class="n">IggyMod</span>
+<span class="kn">from</span> <span class="nn">iggytools.iggypipeline.module.argDefClass</span> <span class="kn">import</span> <span class="n">ArgDef</span>
+<span class="kn">from</span> <span class="nn">iggytools.iggypipeline.module.configClasses</span> <span class="kn">import</span> <span class="n">BaseConfig</span>
+<span class="kn">from</span> <span class="nn">iggytools.utils.util</span> <span class="kn">import</span> <span class="n">mkdir_p</span><span class="p">,</span> <span class="n">dict2namedtuple</span><span class="p">,</span> <span class="n">filestem</span>
+
+
+<div class="viewcode-block" id="Trimmomatic"><a class="viewcode-back" href="../../../../../_rst/iggytools.iggypipeline.module.derived.html#iggytools.iggypipeline.module.derived.trimmomatic.Trimmomatic">[docs]</a><span class="k">class</span> <span class="nc">Trimmomatic</span><span class="p">(</span><span class="n">IggyMod</span><span class="p">):</span>
+
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">pipe</span><span class="p">):</span>
+
+        
+        <span class="n">IggyMod</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s">&#39;Trimmomatic&#39;</span><span class="p">,</span> <span class="n">pipe</span><span class="p">)</span>  <span class="c">#set self.modPref, and do other module initialization</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">modConfig</span> <span class="o">=</span> <span class="n">BaseConfig</span><span class="o">.</span><span class="n">getInstance</span><span class="p">(</span><span class="s">&#39;module&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">getArgDefs</span><span class="p">())</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">outputHelp</span> <span class="o">=</span> <span class="p">[</span><span class="s">&#39;outputs.R1_unpaired            Fastq file of R1 unpaired reads&#39;</span><span class="p">,</span>
+                           <span class="s">&#39;outputs.R1_paired              Fastq file of R1 paired reads&#39;</span><span class="p">,</span>
+                           <span class="s">&#39;outputs.R2_unpaired            Fastq file of R1 unpaired reads&#39;</span><span class="p">,</span>
+                           <span class="s">&#39;outputs.R2_paired              Fastq file of R2 paired reads&#39;</span><span class="p">]</span>
+
+
+<div class="viewcode-block" id="Trimmomatic.argSetup"><a class="viewcode-back" href="../../../../../_rst/iggytools.iggypipeline.module.derived.html#iggytools.iggypipeline.module.derived.trimmomatic.Trimmomatic.argSetup">[docs]</a>    <span class="k">def</span> <span class="nf">argSetup</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">a</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">modConfig</span><span class="o">.</span><span class="n">argDefs</span>
+
+        <span class="k">if</span> <span class="s">&#39;read1&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">a</span> <span class="ow">or</span> <span class="ow">not</span> <span class="n">a</span><span class="p">[</span><span class="s">&#39;read1&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">value</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s">&#39;An R1 input file must be specified&#39;</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="s">&#39;output-stem&#39;</span> <span class="ow">in</span> <span class="n">a</span> <span class="ow">and</span> <span class="n">a</span><span class="p">[</span><span class="s">&#39;output-stem&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">value</span><span class="p">:</span>
+            <span class="n">outStem</span> <span class="o">=</span> <span class="n">a</span><span class="p">[</span><span class="s">&#39;output-stem&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">value</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">outStem</span> <span class="o">=</span> <span class="n">filestem</span><span class="p">(</span><span class="n">a</span><span class="p">[</span><span class="s">&#39;read1&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">value</span><span class="p">)</span>
+
+        <span class="c"># Setup outdir arg, self.modDir, </span>
+
+        <span class="k">if</span> <span class="s">&#39;outdir&#39;</span> <span class="ow">in</span> <span class="n">a</span> <span class="ow">and</span> <span class="n">a</span><span class="p">[</span><span class="s">&#39;outdir&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">value</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">modDir</span> <span class="o">=</span> <span class="n">a</span><span class="p">[</span><span class="s">&#39;outdir&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">value</span>  <span class="c">#set new module output directory</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">a</span><span class="p">[</span><span class="s">&#39;outdir&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">value</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">modDir</span>
+        
+        <span class="c"># Setup steps arg</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">a</span><span class="p">[</span><span class="s">&#39;steps&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">value</span><span class="p">:</span> <span class="c">#get default trimmomatic steps if none were given by user</span>
+            <span class="k">if</span> <span class="n">a</span><span class="p">[</span><span class="s">&#39;read2&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">value</span><span class="p">:</span>
+                <span class="n">a</span><span class="p">[</span><span class="s">&#39;steps&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">value</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">pref</span><span class="o">.</span><span class="n">PAIRED_END_STEPS</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">a</span><span class="p">[</span><span class="s">&#39;steps&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">value</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">pref</span><span class="o">.</span><span class="n">SINGLE_END_STEPS</span>                
+
+        <span class="c"># Set module outputs</span>
+        <span class="n">outdir</span> <span class="o">=</span> <span class="n">a</span><span class="p">[</span><span class="s">&#39;outdir&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">value</span>
+
+        <span class="n">outItems</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span> <span class="p">(</span><span class="n">x</span><span class="p">,</span><span class="bp">None</span><span class="p">)</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="p">[</span><span class="s">&#39;R1_paired&#39;</span><span class="p">,</span> <span class="s">&#39;R1_unpaired&#39;</span><span class="p">,</span> <span class="s">&#39;R2_paired&#39;</span><span class="p">,</span> <span class="s">&#39;R2_unpaired&#39;</span><span class="p">]</span> <span class="p">)</span>
+        <span class="n">outItems</span><span class="p">[</span><span class="s">&#39;R1_unpaired&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">outdir</span><span class="p">,</span> <span class="s">&#39;</span><span class="si">%s</span><span class="s">.</span><span class="si">%s</span><span class="s">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">outStem</span><span class="p">,</span> <span class="s">&#39;R1.unpaired.tr.fastq&#39;</span><span class="p">))</span>
+
+        <span class="k">if</span> <span class="n">a</span><span class="p">[</span><span class="s">&#39;read2&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">value</span><span class="p">:</span>
+            <span class="n">outItems</span><span class="p">[</span><span class="s">&#39;R1_paired&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">outdir</span><span class="p">,</span> <span class="s">&#39;</span><span class="si">%s</span><span class="s">.</span><span class="si">%s</span><span class="s">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">outStem</span><span class="p">,</span> <span class="s">&#39;R1.paired.tr.fastq&#39;</span><span class="p">))</span>
+            <span class="n">outItems</span><span class="p">[</span><span class="s">&#39;R2_paired&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">outdir</span><span class="p">,</span> <span class="s">&#39;</span><span class="si">%s</span><span class="s">.</span><span class="si">%s</span><span class="s">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">outStem</span><span class="p">,</span> <span class="s">&#39;R2.paired.tr.fastq&#39;</span><span class="p">))</span>
+            <span class="n">outItems</span><span class="p">[</span><span class="s">&#39;R2_unpaired&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">outdir</span><span class="p">,</span> <span class="s">&#39;</span><span class="si">%s</span><span class="s">.</span><span class="si">%s</span><span class="s">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">outStem</span><span class="p">,</span> <span class="s">&#39;R2.unpaired.tr.fastq&#39;</span><span class="p">))</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">outputs</span> <span class="o">=</span> <span class="n">dict2namedtuple</span><span class="p">(</span><span class="n">outItems</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">buildCommand</span><span class="p">()</span>
+
+</div>
+<div class="viewcode-block" id="Trimmomatic.modSetup"><a class="viewcode-back" href="../../../../../_rst/iggytools.iggypipeline.module.derived.html#iggytools.iggypipeline.module.derived.trimmomatic.Trimmomatic.modSetup">[docs]</a>    <span class="k">def</span> <span class="nf">modSetup</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+
+        <span class="n">a</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">modConfig</span><span class="o">.</span><span class="n">argDefs</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="n">a</span><span class="p">[</span><span class="s">&#39;read1&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">value</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s">&#39;Cannot find input file </span><span class="si">%s</span><span class="s">&#39;</span> <span class="o">%</span> <span class="n">a</span><span class="p">[</span><span class="s">&#39;read1&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">value</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">a</span><span class="p">[</span><span class="s">&#39;read2&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">value</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="n">a</span><span class="p">[</span><span class="s">&#39;read2&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">value</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s">&#39;Cannot find input file </span><span class="si">%s</span><span class="s">&#39;</span> <span class="o">%</span> <span class="n">a</span><span class="p">[</span><span class="s">&#39;read2&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">value</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">path</span><span class="o">.</span><span class="n">isdir</span><span class="p">(</span><span class="n">a</span><span class="p">[</span><span class="s">&#39;outdir&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">value</span><span class="p">):</span>  <span class="c">#create output dir </span>
+            <span class="n">mkdir_p</span><span class="p">(</span><span class="n">a</span><span class="p">[</span><span class="s">&#39;outdir&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">value</span><span class="p">)</span>
+
+</div>
+<div class="viewcode-block" id="Trimmomatic.getArgDefs"><a class="viewcode-back" href="../../../../../_rst/iggytools.iggypipeline.module.derived.html#iggytools.iggypipeline.module.derived.trimmomatic.Trimmomatic.getArgDefs">[docs]</a>    <span class="k">def</span> <span class="nf">getArgDefs</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        
+        <span class="n">argDefs</span> <span class="o">=</span> <span class="n">OrderedDict</span><span class="p">(</span> <span class="p">[</span>
+
+            <span class="p">(</span><span class="s">&#39;read1&#39;</span><span class="p">,</span>       <span class="n">ArgDef</span><span class="p">(</span><span class="s">&#39;read1&#39;</span><span class="p">,</span>               <span class="n">help</span> <span class="o">=</span> <span class="s">&#39;Read1 fastq file.&#39;</span><span class="p">,</span> 
+                                                          <span class="nb">type</span> <span class="o">=</span> <span class="nb">str</span><span class="p">)),</span>
+ 
+            <span class="p">(</span><span class="s">&#39;read2&#39;</span><span class="p">,</span>       <span class="n">ArgDef</span><span class="p">(</span><span class="s">&#39;-2&#39;</span><span class="p">,</span><span class="s">&#39;--read2&#39;</span><span class="p">,</span>        <span class="n">help</span> <span class="o">=</span> <span class="s">&#39;Read2 fastq file.&#39;</span><span class="p">,</span> 
+                                                          <span class="nb">type</span> <span class="o">=</span> <span class="nb">str</span><span class="p">)),</span>
+
+            <span class="p">(</span><span class="s">&#39;steps&#39;</span><span class="p">,</span>       <span class="n">ArgDef</span><span class="p">(</span><span class="s">&#39;-s&#39;</span><span class="p">,</span> <span class="s">&#39;--steps&#39;</span><span class="p">,</span>       <span class="n">help</span> <span class="o">=</span> <span class="s">&#39;String of comma-separated Trimmomatic steps. For single-end reads, default is </span><span class="si">%s</span><span class="s">. For paired end: </span><span class="si">%s</span><span class="s">&#39;</span> \
+                                                                      <span class="o">%</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">pref</span><span class="o">.</span><span class="n">SINGLE_END_STEPS</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">pref</span><span class="o">.</span><span class="n">PAIRED_END_STEPS</span><span class="p">),</span>
+                                                          <span class="nb">type</span> <span class="o">=</span> <span class="nb">str</span><span class="p">)),</span>
+
+            <span class="p">(</span><span class="s">&#39;encoding&#39;</span><span class="p">,</span>    <span class="n">ArgDef</span><span class="p">(</span><span class="s">&#39;-e&#39;</span><span class="p">,</span> <span class="s">&#39;--encoding&#39;</span><span class="p">,</span>    <span class="n">help</span> <span class="o">=</span> <span class="s">&#39;Fastq quality score encoding. Default: </span><span class="si">%d</span><span class="s">efault&#39;</span><span class="p">,</span>
+                                                          <span class="nb">type</span> <span class="o">=</span> <span class="nb">str</span><span class="p">,</span>
+                                                          <span class="n">choices</span> <span class="o">=</span> <span class="p">[</span><span class="s">&#39;phred64&#39;</span><span class="p">,</span> <span class="s">&#39;phred33&#39;</span><span class="p">],</span>
+                                                          <span class="n">default</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">pref</span><span class="o">.</span><span class="n">ENCODING</span><span class="p">)),</span>
+
+            <span class="p">(</span><span class="s">&#39;output-stem&#39;</span><span class="p">,</span> <span class="n">ArgDef</span><span class="p">(</span><span class="s">&#39;-m&#39;</span><span class="p">,</span> <span class="s">&#39;--output-stem&#39;</span><span class="p">,</span> <span class="n">help</span><span class="o">=</span><span class="s">&#39;String used to name output files. By default, &#39;</span> \
+                                                               <span class="o">+</span> <span class="s">&#39;output files are named by giving input files(s) a &quot;.tr.fastq&quot; extension.&#39;</span><span class="p">,</span>
+                                                          <span class="nb">type</span> <span class="o">=</span> <span class="nb">str</span><span class="p">)),</span>
+
+            <span class="p">(</span><span class="s">&#39;outdir&#39;</span><span class="p">,</span>      <span class="n">ArgDef</span><span class="p">(</span><span class="s">&#39;-o&#39;</span><span class="p">,</span> <span class="s">&#39;--outdir&#39;</span><span class="p">,</span>      <span class="n">help</span><span class="o">=</span><span class="s">&#39;Output directory. Default is current directory.&#39;</span><span class="p">,</span>
+                                                          <span class="nb">type</span> <span class="o">=</span> <span class="nb">str</span><span class="p">)),</span>
+
+            <span class="p">(</span><span class="s">&#39;threads&#39;</span><span class="p">,</span>     <span class="n">ArgDef</span><span class="p">(</span><span class="s">&#39;-t&#39;</span><span class="p">,</span> <span class="s">&#39;--threads&#39;</span><span class="p">,</span>     <span class="n">help</span><span class="o">=</span><span class="s">&#39;Number of threads. Default: </span><span class="si">%(default)s</span><span class="s">&#39;</span><span class="p">,</span>
+                                                          <span class="nb">type</span> <span class="o">=</span> <span class="nb">int</span><span class="p">,</span>
+                                                          <span class="n">default</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">pref</span><span class="o">.</span><span class="n">THREADS</span><span class="p">))</span> <span class="p">]</span> <span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">argDefs</span>
+
+
+</div>
+<div class="viewcode-block" id="Trimmomatic.setSlurmDefaults_from_modConfig"><a class="viewcode-back" href="../../../../../_rst/iggytools.iggypipeline.module.derived.html#iggytools.iggypipeline.module.derived.trimmomatic.Trimmomatic.setSlurmDefaults_from_modConfig">[docs]</a>    <span class="k">def</span> <span class="nf">setSlurmDefaults_from_modConfig</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>  <span class="c">#update slurm settings based on module inputs</span>
+
+        <span class="n">a</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">modConfig</span><span class="o">.</span><span class="n">argDefs</span>  
+        <span class="n">s</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">slurmConfig</span><span class="o">.</span><span class="n">argDefs</span>
+
+        <span class="n">s</span><span class="p">[</span><span class="s">&#39;job_name&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">default</span> <span class="o">=</span> <span class="s">&#39;</span><span class="si">%s</span><span class="s">_</span><span class="si">%s</span><span class="s">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">pipe</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">pref</span><span class="o">.</span><span class="n">SLURM_PARTITION</span><span class="p">:</span>
+            <span class="n">s</span><span class="p">[</span><span class="s">&#39;partition&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">default</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">pref</span><span class="o">.</span><span class="n">SLURM_PARTITION</span>
+
+        <span class="k">for</span> <span class="n">arg</span> <span class="ow">in</span> <span class="n">s</span><span class="o">.</span><span class="n">itervalues</span><span class="p">():</span>
+            <span class="k">if</span> <span class="n">arg</span><span class="o">.</span><span class="n">default</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+                <span class="n">arg</span><span class="o">.</span><span class="n">value</span> <span class="o">=</span> <span class="n">arg</span><span class="o">.</span><span class="n">default</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">slurmConfig</span><span class="o">.</span><span class="n">argDefs</span> <span class="o">=</span> <span class="n">s</span>
+
+
+</div>
+<div class="viewcode-block" id="Trimmomatic.buildCommand"><a class="viewcode-back" href="../../../../../_rst/iggytools.iggypipeline.module.derived.html#iggytools.iggypipeline.module.derived.trimmomatic.Trimmomatic.buildCommand">[docs]</a>    <span class="k">def</span> <span class="nf">buildCommand</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+
+        <span class="c">#example command: </span>
+        <span class="c">#  java -jar /n/sw/centos6/trimmomatic-0.30.jar PE \</span>
+        <span class="c">#       -threads 16 \</span>
+        <span class="c">#       -phred64 \</span>
+        <span class="c">#       $Sample.R1.fastq $Sample.R2.fastq \</span>
+        <span class="c">#       $Outdir/$Sample.R1.paired.t.fastq $Outdir/$Sample.R1.unpaired.t.fastq \</span>
+        <span class="c">#       $Outdir/$Sample.R2.paired.t.fastq $Outdir/$Sample.R2.unpaired.t.fastq \</span>
+        <span class="c">#       ILLUMINACLIP:$TRIMMOMATIC/adapters/TruSeq3-PE.fa:2:30:10 \</span>
+        <span class="c">#       LEADING:10 TRAILING:10 SLIDINGWINDOW:4:15 MINLEN:36</span>
+
+        <span class="n">a</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">modConfig</span><span class="o">.</span><span class="n">argDefs</span>
+
+        <span class="n">command</span> <span class="o">=</span> <span class="s">&#39;java -jar /n/sw/centos6/Trimmomatic-0.32/trimmomatic-0.32.jar </span><span class="se">\\\n</span><span class="s">&#39;</span>
+
+        <span class="k">if</span> <span class="n">a</span><span class="p">[</span><span class="s">&#39;read2&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">value</span><span class="p">:</span>
+            <span class="n">command</span> <span class="o">+=</span> <span class="s">&#39;PE </span><span class="se">\\\n</span><span class="s">&#39;</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">command</span> <span class="o">+=</span> <span class="s">&#39;SE </span><span class="se">\\\n</span><span class="s">&#39;</span>
+
+        <span class="k">if</span> <span class="n">a</span><span class="p">[</span><span class="s">&#39;threads&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">value</span><span class="p">:</span>
+            <span class="n">command</span> <span class="o">+=</span> <span class="s">&#39;-threads </span><span class="si">%s</span><span class="s"> </span><span class="se">\\\n</span><span class="s">&#39;</span> <span class="o">%</span> <span class="n">a</span><span class="p">[</span><span class="s">&#39;threads&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">value</span>
+
+        <span class="n">command</span> <span class="o">+=</span> <span class="s">&#39;-</span><span class="si">%s</span><span class="s"> </span><span class="se">\\\n</span><span class="s">&#39;</span> <span class="o">%</span> <span class="n">a</span><span class="p">[</span><span class="s">&#39;encoding&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">value</span>
+
+        <span class="n">command</span> <span class="o">+=</span> <span class="s">&#39;</span><span class="si">%s</span><span class="s"> </span><span class="se">\\\n</span><span class="s">&#39;</span> <span class="o">%</span> <span class="n">a</span><span class="p">[</span><span class="s">&#39;read1&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">value</span>
+
+        <span class="k">if</span> <span class="n">a</span><span class="p">[</span><span class="s">&#39;read2&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">value</span><span class="p">:</span>
+            <span class="n">command</span> <span class="o">+=</span> <span class="s">&#39;</span><span class="si">%s</span><span class="s"> </span><span class="se">\\\n</span><span class="s">&#39;</span> <span class="o">%</span> <span class="n">a</span><span class="p">[</span><span class="s">&#39;read2&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">value</span>
+
+        <span class="k">for</span> <span class="n">ftype</span> <span class="ow">in</span> <span class="p">[</span><span class="s">&#39;R1_paired&#39;</span><span class="p">,</span> <span class="s">&#39;R1_unpaired&#39;</span><span class="p">,</span> <span class="s">&#39;R2_paired&#39;</span><span class="p">,</span> <span class="s">&#39;R2_unpaired&#39;</span><span class="p">]:</span>
+            <span class="n">fpath</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">outputs</span><span class="p">,</span> <span class="n">ftype</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">fpath</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+                <span class="n">command</span> <span class="o">+=</span> <span class="s">&#39;</span><span class="si">%s</span><span class="s"> </span><span class="se">\\\n</span><span class="s">&#39;</span> <span class="o">%</span> <span class="n">fpath</span>
+
+        <span class="n">command</span> <span class="o">+=</span> <span class="s">&#39;</span><span class="si">%s</span><span class="s"> </span><span class="se">\\\n</span><span class="s">&#39;</span> <span class="o">%</span> <span class="n">re</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="s">&#39;,&#39;</span><span class="p">,</span><span class="s">&#39; &#39;</span><span class="p">,</span><span class="n">a</span><span class="p">[</span><span class="s">&#39;steps&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">value</span><span class="p">)</span>
+
+        <span class="n">command</span> <span class="o">+=</span> <span class="s">&#39;</span><span class="se">\n</span><span class="s">&#39;</span>  <span class="c">#end line continuation</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">command</span> <span class="o">=</span> <span class="n">command</span>
+</pre></div></div></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../../../../index.html">iggytools 0.1 documentation</a> &raquo;</li>
+          <li class="nav-item nav-item-1"><a href="../../../../index.html" >Module code</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &copy; Copyright 2015, Chris Williams.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.3.1.
+    </div>
+  </body>
+</html>

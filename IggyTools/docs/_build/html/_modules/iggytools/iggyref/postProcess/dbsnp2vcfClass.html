@@ -1,0 +1,367 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>iggytools.iggyref.postProcess.dbsnp2vcfClass &mdash; iggytools 0.1 documentation</title>
+    
+    <link rel="stylesheet" href="../../../../_static/sphinxdoc.css" type="text/css" />
+    <link rel="stylesheet" href="../../../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../../',
+        VERSION:     '0.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../../_static/doctools.js"></script>
+    <link rel="top" title="iggytools 0.1 documentation" href="../../../../index.html" />
+    <link rel="up" title="Module code" href="../../../index.html" /> 
+  </head>
+  <body role="document">
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../../../index.html">iggytools 0.1 documentation</a> &raquo;</li>
+          <li class="nav-item nav-item-1"><a href="../../../index.html" accesskey="U">Module code</a> &raquo;</li> 
+      </ul>
+    </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../../../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for iggytools.iggyref.postProcess.dbsnp2vcfClass</h1><div class="highlight"><pre>
+<span class="kn">import</span> <span class="nn">os.path</span> <span class="kn">as</span> <span class="nn">path</span>
+<span class="kn">import</span> <span class="nn">re</span><span class="o">,</span> <span class="nn">glob</span><span class="o">,</span> <span class="nn">logging</span><span class="o">,</span> <span class="nn">traceback</span>
+<span class="kn">from</span> <span class="nn">iggytools.utils.util</span> <span class="kn">import</span> <span class="n">reverseComp</span>
+
+<div class="viewcode-block" id="dbsnp2vcf"><a class="viewcode-back" href="../../../../_rst/iggytools.iggyref.postProcess.html#iggytools.iggyref.postProcess.dbsnp2vcfClass.dbsnp2vcf">[docs]</a><span class="k">class</span> <span class="nc">dbsnp2vcf</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="c"># Note: This format conversion function is not complete. For all variant types except forward/reverse strand SNPs, the base preceeding </span>
+    <span class="c"># the event should be included in the VCF&#39;s ref/alt sequences. However, this base is not included in the UCSC dbsnp file, so it needs to be</span>
+    <span class="c"># retrieved from the genome and included in the VCF file.</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sourceID</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">log</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="s">&quot;iggyref_&quot;</span> <span class="o">+</span> <span class="n">sourceID</span><span class="p">)</span>
+
+        <span class="c">#VCF var definitions: allowed number of vals, type, description</span>
+        <span class="n">vcfVars</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
+        <span class="n">vcfVars</span><span class="p">[</span><span class="s">&#39;SC&#39;</span><span class="p">]</span>  <span class="o">=</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="s">&#39;Flag&#39;</span><span class="p">,</span> <span class="s">&#39;Sample type is cDNA (from exemplar submitted SNPs)&#39;</span><span class="p">]</span> 
+        <span class="n">vcfVars</span><span class="p">[</span><span class="s">&#39;SG&#39;</span><span class="p">]</span>  <span class="o">=</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="s">&#39;Flag&#39;</span><span class="p">,</span> <span class="s">&#39;Sample type is genomic (from exemplar submitted SNPs)&#39;</span><span class="p">]</span>
+        <span class="n">vcfVars</span><span class="p">[</span><span class="s">&#39;SM&#39;</span><span class="p">]</span>  <span class="o">=</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="s">&#39;Flag&#39;</span><span class="p">,</span> <span class="s">&#39;Sample type is mito (from exemplar submitted SNPs)&#39;</span><span class="p">]</span>
+        <span class="n">vcfVars</span><span class="p">[</span><span class="s">&#39;VC&#39;</span><span class="p">]</span>  <span class="o">=</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="s">&#39;String&#39;</span><span class="p">,</span> <span class="s">&#39;Variation class: SNP, INDEL, HET, MIC (microsatellite), NAM (named), MNP (multiple nucleotide polymorphism), &#39;</span><span class="p">]</span>
+        <span class="n">vcfVars</span><span class="p">[</span><span class="s">&#39;VS&#39;</span><span class="p">]</span>  <span class="o">=</span> <span class="p">[</span><span class="s">&#39;.&#39;</span><span class="p">,</span> <span class="s">&#39;String&#39;</span><span class="p">,</span> <span class="s">&#39;Validation status: CL (by-cluster), FR (by-frequency), SB (by-submitter), &#39;</span> \
+                                   <span class="o">+</span> <span class="s">&#39;INS, DEL, 2H (by-2hit-2allele), HM (by-hapmap), 1G (by-1000genomes)&#39;</span><span class="p">]</span>
+        <span class="n">vcfVars</span><span class="p">[</span><span class="s">&#39;HT&#39;</span><span class="p">]</span>  <span class="o">=</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="s">&#39;Float&#39;</span><span class="p">,</span> <span class="s">&#39;Average heterozygosity from all observations. Note: may be computed on small number of samples.&#39;</span><span class="p">]</span>
+        <span class="n">vcfVars</span><span class="p">[</span><span class="s">&#39;HTE&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="s">&#39;Float&#39;</span><span class="p">,</span> <span class="s">&#39;Standard Error for the average heterozygosity&#39;</span><span class="p">]</span>
+        <span class="n">vcfVars</span><span class="p">[</span><span class="s">&#39;FC&#39;</span><span class="p">]</span>  <span class="o">=</span> <span class="p">[</span><span class="s">&#39;.&#39;</span><span class="p">,</span> <span class="s">&#39;String&#39;</span><span class="p">,</span> <span class="s">&#39;Functional category: unknown, coding-synon, intron, near-gene-3, near-gene-5, ncRNA, &#39;</span> \
+                              <span class="o">+</span> <span class="s">&#39;nonsense, missense, stop-loss, frameshift, cds-indel, untranslated-3, untranslated-5, splice-3, splice-5&#39;</span><span class="p">]</span>
+        <span class="n">vcfVars</span><span class="p">[</span><span class="s">&#39;LT&#39;</span><span class="p">]</span>  <span class="o">=</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="s">&#39;String&#39;</span><span class="p">,</span> <span class="s">&#39;Type of mapping inferred from size on reference (may not agree with class): range, &#39;</span> \
+                               <span class="o">+</span> <span class="s">&#39;exact, between, rangeInsertion, rangeSubstitution, rangeDeletion, fuzzy&#39;</span><span class="p">]</span>
+        <span class="n">vcfVars</span><span class="p">[</span><span class="s">&#39;WGT&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="s">&#39;Integer&#39;</span><span class="p">,</span> <span class="s">&#39;The quality of the alignment: 1 - unique mapping, 2 - non-unique, 3 - many matches&#39;</span><span class="p">]</span>
+        <span class="n">vcfVars</span><span class="p">[</span><span class="s">&#39;EC&#39;</span><span class="p">]</span>  <span class="o">=</span> <span class="p">[</span><span class="s">&#39;.&#39;</span><span class="p">,</span> <span class="s">&#39;String&#39;</span><span class="p">,</span> <span class="s">&#39;Unusual conditions noted by UCSC that may indicate a problem with the data: &#39;</span> \
+                               <span class="o">+</span> <span class="s">&#39;RefAlleleMismatch, RefAlleleRevComp, DuplicateObserved, MixedObserved, FlankMismatchGenomeLonger, &#39;</span> \
+                               <span class="o">+</span> <span class="s">&#39;FlankMismatchGenomeEqual, FlankMismatchGenomeShorter, NamedDeletionZeroSpan, NamedInsertionNonzeroSpan, &#39;</span> \
+                               <span class="o">+</span> <span class="s">&#39;SingleClassLongerSpan, SingleClassZeroSpan, SingleClassTriAllelic, SingleClassQuadAllelic, &#39;</span> \
+                               <span class="o">+</span> <span class="s">&#39;ObservedWrongFormat, ObservedTooLong, ObservedContainsIupac, ObservedMismatch, MultipleAlignments, &#39;</span> \
+                               <span class="o">+</span> <span class="s">&#39;NonIntegerChromCount, AlleleFreqSumNot1, SingleAlleleFreq, InconsistentAlleles&#39;</span><span class="p">]</span>
+        <span class="n">vcfVars</span><span class="p">[</span><span class="s">&#39;SBC&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="s">&#39;Integer&#39;</span><span class="p">,</span> <span class="s">&#39;Number of distinct submitter handles for submitted SNPs for this ref SNP&#39;</span><span class="p">]</span>
+        <span class="n">vcfVars</span><span class="p">[</span><span class="s">&#39;SBH&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="s">&#39;.&#39;</span><span class="p">,</span> <span class="s">&#39;String&#39;</span><span class="p">,</span> <span class="s">&#39;List of submitter handles&#39;</span><span class="p">]</span>
+        <span class="n">vcfVars</span><span class="p">[</span><span class="s">&#39;FAC&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="s">&#39;Integer&#39;</span><span class="p">,</span> <span class="s">&#39;Number of observed alleles with frequency data&#39;</span><span class="p">]</span>
+        <span class="n">vcfVars</span><span class="p">[</span><span class="s">&#39;FAN&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="s">&#39;.&#39;</span><span class="p">,</span> <span class="s">&#39;String&#39;</span><span class="p">,</span> <span class="s">&#39;Observed alleles for which frequency data are available&#39;</span><span class="p">]</span>        
+        <span class="n">vcfVars</span><span class="p">[</span><span class="s">&#39;FAC&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="s">&#39;.&#39;</span><span class="p">,</span> <span class="s">&#39;Float&#39;</span><span class="p">,</span> <span class="s">&#39;Count of chromosomes (2N) on which each allele was observed. Note: this is extrapolated by dbSNP &#39;</span> \
+                              <span class="o">+</span> <span class="s">&#39;from submitted frequencies and total sample 2N, and is not always an integer.&#39;</span><span class="p">]</span>
+        <span class="n">vcfVars</span><span class="p">[</span><span class="s">&#39;AF&#39;</span><span class="p">]</span>  <span class="o">=</span> <span class="p">[</span><span class="s">&#39;.&#39;</span><span class="p">,</span> <span class="s">&#39;Float&#39;</span><span class="p">,</span> <span class="s">&#39;Allele frequencies&#39;</span><span class="p">]</span>
+        <span class="n">vcfVars</span><span class="p">[</span><span class="s">&#39;CA&#39;</span><span class="p">]</span>  <span class="o">=</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="s">&#39;Flag&#39;</span><span class="p">,</span> <span class="s">&#39;clinically-associated&#39;</span><span class="p">]</span>
+        <span class="n">vcfVars</span><span class="p">[</span><span class="s">&#39;MSP&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="s">&#39;Flag&#39;</span><span class="p">,</span> <span class="s">&#39;maf-5-some-pop&#39;</span><span class="p">]</span>
+        <span class="n">vcfVars</span><span class="p">[</span><span class="s">&#39;MAP&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="s">&#39;Flag&#39;</span><span class="p">,</span> <span class="s">&#39;maf-5-all-pops&#39;</span><span class="p">]</span>
+        <span class="n">vcfVars</span><span class="p">[</span><span class="s">&#39;OM&#39;</span><span class="p">]</span>  <span class="o">=</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="s">&#39;Flag&#39;</span><span class="p">,</span> <span class="s">&#39;Has OMIM/OMIA&#39;</span><span class="p">]</span>
+        <span class="n">vcfVars</span><span class="p">[</span><span class="s">&#39;MT&#39;</span><span class="p">]</span>  <span class="o">=</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="s">&#39;Flag&#39;</span><span class="p">,</span> <span class="s">&#39;microattr-tpa&#39;</span><span class="p">]</span>
+        <span class="n">vcfVars</span><span class="p">[</span><span class="s">&#39;SL&#39;</span><span class="p">]</span>  <span class="o">=</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="s">&#39;Flag&#39;</span><span class="p">,</span> <span class="s">&#39;Submitted by LSDB&#39;</span><span class="p">]</span>
+        <span class="n">vcfVars</span><span class="p">[</span><span class="s">&#39;GC&#39;</span><span class="p">]</span>  <span class="o">=</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="s">&#39;Flag&#39;</span><span class="p">,</span> <span class="s">&#39;Genotype conflict&#39;</span><span class="p">]</span>
+        <span class="n">vcfVars</span><span class="p">[</span><span class="s">&#39;RN&#39;</span><span class="p">]</span>  <span class="o">=</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="s">&#39;Flag&#39;</span><span class="p">,</span> <span class="s">&#39;RS cluster non-overlapping alleles&#39;</span><span class="p">]</span>
+        <span class="n">vcfVars</span><span class="p">[</span><span class="s">&#39;OBM&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="s">&#39;Flag&#39;</span><span class="p">,</span> <span class="s">&#39;Observed mismatch&#39;</span><span class="p">]</span>
+        <span class="n">vcfVars</span><span class="p">[</span><span class="s">&#39;RV&#39;</span><span class="p">]</span>  <span class="o">=</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="s">&#39;Flag&#39;</span><span class="p">,</span> <span class="s">&#39;RS orientation is reversed&#39;</span><span class="p">]</span>
+        <span class="n">vcfVars</span><span class="p">[</span><span class="s">&#39;NCBI&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="s">&#39;String&#39;</span><span class="p">,</span> <span class="s">&#39;NCBI reference sequence&#39;</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">vcfVars</span> <span class="o">=</span> <span class="n">vcfVars</span>
+
+        <span class="c">#format VCF var definitions</span>
+        <span class="n">header</span> <span class="o">=</span> <span class="s">&#39;##fileformat=VCFv4.1</span><span class="se">\n</span><span class="s">&#39;</span>
+        <span class="k">for</span> <span class="n">v</span> <span class="ow">in</span> <span class="nb">sorted</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">vcfVars</span><span class="o">.</span><span class="n">keys</span><span class="p">()):</span>
+            <span class="n">header</span> <span class="o">+=</span> <span class="s">&#39;##INFO=&lt;ID=</span><span class="si">%s</span><span class="s">,Number=</span><span class="si">%s</span><span class="s">,Type=</span><span class="si">%s</span><span class="s">,Description=&quot;</span><span class="si">%s</span><span class="s">&quot;&gt;</span><span class="se">\n</span><span class="s">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">v</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">vcfVars</span><span class="p">[</span><span class="n">v</span><span class="p">][</span><span class="mi">0</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">vcfVars</span><span class="p">[</span><span class="n">v</span><span class="p">][</span><span class="mi">1</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">vcfVars</span><span class="p">[</span><span class="n">v</span><span class="p">][</span><span class="mi">2</span><span class="p">])</span>
+        <span class="n">header</span> <span class="o">+=</span> <span class="s">&#39;#CHROM</span><span class="se">\t</span><span class="s">POS</span><span class="se">\t</span><span class="s">ID</span><span class="se">\t</span><span class="s">REF</span><span class="se">\t</span><span class="s">ALT</span><span class="se">\t</span><span class="s">QUAL</span><span class="se">\t</span><span class="s">FILTER</span><span class="se">\t</span><span class="s">INFO</span><span class="se">\n</span><span class="s">&#39;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">header</span> <span class="o">=</span> <span class="n">header</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">headerLineCount</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">re</span><span class="o">.</span><span class="n">findall</span><span class="p">(</span><span class="s">&#39;</span><span class="se">\n</span><span class="s">&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">header</span><span class="p">))</span>
+
+<div class="viewcode-block" id="dbsnp2vcf.convert"><a class="viewcode-back" href="../../../../_rst/iggytools.iggyref.postProcess.html#iggytools.iggyref.postProcess.dbsnp2vcfClass.dbsnp2vcf.convert">[docs]</a>    <span class="k">def</span> <span class="nf">convert</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">inFile</span><span class="p">,</span> <span class="n">outDir</span> <span class="o">=</span> <span class="bp">None</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s">&#39;Converting </span><span class="si">%s</span><span class="s"> to VCF format&#39;</span> <span class="o">%</span> <span class="n">inFile</span><span class="p">)</span>
+        <span class="n">inFileStem</span> <span class="o">=</span> <span class="n">path</span><span class="o">.</span><span class="n">splitext</span><span class="p">(</span><span class="n">inFile</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="k">if</span> <span class="n">outDir</span><span class="p">:</span>
+            <span class="n">outFile</span> <span class="o">=</span> <span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">outDir</span><span class="p">,</span> <span class="n">inFileStem</span> <span class="o">+</span> <span class="s">&quot;.vcf&quot;</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">outFile</span> <span class="o">=</span> <span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span> <span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="n">inFile</span><span class="p">),</span> <span class="n">inFileStem</span> <span class="o">+</span> <span class="s">&quot;.vcf&quot;</span> <span class="p">)</span>
+
+        <span class="c">#infoFields are the fields in the dbSNP schema that are represented in the INFO column in the VCF file</span>
+        <span class="n">infoFields</span> <span class="o">=</span> <span class="p">[</span><span class="s">&#39;strand&#39;</span><span class="p">,</span> <span class="s">&#39;refNCBI&#39;</span><span class="p">,</span> <span class="s">&#39;sampleType&#39;</span><span class="p">,</span> <span class="s">&#39;class&#39;</span><span class="p">,</span> <span class="s">&#39;valStatus&#39;</span><span class="p">,</span> <span class="s">&#39;avgHet&#39;</span><span class="p">,</span> <span class="s">&#39;avgHetSE&#39;</span><span class="p">,</span> <span class="s">&#39;funcCat&#39;</span><span class="p">,</span> <span class="s">&#39;locType&#39;</span><span class="p">,</span> <span class="s">&#39;weight&#39;</span><span class="p">,</span> 
+                      <span class="s">&#39;exceptions&#39;</span><span class="p">,</span> <span class="s">&#39;submitterCount&#39;</span><span class="p">,</span> <span class="s">&#39;submitters&#39;</span><span class="p">,</span> <span class="s">&#39;FAcount&#39;</span><span class="p">,</span> <span class="s">&#39;FAnames&#39;</span><span class="p">,</span> <span class="s">&#39;FAchromCounts&#39;</span><span class="p">,</span> <span class="s">&#39;alleleFreqs&#39;</span><span class="p">,</span> <span class="s">&#39;attributes&#39;</span><span class="p">]</span>
+
+        <span class="n">fin</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="n">inFile</span><span class="p">,</span> <span class="s">&#39;r&#39;</span><span class="p">)</span>
+        <span class="n">fout</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="n">outFile</span><span class="p">,</span> <span class="s">&#39;w&#39;</span><span class="p">)</span>
+        <span class="n">linenum</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="n">g</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
+        <span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="n">fin</span><span class="p">:</span>
+            <span class="n">linenum</span> <span class="o">+=</span> <span class="mi">1</span>
+            <span class="n">vals</span> <span class="o">=</span> <span class="p">[</span><span class="n">x</span><span class="o">.</span><span class="n">rstrip</span><span class="p">(</span><span class="s">&#39;,&#39;</span><span class="p">)</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">line</span><span class="o">.</span><span class="n">rstrip</span><span class="p">()</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s">&#39;</span><span class="se">\t</span><span class="s">&#39;</span><span class="p">)]</span>
+
+            <span class="n">g</span><span class="p">[</span><span class="s">&#39;chromName&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">vals</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+            <span class="n">g</span><span class="p">[</span><span class="s">&#39;start&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">vals</span><span class="p">[</span><span class="mi">2</span><span class="p">])</span> <span class="o">+</span> <span class="mi">1</span>  <span class="c">#add 1 to start to convert from UCSC indexing</span>
+            <span class="n">g</span><span class="p">[</span><span class="s">&#39;dbsnpID&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">vals</span><span class="p">[</span><span class="mi">4</span><span class="p">]</span>
+            <span class="n">g</span><span class="p">[</span><span class="s">&#39;strand&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">vals</span><span class="p">[</span><span class="mi">6</span><span class="p">]</span>
+            <span class="n">g</span><span class="p">[</span><span class="s">&#39;refNCBI&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">vals</span><span class="p">[</span><span class="mi">7</span><span class="p">]</span>
+            <span class="n">g</span><span class="p">[</span><span class="s">&#39;refUCSC&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">vals</span><span class="p">[</span><span class="mi">8</span><span class="p">]</span>
+            <span class="n">g</span><span class="p">[</span><span class="s">&#39;observedAlleles&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">vals</span><span class="p">[</span><span class="mi">9</span><span class="p">]</span>
+            <span class="n">g</span><span class="p">[</span><span class="s">&#39;sampleType&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">vals</span><span class="p">[</span><span class="mi">10</span><span class="p">]</span> 
+            <span class="n">g</span><span class="p">[</span><span class="s">&#39;class&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">vals</span><span class="p">[</span><span class="mi">11</span><span class="p">]</span>      
+            <span class="n">g</span><span class="p">[</span><span class="s">&#39;valStatus&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">vals</span><span class="p">[</span><span class="mi">12</span><span class="p">]</span>  
+            <span class="n">g</span><span class="p">[</span><span class="s">&#39;avgHet&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">vals</span><span class="p">[</span><span class="mi">13</span><span class="p">]</span>
+            <span class="n">g</span><span class="p">[</span><span class="s">&#39;avgHetSE&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">vals</span><span class="p">[</span><span class="mi">14</span><span class="p">]</span>
+            <span class="n">g</span><span class="p">[</span><span class="s">&#39;funcCat&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">vals</span><span class="p">[</span><span class="mi">15</span><span class="p">]</span>  
+            <span class="n">g</span><span class="p">[</span><span class="s">&#39;locType&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">vals</span><span class="p">[</span><span class="mi">16</span><span class="p">]</span>  
+            <span class="n">g</span><span class="p">[</span><span class="s">&#39;weight&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">vals</span><span class="p">[</span><span class="mi">17</span><span class="p">]</span>  
+            <span class="n">g</span><span class="p">[</span><span class="s">&#39;exceptions&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">vals</span><span class="p">[</span><span class="mi">18</span><span class="p">]</span>
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">vals</span><span class="p">)</span> <span class="o">&gt;=</span> <span class="mi">20</span><span class="p">:</span>
+               <span class="n">g</span><span class="p">[</span><span class="s">&#39;submitterCount&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">vals</span><span class="p">[</span><span class="mi">19</span><span class="p">]</span>
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">vals</span><span class="p">)</span> <span class="o">&gt;=</span> <span class="mi">21</span><span class="p">:</span>
+                <span class="n">g</span><span class="p">[</span><span class="s">&#39;submitters&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">vals</span><span class="p">[</span><span class="mi">20</span><span class="p">]</span>
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">vals</span><span class="p">)</span> <span class="o">&gt;=</span> <span class="mi">22</span><span class="p">:</span>
+                <span class="n">g</span><span class="p">[</span><span class="s">&#39;FAcount&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">vals</span><span class="p">[</span><span class="mi">21</span><span class="p">]</span>
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">vals</span><span class="p">)</span> <span class="o">&gt;=</span> <span class="mi">23</span><span class="p">:</span>
+                <span class="n">g</span><span class="p">[</span><span class="s">&#39;FAnames&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">vals</span><span class="p">[</span><span class="mi">22</span><span class="p">]</span>
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">vals</span><span class="p">)</span> <span class="o">&gt;=</span> <span class="mi">24</span><span class="p">:</span>
+                <span class="n">g</span><span class="p">[</span><span class="s">&#39;FAchromCounts&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">vals</span><span class="p">[</span><span class="mi">23</span><span class="p">]</span>
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">vals</span><span class="p">)</span> <span class="o">&gt;=</span> <span class="mi">25</span><span class="p">:</span>
+                <span class="n">g</span><span class="p">[</span><span class="s">&#39;alleleFreqs&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">vals</span><span class="p">[</span><span class="mi">24</span><span class="p">]</span>
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">vals</span><span class="p">)</span> <span class="o">&gt;=</span> <span class="mi">26</span><span class="p">:</span>
+                <span class="n">g</span><span class="p">[</span><span class="s">&#39;attributes&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">vals</span><span class="p">[</span><span class="mi">25</span><span class="p">]</span> 
+
+            <span class="k">if</span> <span class="n">linenum</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>  <span class="c">#write VCF header</span>
+                <span class="n">fout</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">header</span><span class="p">)</span>
+                <span class="n">linenum</span> <span class="o">+=</span> <span class="bp">self</span><span class="o">.</span><span class="n">headerLineCount</span>
+
+            <span class="n">outFields</span> <span class="o">=</span> <span class="nb">list</span><span class="p">()</span>  <span class="c">#build VCF INFO column</span>
+            <span class="k">for</span> <span class="n">field</span> <span class="ow">in</span> <span class="n">infoFields</span><span class="p">:</span> 
+                <span class="k">if</span> <span class="n">field</span> <span class="ow">in</span> <span class="n">g</span><span class="o">.</span><span class="n">keys</span><span class="p">()</span> <span class="ow">and</span> <span class="n">g</span><span class="p">[</span><span class="n">field</span><span class="p">]:</span>
+                    <span class="n">inputVal</span> <span class="o">=</span> <span class="n">g</span><span class="p">[</span><span class="n">field</span><span class="p">]</span>
+                    <span class="k">try</span><span class="p">:</span>
+                        <span class="n">formattedVal</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s">&#39;format_&#39;</span> <span class="o">+</span> <span class="n">field</span><span class="p">)(</span><span class="n">inputVal</span><span class="p">)</span>
+                    <span class="k">except</span><span class="p">:</span>
+                        <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span> <span class="p">(</span><span class="s">&quot;Error in </span><span class="si">%s</span><span class="s"> at line </span><span class="si">%s</span><span class="s">:</span><span class="se">\n</span><span class="s">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">inFile</span><span class="p">,</span> <span class="n">linenum</span><span class="p">))</span> <span class="o">+</span> <span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">()</span> <span class="p">)</span>
+                    <span class="k">if</span> <span class="n">formattedVal</span><span class="p">:</span>
+                        <span class="n">outFields</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">formattedVal</span><span class="p">)</span>
+
+            <span class="k">if</span> <span class="n">g</span><span class="p">[</span><span class="s">&#39;strand&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="s">&#39;-&#39;</span><span class="p">:</span> <span class="c">#if snp is on reverse strand, output reverse complement of observed alleles:</span>
+                <span class="n">alleles</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">revComp</span><span class="p">(</span><span class="n">g</span><span class="p">[</span><span class="s">&#39;observedAlleles&#39;</span><span class="p">])</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">alleles</span> <span class="o">=</span> <span class="n">g</span><span class="p">[</span><span class="s">&#39;observedAlleles&#39;</span><span class="p">]</span>
+                
+            <span class="c">#write record to file</span>
+            <span class="n">fout</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s">&#39;</span><span class="se">\t</span><span class="s">&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span> <span class="p">[</span><span class="n">g</span><span class="p">[</span><span class="s">&#39;chromName&#39;</span><span class="p">],</span> <span class="n">g</span><span class="p">[</span><span class="s">&#39;start&#39;</span><span class="p">],</span> <span class="n">g</span><span class="p">[</span><span class="s">&#39;dbsnpID&#39;</span><span class="p">],</span> <span class="n">g</span><span class="p">[</span><span class="s">&#39;refUCSC&#39;</span><span class="p">],</span> <span class="n">alleles</span><span class="p">,</span> <span class="s">&#39;;&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">outFields</span><span class="p">)]</span> <span class="p">)</span> <span class="o">+</span> <span class="s">&#39;</span><span class="se">\n</span><span class="s">&#39;</span><span class="p">)</span>  
+            <span class="n">g</span><span class="o">.</span><span class="n">clear</span><span class="p">()</span>
+            
+        <span class="n">fin</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+        <span class="n">fout</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+        <span class="k">return</span> <span class="n">outFile</span>
+</div>
+<div class="viewcode-block" id="dbsnp2vcf.revComp"><a class="viewcode-back" href="../../../../_rst/iggytools.iggyref.postProcess.html#iggytools.iggyref.postProcess.dbsnp2vcfClass.dbsnp2vcf.revComp">[docs]</a>    <span class="k">def</span> <span class="nf">revComp</span><span class="p">(</span><span class="n">myStr</span><span class="p">):</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">re</span><span class="o">.</span><span class="n">match</span><span class="p">(</span><span class="s">r&#39;[AGCTagct/-]+&#39;</span><span class="p">,</span><span class="n">myStr</span><span class="p">):</span>
+            <span class="k">return</span> <span class="n">myStr</span>
+        <span class="n">RCs</span> <span class="o">=</span> <span class="p">[</span><span class="n">reverseComp</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">myStr</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s">&#39;/&#39;</span><span class="p">)]</span>
+        <span class="k">return</span> <span class="s">&#39;/&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">RCs</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="dbsnp2vcf.format_alleleFreqs"><a class="viewcode-back" href="../../../../_rst/iggytools.iggyref.postProcess.html#iggytools.iggyref.postProcess.dbsnp2vcfClass.dbsnp2vcf.format_alleleFreqs">[docs]</a>    <span class="k">def</span> <span class="nf">format_alleleFreqs</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">val</span><span class="p">):</span>
+        <span class="k">return</span> <span class="s">&#39;AF=</span><span class="si">%s</span><span class="s">&#39;</span> <span class="o">%</span> <span class="n">val</span>
+</div>
+<div class="viewcode-block" id="dbsnp2vcf.format_attributes"><a class="viewcode-back" href="../../../../_rst/iggytools.iggyref.postProcess.html#iggytools.iggyref.postProcess.dbsnp2vcfClass.dbsnp2vcf.format_attributes">[docs]</a>    <span class="k">def</span> <span class="nf">format_attributes</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">val</span><span class="p">):</span>
+        <span class="n">vals</span> <span class="o">=</span> <span class="n">val</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s">&#39;,&#39;</span><span class="p">)</span>
+        <span class="n">outList</span> <span class="o">=</span> <span class="nb">list</span><span class="p">()</span>
+        <span class="k">for</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">vals</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">v</span> <span class="o">==</span> <span class="s">&#39;unknown&#39;</span><span class="p">:</span>
+                <span class="k">continue</span>
+            <span class="k">elif</span> <span class="n">v</span> <span class="o">==</span> <span class="s">&#39;clinically-assoc&#39;</span><span class="p">:</span>
+                <span class="n">outList</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s">&#39;CA&#39;</span><span class="p">)</span>
+            <span class="k">elif</span> <span class="n">v</span> <span class="o">==</span> <span class="s">&#39;maf-5-some-pop&#39;</span><span class="p">:</span>
+                <span class="n">outList</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s">&#39;MSP&#39;</span><span class="p">)</span>
+            <span class="k">elif</span> <span class="n">v</span> <span class="o">==</span> <span class="s">&#39;maf-5-all-pops&#39;</span><span class="p">:</span>
+                <span class="n">outList</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s">&#39;MAP&#39;</span><span class="p">)</span>
+            <span class="k">elif</span> <span class="n">v</span> <span class="o">==</span> <span class="s">&#39;has-omim-omia&#39;</span><span class="p">:</span>
+                <span class="n">outList</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s">&#39;OM&#39;</span><span class="p">)</span>
+            <span class="k">elif</span> <span class="n">v</span> <span class="o">==</span> <span class="s">&#39;microattr-tpa&#39;</span><span class="p">:</span>
+                <span class="n">outList</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s">&#39;MT&#39;</span><span class="p">)</span>
+            <span class="k">elif</span> <span class="n">v</span> <span class="o">==</span> <span class="s">&#39;submitted-by-lsdb&#39;</span><span class="p">:</span>
+                <span class="n">outList</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s">&#39;SL&#39;</span><span class="p">)</span>
+            <span class="k">elif</span> <span class="n">v</span> <span class="o">==</span> <span class="s">&#39;genotype-conflict&#39;</span><span class="p">:</span>
+                <span class="n">outList</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s">&#39;GC&#39;</span><span class="p">)</span>
+            <span class="k">elif</span> <span class="n">v</span> <span class="o">==</span> <span class="s">&#39;rs-cluster-nonoverlapping-alleles&#39;</span><span class="p">:</span>
+                <span class="n">outList</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s">&#39;RN&#39;</span><span class="p">)</span>
+            <span class="k">elif</span> <span class="n">v</span> <span class="o">==</span> <span class="s">&#39;observed-mismatch&#39;</span><span class="p">:</span>
+                <span class="n">outList</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s">&#39;OBM&#39;</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s">&#39;No attribute mapping for </span><span class="si">%s</span><span class="s">&#39;</span> <span class="o">%</span> <span class="n">v</span><span class="p">)</span>
+        <span class="k">return</span> <span class="s">&#39;;&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">outList</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="dbsnp2vcf.format_avgHet"><a class="viewcode-back" href="../../../../_rst/iggytools.iggyref.postProcess.html#iggytools.iggyref.postProcess.dbsnp2vcfClass.dbsnp2vcf.format_avgHet">[docs]</a>    <span class="k">def</span> <span class="nf">format_avgHet</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">val</span><span class="p">):</span>
+        <span class="k">return</span> <span class="s">&#39;HT=</span><span class="si">%s</span><span class="s">&#39;</span> <span class="o">%</span> <span class="n">val</span>
+</div>
+<div class="viewcode-block" id="dbsnp2vcf.format_avgHetSE"><a class="viewcode-back" href="../../../../_rst/iggytools.iggyref.postProcess.html#iggytools.iggyref.postProcess.dbsnp2vcfClass.dbsnp2vcf.format_avgHetSE">[docs]</a>    <span class="k">def</span> <span class="nf">format_avgHetSE</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">val</span><span class="p">):</span>
+        <span class="k">return</span> <span class="s">&#39;HTE=</span><span class="si">%s</span><span class="s">&#39;</span> <span class="o">%</span> <span class="n">val</span>
+</div>
+<div class="viewcode-block" id="dbsnp2vcf.format_class"><a class="viewcode-back" href="../../../../_rst/iggytools.iggyref.postProcess.html#iggytools.iggyref.postProcess.dbsnp2vcfClass.dbsnp2vcf.format_class">[docs]</a>    <span class="k">def</span> <span class="nf">format_class</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">val</span><span class="p">):</span>
+        <span class="n">outList</span> <span class="o">=</span> <span class="nb">list</span><span class="p">()</span>
+        <span class="k">if</span> <span class="n">val</span> <span class="o">==</span> <span class="s">&#39;unknown&#39;</span><span class="p">:</span>
+            <span class="k">return</span> <span class="s">&#39;&#39;</span>
+        <span class="k">elif</span> <span class="n">val</span> <span class="o">==</span> <span class="s">&#39;single&#39;</span><span class="p">:</span>
+            <span class="k">return</span> <span class="s">&#39;VC=SNP&#39;</span>
+        <span class="k">elif</span> <span class="n">val</span> <span class="o">==</span> <span class="s">&#39;in-del&#39;</span><span class="p">:</span>
+            <span class="k">return</span> <span class="s">&#39;VC=INDEL&#39;</span>
+        <span class="k">elif</span> <span class="n">val</span> <span class="o">==</span> <span class="s">&#39;het&#39;</span><span class="p">:</span>
+            <span class="k">return</span> <span class="s">&#39;VC=HET&#39;</span>
+        <span class="k">elif</span> <span class="n">val</span> <span class="o">==</span> <span class="s">&#39;microsatellite&#39;</span><span class="p">:</span>
+            <span class="k">return</span> <span class="s">&#39;VC=MIC&#39;</span>
+        <span class="k">elif</span> <span class="n">val</span> <span class="o">==</span> <span class="s">&#39;named&#39;</span><span class="p">:</span>
+            <span class="k">return</span> <span class="s">&#39;VC=NAM&#39;</span>
+        <span class="k">elif</span> <span class="n">val</span> <span class="o">==</span> <span class="s">&#39;mnp&#39;</span><span class="p">:</span>
+            <span class="k">return</span> <span class="s">&#39;VC=MNP&#39;</span>        
+        <span class="k">elif</span> <span class="n">val</span> <span class="o">==</span> <span class="s">&#39;insertion&#39;</span><span class="p">:</span>
+            <span class="k">return</span> <span class="s">&#39;VC=INS&#39;</span>
+        <span class="k">elif</span> <span class="n">val</span> <span class="o">==</span> <span class="s">&#39;deletion&#39;</span><span class="p">:</span>
+            <span class="k">return</span> <span class="s">&#39;VC=DEL&#39;</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s">&#39;No format mapping for </span><span class="si">%s</span><span class="s">&#39;</span> <span class="o">%</span> <span class="n">val</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="dbsnp2vcf.format_exceptions"><a class="viewcode-back" href="../../../../_rst/iggytools.iggyref.postProcess.html#iggytools.iggyref.postProcess.dbsnp2vcfClass.dbsnp2vcf.format_exceptions">[docs]</a>    <span class="k">def</span> <span class="nf">format_exceptions</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">val</span><span class="p">):</span>
+        <span class="k">return</span> <span class="s">&#39;EC=</span><span class="si">%s</span><span class="s">&#39;</span> <span class="o">%</span> <span class="n">val</span>
+</div>
+<div class="viewcode-block" id="dbsnp2vcf.format_FAcount"><a class="viewcode-back" href="../../../../_rst/iggytools.iggyref.postProcess.html#iggytools.iggyref.postProcess.dbsnp2vcfClass.dbsnp2vcf.format_FAcount">[docs]</a>    <span class="k">def</span> <span class="nf">format_FAcount</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">val</span><span class="p">):</span>
+        <span class="k">return</span> <span class="s">&#39;FAC=</span><span class="si">%s</span><span class="s">&#39;</span> <span class="o">%</span> <span class="n">val</span>
+</div>
+<div class="viewcode-block" id="dbsnp2vcf.format_FAnames"><a class="viewcode-back" href="../../../../_rst/iggytools.iggyref.postProcess.html#iggytools.iggyref.postProcess.dbsnp2vcfClass.dbsnp2vcf.format_FAnames">[docs]</a>    <span class="k">def</span> <span class="nf">format_FAnames</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">val</span><span class="p">):</span>
+        <span class="k">return</span> <span class="s">&#39;FAN=</span><span class="si">%s</span><span class="s">&#39;</span> <span class="o">%</span> <span class="n">val</span>
+</div>
+<div class="viewcode-block" id="dbsnp2vcf.format_FAchromCounts"><a class="viewcode-back" href="../../../../_rst/iggytools.iggyref.postProcess.html#iggytools.iggyref.postProcess.dbsnp2vcfClass.dbsnp2vcf.format_FAchromCounts">[docs]</a>    <span class="k">def</span> <span class="nf">format_FAchromCounts</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">val</span><span class="p">):</span>
+        <span class="k">return</span> <span class="s">&#39;FAC=</span><span class="si">%s</span><span class="s">&#39;</span> <span class="o">%</span> <span class="n">val</span>
+</div>
+<div class="viewcode-block" id="dbsnp2vcf.format_funcCat"><a class="viewcode-back" href="../../../../_rst/iggytools.iggyref.postProcess.html#iggytools.iggyref.postProcess.dbsnp2vcfClass.dbsnp2vcf.format_funcCat">[docs]</a>    <span class="k">def</span> <span class="nf">format_funcCat</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">val</span><span class="p">):</span>
+        <span class="k">return</span> <span class="s">&#39;FC=</span><span class="si">%s</span><span class="s">&#39;</span> <span class="o">%</span> <span class="n">val</span>
+</div>
+<div class="viewcode-block" id="dbsnp2vcf.format_locType"><a class="viewcode-back" href="../../../../_rst/iggytools.iggyref.postProcess.html#iggytools.iggyref.postProcess.dbsnp2vcfClass.dbsnp2vcf.format_locType">[docs]</a>    <span class="k">def</span> <span class="nf">format_locType</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">val</span><span class="p">):</span>
+        <span class="k">return</span> <span class="s">&#39;LT=</span><span class="si">%s</span><span class="s">&#39;</span> <span class="o">%</span> <span class="n">val</span>
+</div>
+<div class="viewcode-block" id="dbsnp2vcf.format_refNCBI"><a class="viewcode-back" href="../../../../_rst/iggytools.iggyref.postProcess.html#iggytools.iggyref.postProcess.dbsnp2vcfClass.dbsnp2vcf.format_refNCBI">[docs]</a>    <span class="k">def</span> <span class="nf">format_refNCBI</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">val</span><span class="p">):</span>
+        <span class="k">return</span> <span class="s">&#39;NCBI=</span><span class="si">%s</span><span class="s">&#39;</span> <span class="o">%</span> <span class="n">val</span>
+</div>
+<div class="viewcode-block" id="dbsnp2vcf.format_sampleType"><a class="viewcode-back" href="../../../../_rst/iggytools.iggyref.postProcess.html#iggytools.iggyref.postProcess.dbsnp2vcfClass.dbsnp2vcf.format_sampleType">[docs]</a>    <span class="k">def</span> <span class="nf">format_sampleType</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">val</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">val</span> <span class="o">==</span> <span class="s">&#39;unknown&#39;</span><span class="p">:</span>
+            <span class="k">return</span> <span class="s">&#39;&#39;</span>
+        <span class="k">elif</span> <span class="n">val</span> <span class="o">==</span> <span class="s">&#39;cDNA&#39;</span><span class="p">:</span>
+            <span class="k">return</span> <span class="s">&#39;SC&#39;</span>
+        <span class="k">elif</span> <span class="n">val</span> <span class="o">==</span> <span class="s">&#39;genomic&#39;</span><span class="p">:</span>
+            <span class="k">return</span> <span class="s">&#39;SG&#39;</span>
+        <span class="k">elif</span> <span class="n">val</span> <span class="o">==</span> <span class="s">&#39;mito&#39;</span><span class="p">:</span>
+            <span class="k">return</span> <span class="s">&#39;SM&#39;</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s">&#39;Unrecognized sample type: </span><span class="si">%s</span><span class="s">&#39;</span> <span class="o">%</span> <span class="n">val</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="dbsnp2vcf.format_submitterCount"><a class="viewcode-back" href="../../../../_rst/iggytools.iggyref.postProcess.html#iggytools.iggyref.postProcess.dbsnp2vcfClass.dbsnp2vcf.format_submitterCount">[docs]</a>    <span class="k">def</span> <span class="nf">format_submitterCount</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">val</span><span class="p">):</span>
+        <span class="k">return</span> <span class="s">&#39;SBC=</span><span class="si">%s</span><span class="s">&#39;</span> <span class="o">%</span> <span class="n">val</span>
+</div>
+<div class="viewcode-block" id="dbsnp2vcf.format_submitters"><a class="viewcode-back" href="../../../../_rst/iggytools.iggyref.postProcess.html#iggytools.iggyref.postProcess.dbsnp2vcfClass.dbsnp2vcf.format_submitters">[docs]</a>    <span class="k">def</span> <span class="nf">format_submitters</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">val</span><span class="p">):</span>
+        <span class="k">return</span> <span class="s">&#39;SBH=</span><span class="si">%s</span><span class="s">&#39;</span> <span class="o">%</span> <span class="n">val</span>
+</div>
+<div class="viewcode-block" id="dbsnp2vcf.format_valStatus"><a class="viewcode-back" href="../../../../_rst/iggytools.iggyref.postProcess.html#iggytools.iggyref.postProcess.dbsnp2vcfClass.dbsnp2vcf.format_valStatus">[docs]</a>    <span class="k">def</span> <span class="nf">format_valStatus</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">val</span><span class="p">):</span>
+        <span class="n">vals</span> <span class="o">=</span> <span class="n">val</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s">&#39;,&#39;</span><span class="p">)</span>
+        <span class="n">outList</span> <span class="o">=</span> <span class="nb">list</span><span class="p">()</span>
+        <span class="k">for</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">vals</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">v</span> <span class="o">==</span> <span class="s">&#39;unknown&#39;</span><span class="p">:</span>
+                <span class="k">continue</span>
+            <span class="k">elif</span> <span class="n">v</span> <span class="o">==</span> <span class="s">&#39;by-cluster&#39;</span><span class="p">:</span>
+                <span class="n">outList</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s">&#39;CL&#39;</span><span class="p">)</span>
+            <span class="k">elif</span> <span class="n">v</span> <span class="o">==</span> <span class="s">&#39;by-frequency&#39;</span><span class="p">:</span>
+                <span class="n">outList</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s">&#39;FR&#39;</span><span class="p">)</span>
+            <span class="k">elif</span> <span class="n">v</span> <span class="o">==</span> <span class="s">&#39;by-submitter&#39;</span><span class="p">:</span>
+                <span class="n">outList</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s">&#39;SB&#39;</span><span class="p">)</span>
+            <span class="k">elif</span> <span class="n">v</span> <span class="o">==</span> <span class="s">&#39;by-2hit-2allele&#39;</span><span class="p">:</span>
+                <span class="n">outList</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s">&#39;2H&#39;</span><span class="p">)</span>
+            <span class="k">elif</span> <span class="n">v</span> <span class="o">==</span> <span class="s">&#39;by-hapmap&#39;</span><span class="p">:</span>
+                <span class="n">outList</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s">&#39;HM&#39;</span><span class="p">)</span>
+            <span class="k">elif</span> <span class="n">v</span> <span class="o">==</span> <span class="s">&#39;by-1000genomes&#39;</span><span class="p">:</span>
+                <span class="n">outList</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s">&#39;1G&#39;</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s">&#39;No validation_status mapping for </span><span class="si">%s</span><span class="s">&#39;</span> <span class="o">%</span> <span class="n">v</span><span class="p">)</span>
+        <span class="k">return</span> <span class="s">&#39;VS=&#39;</span> <span class="o">+</span> <span class="s">&#39;,&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">outList</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="dbsnp2vcf.format_strand"><a class="viewcode-back" href="../../../../_rst/iggytools.iggyref.postProcess.html#iggytools.iggyref.postProcess.dbsnp2vcfClass.dbsnp2vcf.format_strand">[docs]</a>    <span class="k">def</span> <span class="nf">format_strand</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">val</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">val</span> <span class="o">==</span> <span class="s">&#39;-&#39;</span><span class="p">:</span>
+            <span class="k">return</span> <span class="s">&#39;RV&#39;</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="s">&#39;&#39;</span>
+</div>
+<div class="viewcode-block" id="dbsnp2vcf.format_weight"><a class="viewcode-back" href="../../../../_rst/iggytools.iggyref.postProcess.html#iggytools.iggyref.postProcess.dbsnp2vcfClass.dbsnp2vcf.format_weight">[docs]</a>    <span class="k">def</span> <span class="nf">format_weight</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">val</span><span class="p">):</span>
+        <span class="k">return</span> <span class="s">&#39;WGT=</span><span class="si">%s</span><span class="s">&#39;</span> <span class="o">%</span> <span class="n">val</span>
+    </div></div>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../../../index.html">iggytools 0.1 documentation</a> &raquo;</li>
+          <li class="nav-item nav-item-1"><a href="../../../index.html" >Module code</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &copy; Copyright 2015, Chris Williams.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.3.1.
+    </div>
+  </body>
+</html>

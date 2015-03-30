@@ -1,0 +1,59 @@
+#!/usr/bin/env python 
+from optparse import OptionParser
+import sys, os, re, time, traceback
+import os.path as path
+from iggytools.utils.util import intersect, touch, email, append
+from iggytools.iggyseq.runClasses import IlluminaNextGen, getSeqPref
+
+def seqprepOnNew(argv):
+
+    pref = getSeqPref()
+
+    parser = OptionParser(usage="usage: %prog [options]")
+    parser.add_option("-d","--dir", help="Directory searched for new sequencing runs. Default: %default",
+                      default=pref.PRIMARY_PARENT, action="store", dest="primaryParent")
+    parser.add_option("-v","--verbose", help="Verbose mode. Default: %default",
+                      default=pref.VERBOSE, action="store_true", dest="verbose")
+    (options, args) = parser.parse_args(argv)
+
+    verbose = options.verbose
+    primaryParent = options.primaryParent
+    cronLog = '/n/informatics_external/seq/seqprep_log/log.txt'
+
+    if len(args) != 0:
+        parser.error("Expected 0 input arguments, " + str(len(args)) + " provided. Use -h to see usage.")
+
+    required = ["InterOp", "RunInfo.xml", "SampleSheet.csv", "RTAComplete.txt"]  #files that must be in run folder
+    interopRequired = ["QMetricsOut.bin", "TileMetricsOut.bin"]  #files that must be in <run>/InterOp folder
+    runParametersOptions = ["runParameters.xml", "RunParameters.xml"] #one of these must be in run folder
+    for item in os.listdir(primaryParent):
+        itemPath = path.join(primaryParent, item)
+        runNameMatch = re.match('[0-9]{6}_[0-9A-Za-z]+_[0-9A-Za-z]+_[0-9A-Za-z]{10}$', item) #re.match matches from beginning of string
+        if path.isdir(itemPath) and runNameMatch:
+            runName = item
+            runPath = itemPath
+            runItems = os.listdir(runPath) #get list of directory contents
+            #check that we haven't examined this run folder before, and then check that required files are present:
+            if 'seqprep_seen.txt' not in runItems \
+                    and 'seqprep_skip.txt' not in runItems \
+                    and 'seq_skip.txt' not in runItems \
+                    and len(intersect(runItems, required)) == len(required) \
+                    and len(intersect(runItems, runParametersOptions)) == 1 \
+                    and len(intersect(os.listdir(path.join(runPath, "InterOp")), interopRequired)) == len(interopRequired):
+                if verbose: print "\nNew run: " + runName
+                touch(path.join(runPath, "seqprep_seen.txt"))  #mark run as seen by seqprep
+
+                #send notification email
+                email(pref.USER_EMAILS, 'Found new run:  %s' % runName, 'Starting seqprep\n')
+
+                #start seqprep for this run
+                myArgs = dict(primary = primaryParent)
+                if verbose: myArgs['verbose'] = True
+                logMsg = time.strftime("%c") + "  Running seqprep on " + runName + " with args: " + str(myArgs)
+                append(logMsg, cronLog, echo = verbose)
+
+                r = IlluminaNextGen.getInstance(runName, pref = pref, **myArgs)
+                r.processRun()
+
+if __name__ == "__main__":
+    seqprepOnNew(sys.argv[1:])

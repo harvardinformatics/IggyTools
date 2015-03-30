@@ -1,0 +1,556 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>iggytools.iggyseq package &mdash; iggytools 0.1 documentation</title>
+    
+    <link rel="stylesheet" href="../_static/sphinxdoc.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../',
+        VERSION:     '0.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <link rel="top" title="iggytools 0.1 documentation" href="../index.html" /> 
+  </head>
+  <body role="document">
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../index.html">iggytools 0.1 documentation</a> &raquo;</li> 
+      </ul>
+    </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="../index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">iggytools.iggyseq package</a><ul>
+<li><a class="reference internal" href="#subpackages">Subpackages</a></li>
+<li><a class="reference internal" href="#submodules">Submodules</a></li>
+<li><a class="reference internal" href="#module-iggytools.iggyseq.analysisClasses">iggytools.iggyseq.analysisClasses module</a></li>
+<li><a class="reference internal" href="#module-iggytools.iggyseq.laneClass">iggytools.iggyseq.laneClass module</a></li>
+<li><a class="reference internal" href="#module-iggytools.iggyseq.runClasses">iggytools.iggyseq.runClasses module</a></li>
+<li><a class="reference internal" href="#module-iggytools.iggyseq.sampleSheetClasses">iggytools.iggyseq.sampleSheetClasses module</a></li>
+<li><a class="reference internal" href="#module-iggytools.iggyseq.seqUtil">iggytools.iggyseq.seqUtil module</a></li>
+<li><a class="reference internal" href="#module-iggytools.iggyseq">Module contents</a></li>
+</ul>
+</li>
+</ul>
+
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="../_sources/_rst/iggytools.iggyseq.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="iggytools-iggyseq-package">
+<h1>iggytools.iggyseq package<a class="headerlink" href="#iggytools-iggyseq-package" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="subpackages">
+<h2>Subpackages<a class="headerlink" href="#subpackages" title="Permalink to this headline">¶</a></h2>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="iggytools.iggyseq.seqmem.html">iggytools.iggyseq.seqmem package</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="iggytools.iggyseq.seqmem.html#submodules">Submodules</a></li>
+<li class="toctree-l2"><a class="reference internal" href="iggytools.iggyseq.seqmem.html#iggytools-iggyseq-seqmem-managemem-module">iggytools.iggyseq.seqmem.manageMem module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="iggytools.iggyseq.seqmem.html#iggytools-iggyseq-seqmem-util-module">iggytools.iggyseq.seqmem.util module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="iggytools.iggyseq.seqmem.html#module-iggytools.iggyseq.seqmem">Module contents</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="iggytools.iggyseq.seqprep.html">iggytools.iggyseq.seqprep package</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="iggytools.iggyseq.seqprep.html#submodules">Submodules</a></li>
+<li class="toctree-l2"><a class="reference internal" href="iggytools.iggyseq.seqprep.html#module-iggytools.iggyseq.seqprep.countUndetInd">iggytools.iggyseq.seqprep.countUndetInd module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="iggytools.iggyseq.seqprep.html#module-iggytools.iggyseq.seqprep.dictOptParse">iggytools.iggyseq.seqprep.dictOptParse module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="iggytools.iggyseq.seqprep.html#module-iggytools.iggyseq.seqprep.parseArgs">iggytools.iggyseq.seqprep.parseArgs module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="iggytools.iggyseq.seqprep.html#iggytools-iggyseq-seqprep-slurmprocessrun-module">iggytools.iggyseq.seqprep.slurmProcessRun module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="iggytools.iggyseq.seqprep.html#module-iggytools.iggyseq.seqprep">Module contents</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="iggytools.iggyseq.seqstats.html">iggytools.iggyseq.seqstats package</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="iggytools.iggyseq.seqstats.html#subpackages">Subpackages</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="iggytools.iggyseq.seqstats.migrations.html">iggytools.iggyseq.seqstats.migrations package</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="iggytools.iggyseq.seqstats.migrations.html#submodules">Submodules</a></li>
+<li class="toctree-l4"><a class="reference internal" href="iggytools.iggyseq.seqstats.migrations.html#iggytools-iggyseq-seqstats-migrations-0001-initial-module">iggytools.iggyseq.seqstats.migrations.0001_initial module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="iggytools.iggyseq.seqstats.migrations.html#iggytools-iggyseq-seqstats-migrations-0002-auto-chg-field-seqrun-specs-module">iggytools.iggyseq.seqstats.migrations.0002_auto__chg_field_seqrun_specs module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="iggytools.iggyseq.seqstats.migrations.html#iggytools-iggyseq-seqstats-migrations-0003-auto-add-field-seqrun-type-add-field-lane-type-module">iggytools.iggyseq.seqstats.migrations.0003_auto__add_field_seqrun_type__add_field_lane_type module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="iggytools.iggyseq.seqstats.migrations.html#iggytools-iggyseq-seqstats-migrations-0004-auto-add-field-lane-date-module">iggytools.iggyseq.seqstats.migrations.0004_auto__add_field_lane_date module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="iggytools.iggyseq.seqstats.migrations.html#iggytools-iggyseq-seqstats-migrations-0005-auto-add-field-lane-machine-name-module">iggytools.iggyseq.seqstats.migrations.0005_auto__add_field_lane_machine_name module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="iggytools.iggyseq.seqstats.migrations.html#iggytools-iggyseq-seqstats-migrations-0006-auto-add-field-seqrun-perc-q-ge-30-add-field-lane-sub-name-module">iggytools.iggyseq.seqstats.migrations.0006_auto__add_field_seqrun_perc_q_ge_30__add_field_lane_sub_name module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="iggytools.iggyseq.seqstats.migrations.html#iggytools-iggyseq-seqstats-migrations-0007-auto-chg-field-seqrun-num-clusters-pf-chg-field-seqrun-num-clusters-module">iggytools.iggyseq.seqstats.migrations.0007_auto__chg_field_seqrun_num_clusters_pf__chg_field_seqrun_num_clusters_ module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="iggytools.iggyseq.seqstats.migrations.html#module-iggytools.iggyseq.seqstats.migrations">Module contents</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="iggytools.iggyseq.seqstats.html#submodules">Submodules</a></li>
+<li class="toctree-l2"><a class="reference internal" href="iggytools.iggyseq.seqstats.html#iggytools-iggyseq-seqstats-addseqrun-module">iggytools.iggyseq.seqstats.addSeqRun module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="iggytools.iggyseq.seqstats.html#iggytools-iggyseq-seqstats-admin-module">iggytools.iggyseq.seqstats.admin module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="iggytools.iggyseq.seqstats.html#iggytools-iggyseq-seqstats-models-module">iggytools.iggyseq.seqstats.models module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="iggytools.iggyseq.seqstats.html#module-iggytools.iggyseq.seqstats.settings">iggytools.iggyseq.seqstats.settings module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="iggytools.iggyseq.seqstats.html#iggytools-iggyseq-seqstats-stats-module">iggytools.iggyseq.seqstats.stats module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="iggytools.iggyseq.seqstats.html#iggytools-iggyseq-seqstats-urls-module">iggytools.iggyseq.seqstats.urls module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="iggytools.iggyseq.seqstats.html#iggytools-iggyseq-seqstats-util-module">iggytools.iggyseq.seqstats.util module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="iggytools.iggyseq.seqstats.html#iggytools-iggyseq-seqstats-views-module">iggytools.iggyseq.seqstats.views module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="iggytools.iggyseq.seqstats.html#iggytools-iggyseq-seqstats-wsgi-module">iggytools.iggyseq.seqstats.wsgi module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="iggytools.iggyseq.seqstats.html#module-iggytools.iggyseq.seqstats">Module contents</a></li>
+</ul>
+</li>
+</ul>
+</div>
+</div>
+<div class="section" id="submodules">
+<h2>Submodules<a class="headerlink" href="#submodules" title="Permalink to this headline">¶</a></h2>
+</div>
+<div class="section" id="module-iggytools.iggyseq.analysisClasses">
+<span id="iggytools-iggyseq-analysisclasses-module"></span><h2>iggytools.iggyseq.analysisClasses module<a class="headerlink" href="#module-iggytools.iggyseq.analysisClasses" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="iggytools.iggyseq.analysisClasses.HiSeqAnalysis">
+<em class="property">class </em><code class="descclassname">iggytools.iggyseq.analysisClasses.</code><code class="descname">HiSeqAnalysis</code><span class="sig-paren">(</span><em>analysisName</em>, <em>Run=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/iggytools/iggyseq/analysisClasses.html#HiSeqAnalysis"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#iggytools.iggyseq.analysisClasses.HiSeqAnalysis" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#iggytools.iggyseq.analysisClasses.IlluminaNextGenAnalysis" title="iggytools.iggyseq.analysisClasses.IlluminaNextGenAnalysis"><code class="xref py py-class docutils literal"><span class="pre">iggytools.iggyseq.analysisClasses.IlluminaNextGenAnalysis</span></code></a></p>
+<dl class="method">
+<dt id="iggytools.iggyseq.analysisClasses.HiSeqAnalysis.bcl2fastq">
+<code class="descname">bcl2fastq</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/iggytools/iggyseq/analysisClasses.html#HiSeqAnalysis.bcl2fastq"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#iggytools.iggyseq.analysisClasses.HiSeqAnalysis.bcl2fastq" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="iggytools.iggyseq.analysisClasses.HiSeqAnalysis.copy_reports_to_finishing">
+<code class="descname">copy_reports_to_finishing</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/iggytools/iggyseq/analysisClasses.html#HiSeqAnalysis.copy_reports_to_finishing"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#iggytools.iggyseq.analysisClasses.HiSeqAnalysis.copy_reports_to_finishing" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="iggytools.iggyseq.analysisClasses.HiSeqAnalysis.gather_analysis_fastq">
+<code class="descname">gather_analysis_fastq</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/iggytools/iggyseq/analysisClasses.html#HiSeqAnalysis.gather_analysis_fastq"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#iggytools.iggyseq.analysisClasses.HiSeqAnalysis.gather_analysis_fastq" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="iggytools.iggyseq.analysisClasses.HiSeqAnalysis.summarizeDemuxResults">
+<code class="descname">summarizeDemuxResults</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/iggytools/iggyseq/analysisClasses.html#HiSeqAnalysis.summarizeDemuxResults"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#iggytools.iggyseq.analysisClasses.HiSeqAnalysis.summarizeDemuxResults" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="iggytools.iggyseq.analysisClasses.HiSeqAnalysis.writeSamplesheet">
+<code class="descname">writeSamplesheet</code><span class="sig-paren">(</span><em>outDir=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/iggytools/iggyseq/analysisClasses.html#HiSeqAnalysis.writeSamplesheet"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#iggytools.iggyseq.analysisClasses.HiSeqAnalysis.writeSamplesheet" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="iggytools.iggyseq.analysisClasses.IlluminaNextGenAnalysis">
+<em class="property">class </em><code class="descclassname">iggytools.iggyseq.analysisClasses.</code><code class="descname">IlluminaNextGenAnalysis</code><span class="sig-paren">(</span><em>analysisName</em>, <em>run</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/iggytools/iggyseq/analysisClasses.html#IlluminaNextGenAnalysis"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#iggytools.iggyseq.analysisClasses.IlluminaNextGenAnalysis" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference external" href="http://docs.python.org/2.7/library/functions.html#object" title="(in Python v2.7)"><code class="xref py py-class docutils literal"><span class="pre">object</span></code></a></p>
+<dl class="method">
+<dt id="iggytools.iggyseq.analysisClasses.IlluminaNextGenAnalysis.bcl2fastq">
+<code class="descname">bcl2fastq</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/iggytools/iggyseq/analysisClasses.html#IlluminaNextGenAnalysis.bcl2fastq"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#iggytools.iggyseq.analysisClasses.IlluminaNextGenAnalysis.bcl2fastq" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="iggytools.iggyseq.analysisClasses.IlluminaNextGenAnalysis.calcCheckSums">
+<code class="descname">calcCheckSums</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/iggytools/iggyseq/analysisClasses.html#IlluminaNextGenAnalysis.calcCheckSums"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#iggytools.iggyseq.analysisClasses.IlluminaNextGenAnalysis.calcCheckSums" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="iggytools.iggyseq.analysisClasses.IlluminaNextGenAnalysis.copy_reports_to_finishing">
+<code class="descname">copy_reports_to_finishing</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/iggytools/iggyseq/analysisClasses.html#IlluminaNextGenAnalysis.copy_reports_to_finishing"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#iggytools.iggyseq.analysisClasses.IlluminaNextGenAnalysis.copy_reports_to_finishing" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="iggytools.iggyseq.analysisClasses.IlluminaNextGenAnalysis.countUndetIndices">
+<code class="descname">countUndetIndices</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/iggytools/iggyseq/analysisClasses.html#IlluminaNextGenAnalysis.countUndetIndices"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#iggytools.iggyseq.analysisClasses.IlluminaNextGenAnalysis.countUndetIndices" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="iggytools.iggyseq.analysisClasses.IlluminaNextGenAnalysis.fastQC">
+<code class="descname">fastQC</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/iggytools/iggyseq/analysisClasses.html#IlluminaNextGenAnalysis.fastQC"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#iggytools.iggyseq.analysisClasses.IlluminaNextGenAnalysis.fastQC" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="iggytools.iggyseq.analysisClasses.IlluminaNextGenAnalysis.formatTable">
+<code class="descname">formatTable</code><span class="sig-paren">(</span><em>rows</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/iggytools/iggyseq/analysisClasses.html#IlluminaNextGenAnalysis.formatTable"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#iggytools.iggyseq.analysisClasses.IlluminaNextGenAnalysis.formatTable" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="iggytools.iggyseq.analysisClasses.IlluminaNextGenAnalysis.gather_analysis_fastq">
+<code class="descname">gather_analysis_fastq</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/iggytools/iggyseq/analysisClasses.html#IlluminaNextGenAnalysis.gather_analysis_fastq"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#iggytools.iggyseq.analysisClasses.IlluminaNextGenAnalysis.gather_analysis_fastq" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="classmethod">
+<dt id="iggytools.iggyseq.analysisClasses.IlluminaNextGenAnalysis.getInstance">
+<em class="property">classmethod </em><code class="descname">getInstance</code><span class="sig-paren">(</span><em>analysisName</em>, <em>run</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/iggytools/iggyseq/analysisClasses.html#IlluminaNextGenAnalysis.getInstance"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#iggytools.iggyseq.analysisClasses.IlluminaNextGenAnalysis.getInstance" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="iggytools.iggyseq.analysisClasses.IlluminaNextGenAnalysis.makeBasesMask">
+<code class="descname">makeBasesMask</code><span class="sig-paren">(</span><em>index1Length</em>, <em>index2Length</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/iggytools/iggyseq/analysisClasses.html#IlluminaNextGenAnalysis.makeBasesMask"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#iggytools.iggyseq.analysisClasses.IlluminaNextGenAnalysis.makeBasesMask" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="iggytools.iggyseq.analysisClasses.IlluminaNextGenAnalysis.summarizeDemuxResults">
+<code class="descname">summarizeDemuxResults</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/iggytools/iggyseq/analysisClasses.html#IlluminaNextGenAnalysis.summarizeDemuxResults"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#iggytools.iggyseq.analysisClasses.IlluminaNextGenAnalysis.summarizeDemuxResults" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="iggytools.iggyseq.analysisClasses.IlluminaNextGenAnalysis.validateFinalDir">
+<code class="descname">validateFinalDir</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/iggytools/iggyseq/analysisClasses.html#IlluminaNextGenAnalysis.validateFinalDir"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#iggytools.iggyseq.analysisClasses.IlluminaNextGenAnalysis.validateFinalDir" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="iggytools.iggyseq.analysisClasses.IlluminaNextGenAnalysis.writeSamplesheet">
+<code class="descname">writeSamplesheet</code><span class="sig-paren">(</span><em>outDir=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/iggytools/iggyseq/analysisClasses.html#IlluminaNextGenAnalysis.writeSamplesheet"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#iggytools.iggyseq.analysisClasses.IlluminaNextGenAnalysis.writeSamplesheet" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="iggytools.iggyseq.analysisClasses.NextSeqAnalysis">
+<em class="property">class </em><code class="descclassname">iggytools.iggyseq.analysisClasses.</code><code class="descname">NextSeqAnalysis</code><span class="sig-paren">(</span><em>analysisName</em>, <em>Run=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/iggytools/iggyseq/analysisClasses.html#NextSeqAnalysis"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#iggytools.iggyseq.analysisClasses.NextSeqAnalysis" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#iggytools.iggyseq.analysisClasses.IlluminaNextGenAnalysis" title="iggytools.iggyseq.analysisClasses.IlluminaNextGenAnalysis"><code class="xref py py-class docutils literal"><span class="pre">iggytools.iggyseq.analysisClasses.IlluminaNextGenAnalysis</span></code></a></p>
+<dl class="method">
+<dt id="iggytools.iggyseq.analysisClasses.NextSeqAnalysis.bcl2fastq">
+<code class="descname">bcl2fastq</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/iggytools/iggyseq/analysisClasses.html#NextSeqAnalysis.bcl2fastq"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#iggytools.iggyseq.analysisClasses.NextSeqAnalysis.bcl2fastq" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="iggytools.iggyseq.analysisClasses.NextSeqAnalysis.copy_reports_to_finishing">
+<code class="descname">copy_reports_to_finishing</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/iggytools/iggyseq/analysisClasses.html#NextSeqAnalysis.copy_reports_to_finishing"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#iggytools.iggyseq.analysisClasses.NextSeqAnalysis.copy_reports_to_finishing" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="iggytools.iggyseq.analysisClasses.NextSeqAnalysis.gather_analysis_fastq">
+<code class="descname">gather_analysis_fastq</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/iggytools/iggyseq/analysisClasses.html#NextSeqAnalysis.gather_analysis_fastq"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#iggytools.iggyseq.analysisClasses.NextSeqAnalysis.gather_analysis_fastq" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="iggytools.iggyseq.analysisClasses.NextSeqAnalysis.summarizeDemuxResults">
+<code class="descname">summarizeDemuxResults</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/iggytools/iggyseq/analysisClasses.html#NextSeqAnalysis.summarizeDemuxResults"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#iggytools.iggyseq.analysisClasses.NextSeqAnalysis.summarizeDemuxResults" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="iggytools.iggyseq.analysisClasses.NextSeqAnalysis.writeSamplesheet">
+<code class="descname">writeSamplesheet</code><span class="sig-paren">(</span><em>outDir=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/iggytools/iggyseq/analysisClasses.html#NextSeqAnalysis.writeSamplesheet"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#iggytools.iggyseq.analysisClasses.NextSeqAnalysis.writeSamplesheet" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-iggytools.iggyseq.laneClass">
+<span id="iggytools-iggyseq-laneclass-module"></span><h2>iggytools.iggyseq.laneClass module<a class="headerlink" href="#module-iggytools.iggyseq.laneClass" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="iggytools.iggyseq.laneClass.Lane">
+<em class="property">class </em><code class="descclassname">iggytools.iggyseq.laneClass.</code><code class="descname">Lane</code><span class="sig-paren">(</span><em>run=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/iggytools/iggyseq/laneClass.html#Lane"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#iggytools.iggyseq.laneClass.Lane" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference external" href="http://docs.python.org/2.7/library/functions.html#object" title="(in Python v2.7)"><code class="xref py py-class docutils literal"><span class="pre">object</span></code></a></p>
+</dd></dl>
+
+</div>
+<div class="section" id="module-iggytools.iggyseq.runClasses">
+<span id="iggytools-iggyseq-runclasses-module"></span><h2>iggytools.iggyseq.runClasses module<a class="headerlink" href="#module-iggytools.iggyseq.runClasses" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="iggytools.iggyseq.runClasses.HiSeq">
+<em class="property">class </em><code class="descclassname">iggytools.iggyseq.runClasses.</code><code class="descname">HiSeq</code><span class="sig-paren">(</span><em>runName</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/iggytools/iggyseq/runClasses.html#HiSeq"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#iggytools.iggyseq.runClasses.HiSeq" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#iggytools.iggyseq.runClasses.IlluminaNextGen" title="iggytools.iggyseq.runClasses.IlluminaNextGen"><code class="xref py py-class docutils literal"><span class="pre">iggytools.iggyseq.runClasses.IlluminaNextGen</span></code></a></p>
+<dl class="method">
+<dt id="iggytools.iggyseq.runClasses.HiSeq.makeLetter">
+<code class="descname">makeLetter</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/iggytools/iggyseq/runClasses.html#HiSeq.makeLetter"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#iggytools.iggyseq.runClasses.HiSeq.makeLetter" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="iggytools.iggyseq.runClasses.IlluminaNextGen">
+<em class="property">class </em><code class="descclassname">iggytools.iggyseq.runClasses.</code><code class="descname">IlluminaNextGen</code><span class="sig-paren">(</span><em>runName</em>, <em>pref=None</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/iggytools/iggyseq/runClasses.html#IlluminaNextGen"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#iggytools.iggyseq.runClasses.IlluminaNextGen" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference external" href="http://docs.python.org/2.7/library/functions.html#object" title="(in Python v2.7)"><code class="xref py py-class docutils literal"><span class="pre">object</span></code></a></p>
+<dl class="method">
+<dt id="iggytools.iggyseq.runClasses.IlluminaNextGen.DBupdate">
+<code class="descname">DBupdate</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/iggytools/iggyseq/runClasses.html#IlluminaNextGen.DBupdate"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#iggytools.iggyseq.runClasses.IlluminaNextGen.DBupdate" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="iggytools.iggyseq.runClasses.IlluminaNextGen.append">
+<code class="descname">append</code><span class="sig-paren">(</span><em>text</em>, <em>filename</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/iggytools/iggyseq/runClasses.html#IlluminaNextGen.append"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#iggytools.iggyseq.runClasses.IlluminaNextGen.append" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="iggytools.iggyseq.runClasses.IlluminaNextGen.bcl2fastq">
+<code class="descname">bcl2fastq</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/iggytools/iggyseq/runClasses.html#IlluminaNextGen.bcl2fastq"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#iggytools.iggyseq.runClasses.IlluminaNextGen.bcl2fastq" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="iggytools.iggyseq.runClasses.IlluminaNextGen.calcCheckSums">
+<code class="descname">calcCheckSums</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/iggytools/iggyseq/runClasses.html#IlluminaNextGen.calcCheckSums"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#iggytools.iggyseq.runClasses.IlluminaNextGen.calcCheckSums" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="iggytools.iggyseq.runClasses.IlluminaNextGen.checkDest">
+<code class="descname">checkDest</code><span class="sig-paren">(</span><em>dest</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/iggytools/iggyseq/runClasses.html#IlluminaNextGen.checkDest"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#iggytools.iggyseq.runClasses.IlluminaNextGen.checkDest" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="iggytools.iggyseq.runClasses.IlluminaNextGen.clearDir">
+<code class="descname">clearDir</code><span class="sig-paren">(</span><em>item</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/iggytools/iggyseq/runClasses.html#IlluminaNextGen.clearDir"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#iggytools.iggyseq.runClasses.IlluminaNextGen.clearDir" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="iggytools.iggyseq.runClasses.IlluminaNextGen.copyToFinal">
+<code class="descname">copyToFinal</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/iggytools/iggyseq/runClasses.html#IlluminaNextGen.copyToFinal"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#iggytools.iggyseq.runClasses.IlluminaNextGen.copyToFinal" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="iggytools.iggyseq.runClasses.IlluminaNextGen.countUndetIndices">
+<code class="descname">countUndetIndices</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/iggytools/iggyseq/runClasses.html#IlluminaNextGen.countUndetIndices"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#iggytools.iggyseq.runClasses.IlluminaNextGen.countUndetIndices" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="iggytools.iggyseq.runClasses.IlluminaNextGen.fastQC">
+<code class="descname">fastQC</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/iggytools/iggyseq/runClasses.html#IlluminaNextGen.fastQC"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#iggytools.iggyseq.runClasses.IlluminaNextGen.fastQC" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="iggytools.iggyseq.runClasses.IlluminaNextGen.gatherFastq">
+<code class="descname">gatherFastq</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/iggytools/iggyseq/runClasses.html#IlluminaNextGen.gatherFastq"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#iggytools.iggyseq.runClasses.IlluminaNextGen.gatherFastq" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="classmethod">
+<dt id="iggytools.iggyseq.runClasses.IlluminaNextGen.getInstance">
+<em class="property">classmethod </em><code class="descname">getInstance</code><span class="sig-paren">(</span><em>runName</em>, <em>pref=None</em>, <em>prefDir=None</em>, <em>**options</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/iggytools/iggyseq/runClasses.html#IlluminaNextGen.getInstance"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#iggytools.iggyseq.runClasses.IlluminaNextGen.getInstance" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="iggytools.iggyseq.runClasses.IlluminaNextGen.initLogFile">
+<code class="descname">initLogFile</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/iggytools/iggyseq/runClasses.html#IlluminaNextGen.initLogFile"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#iggytools.iggyseq.runClasses.IlluminaNextGen.initLogFile" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="iggytools.iggyseq.runClasses.IlluminaNextGen.log">
+<code class="descname">log</code><span class="sig-paren">(</span><em>text</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/iggytools/iggyseq/runClasses.html#IlluminaNextGen.log"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#iggytools.iggyseq.runClasses.IlluminaNextGen.log" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="iggytools.iggyseq.runClasses.IlluminaNextGen.logOptions">
+<code class="descname">logOptions</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/iggytools/iggyseq/runClasses.html#IlluminaNextGen.logOptions"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#iggytools.iggyseq.runClasses.IlluminaNextGen.logOptions" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="iggytools.iggyseq.runClasses.IlluminaNextGen.makeLetter">
+<code class="descname">makeLetter</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/iggytools/iggyseq/runClasses.html#IlluminaNextGen.makeLetter"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#iggytools.iggyseq.runClasses.IlluminaNextGen.makeLetter" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="iggytools.iggyseq.runClasses.IlluminaNextGen.notify">
+<code class="descname">notify</code><span class="sig-paren">(</span><em>subject</em>, <em>body</em>, <em>includeWatchers=False</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/iggytools/iggyseq/runClasses.html#IlluminaNextGen.notify"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#iggytools.iggyseq.runClasses.IlluminaNextGen.notify" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="iggytools.iggyseq.runClasses.IlluminaNextGen.parseSamplesheet">
+<code class="descname">parseSamplesheet</code><span class="sig-paren">(</span><em>write_validated=False</em>, <em>write_analysis_samplesheets=False</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/iggytools/iggyseq/runClasses.html#IlluminaNextGen.parseSamplesheet"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#iggytools.iggyseq.runClasses.IlluminaNextGen.parseSamplesheet" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="iggytools.iggyseq.runClasses.IlluminaNextGen.postProcess">
+<code class="descname">postProcess</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/iggytools/iggyseq/runClasses.html#IlluminaNextGen.postProcess"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#iggytools.iggyseq.runClasses.IlluminaNextGen.postProcess" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="iggytools.iggyseq.runClasses.IlluminaNextGen.processRun">
+<code class="descname">processRun</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/iggytools/iggyseq/runClasses.html#IlluminaNextGen.processRun"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#iggytools.iggyseq.runClasses.IlluminaNextGen.processRun" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="iggytools.iggyseq.runClasses.IlluminaNextGen.safeCopy">
+<code class="descname">safeCopy</code><span class="sig-paren">(</span><em>src</em>, <em>dst</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/iggytools/iggyseq/runClasses.html#IlluminaNextGen.safeCopy"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#iggytools.iggyseq.runClasses.IlluminaNextGen.safeCopy" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="iggytools.iggyseq.runClasses.IlluminaNextGen.safeDeleteItem">
+<code class="descname">safeDeleteItem</code><span class="sig-paren">(</span><em>item</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/iggytools/iggyseq/runClasses.html#IlluminaNextGen.safeDeleteItem"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#iggytools.iggyseq.runClasses.IlluminaNextGen.safeDeleteItem" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="iggytools.iggyseq.runClasses.IlluminaNextGen.shell">
+<code class="descname">shell</code><span class="sig-paren">(</span><em>command</em>, <em>outputFile</em>, <em>append=True</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/iggytools/iggyseq/runClasses.html#IlluminaNextGen.shell"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#iggytools.iggyseq.runClasses.IlluminaNextGen.shell" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="iggytools.iggyseq.runClasses.IlluminaNextGen.summarizeDemuxResults">
+<code class="descname">summarizeDemuxResults</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/iggytools/iggyseq/runClasses.html#IlluminaNextGen.summarizeDemuxResults"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#iggytools.iggyseq.runClasses.IlluminaNextGen.summarizeDemuxResults" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="iggytools.iggyseq.runClasses.IlluminaNextGen.validateFinalDir">
+<code class="descname">validateFinalDir</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/iggytools/iggyseq/runClasses.html#IlluminaNextGen.validateFinalDir"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#iggytools.iggyseq.runClasses.IlluminaNextGen.validateFinalDir" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="iggytools.iggyseq.runClasses.IlluminaNextGen.warn">
+<code class="descname">warn</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/iggytools/iggyseq/runClasses.html#IlluminaNextGen.warn"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#iggytools.iggyseq.runClasses.IlluminaNextGen.warn" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="iggytools.iggyseq.runClasses.NextSeq">
+<em class="property">class </em><code class="descclassname">iggytools.iggyseq.runClasses.</code><code class="descname">NextSeq</code><span class="sig-paren">(</span><em>runName</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/iggytools/iggyseq/runClasses.html#NextSeq"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#iggytools.iggyseq.runClasses.NextSeq" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#iggytools.iggyseq.runClasses.IlluminaNextGen" title="iggytools.iggyseq.runClasses.IlluminaNextGen"><code class="xref py py-class docutils literal"><span class="pre">iggytools.iggyseq.runClasses.IlluminaNextGen</span></code></a></p>
+<dl class="method">
+<dt id="iggytools.iggyseq.runClasses.NextSeq.makeLetter">
+<code class="descname">makeLetter</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/iggytools/iggyseq/runClasses.html#NextSeq.makeLetter"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#iggytools.iggyseq.runClasses.NextSeq.makeLetter" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="function">
+<dt id="iggytools.iggyseq.runClasses.getSeqPref">
+<code class="descclassname">iggytools.iggyseq.runClasses.</code><code class="descname">getSeqPref</code><span class="sig-paren">(</span><em>prefDir=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/iggytools/iggyseq/runClasses.html#getSeqPref"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#iggytools.iggyseq.runClasses.getSeqPref" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</div>
+<div class="section" id="module-iggytools.iggyseq.sampleSheetClasses">
+<span id="iggytools-iggyseq-samplesheetclasses-module"></span><h2>iggytools.iggyseq.sampleSheetClasses module<a class="headerlink" href="#module-iggytools.iggyseq.sampleSheetClasses" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="iggytools.iggyseq.sampleSheetClasses.BaseSampleSheet">
+<em class="property">class </em><code class="descclassname">iggytools.iggyseq.sampleSheetClasses.</code><code class="descname">BaseSampleSheet</code><span class="sig-paren">(</span><em>runObj</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/iggytools/iggyseq/sampleSheetClasses.html#BaseSampleSheet"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#iggytools.iggyseq.sampleSheetClasses.BaseSampleSheet" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference external" href="http://docs.python.org/2.7/library/functions.html#object" title="(in Python v2.7)"><code class="xref py py-class docutils literal"><span class="pre">object</span></code></a></p>
+<dl class="method">
+<dt id="iggytools.iggyseq.sampleSheetClasses.BaseSampleSheet.adjustIndexLength">
+<code class="descname">adjustIndexLength</code><span class="sig-paren">(</span><em>index</em>, <em>rlen</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/iggytools/iggyseq/sampleSheetClasses.html#BaseSampleSheet.adjustIndexLength"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#iggytools.iggyseq.sampleSheetClasses.BaseSampleSheet.adjustIndexLength" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="classmethod">
+<dt id="iggytools.iggyseq.sampleSheetClasses.BaseSampleSheet.getInstance">
+<em class="property">classmethod </em><code class="descname">getInstance</code><span class="sig-paren">(</span><em>runObj</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/iggytools/iggyseq/sampleSheetClasses.html#BaseSampleSheet.getInstance"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#iggytools.iggyseq.sampleSheetClasses.BaseSampleSheet.getInstance" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="iggytools.iggyseq.sampleSheetClasses.BaseSampleSheet.parse">
+<code class="descname">parse</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/iggytools/iggyseq/sampleSheetClasses.html#BaseSampleSheet.parse"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#iggytools.iggyseq.sampleSheetClasses.BaseSampleSheet.parse" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="iggytools.iggyseq.sampleSheetClasses.BaseSampleSheet.validate_indexChars">
+<code class="descname">validate_indexChars</code><span class="sig-paren">(</span><em>index</em>, <em>lineIndex</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/iggytools/iggyseq/sampleSheetClasses.html#BaseSampleSheet.validate_indexChars"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#iggytools.iggyseq.sampleSheetClasses.BaseSampleSheet.validate_indexChars" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="iggytools.iggyseq.sampleSheetClasses.BaseSampleSheet.validate_indexTypeChars">
+<code class="descname">validate_indexTypeChars</code><span class="sig-paren">(</span><em>indexType</em>, <em>lineIndex</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/iggytools/iggyseq/sampleSheetClasses.html#BaseSampleSheet.validate_indexTypeChars"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#iggytools.iggyseq.sampleSheetClasses.BaseSampleSheet.validate_indexTypeChars" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="iggytools.iggyseq.sampleSheetClasses.BaseSampleSheet.validate_subIDChars">
+<code class="descname">validate_subIDChars</code><span class="sig-paren">(</span><em>subID</em>, <em>lineIndex</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/iggytools/iggyseq/sampleSheetClasses.html#BaseSampleSheet.validate_subIDChars"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#iggytools.iggyseq.sampleSheetClasses.BaseSampleSheet.validate_subIDChars" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="iggytools.iggyseq.sampleSheetClasses.BaseSampleSheet.write_validatedSamplesheet">
+<code class="descname">write_validatedSamplesheet</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/iggytools/iggyseq/sampleSheetClasses.html#BaseSampleSheet.write_validatedSamplesheet"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#iggytools.iggyseq.sampleSheetClasses.BaseSampleSheet.write_validatedSamplesheet" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="iggytools.iggyseq.sampleSheetClasses.SampleSheet_formatA">
+<em class="property">class </em><code class="descclassname">iggytools.iggyseq.sampleSheetClasses.</code><code class="descname">SampleSheet_formatA</code><span class="sig-paren">(</span><em>runObj</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/iggytools/iggyseq/sampleSheetClasses.html#SampleSheet_formatA"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#iggytools.iggyseq.sampleSheetClasses.SampleSheet_formatA" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#iggytools.iggyseq.sampleSheetClasses.BaseSampleSheet" title="iggytools.iggyseq.sampleSheetClasses.BaseSampleSheet"><code class="xref py py-class docutils literal"><span class="pre">iggytools.iggyseq.sampleSheetClasses.BaseSampleSheet</span></code></a></p>
+<dl class="method">
+<dt id="iggytools.iggyseq.sampleSheetClasses.SampleSheet_formatA.parse">
+<code class="descname">parse</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/iggytools/iggyseq/sampleSheetClasses.html#SampleSheet_formatA.parse"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#iggytools.iggyseq.sampleSheetClasses.SampleSheet_formatA.parse" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="iggytools.iggyseq.sampleSheetClasses.SampleSheet_formatB">
+<em class="property">class </em><code class="descclassname">iggytools.iggyseq.sampleSheetClasses.</code><code class="descname">SampleSheet_formatB</code><span class="sig-paren">(</span><em>runObj</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/iggytools/iggyseq/sampleSheetClasses.html#SampleSheet_formatB"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#iggytools.iggyseq.sampleSheetClasses.SampleSheet_formatB" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#iggytools.iggyseq.sampleSheetClasses.BaseSampleSheet" title="iggytools.iggyseq.sampleSheetClasses.BaseSampleSheet"><code class="xref py py-class docutils literal"><span class="pre">iggytools.iggyseq.sampleSheetClasses.BaseSampleSheet</span></code></a></p>
+<dl class="method">
+<dt id="iggytools.iggyseq.sampleSheetClasses.SampleSheet_formatB.parse">
+<code class="descname">parse</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/iggytools/iggyseq/sampleSheetClasses.html#SampleSheet_formatB.parse"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#iggytools.iggyseq.sampleSheetClasses.SampleSheet_formatB.parse" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-iggytools.iggyseq.seqUtil">
+<span id="iggytools-iggyseq-sequtil-module"></span><h2>iggytools.iggyseq.seqUtil module<a class="headerlink" href="#module-iggytools.iggyseq.seqUtil" title="Permalink to this headline">¶</a></h2>
+<dl class="function">
+<dt id="iggytools.iggyseq.seqUtil.fastqGz_checksums">
+<code class="descclassname">iggytools.iggyseq.seqUtil.</code><code class="descname">fastqGz_checksums</code><span class="sig-paren">(</span><em>myDir</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/iggytools/iggyseq/seqUtil.html#fastqGz_checksums"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#iggytools.iggyseq.seqUtil.fastqGz_checksums" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="iggytools.iggyseq.seqUtil.parseRunInfo">
+<code class="descclassname">iggytools.iggyseq.seqUtil.</code><code class="descname">parseRunInfo</code><span class="sig-paren">(</span><em>rifile</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/iggytools/iggyseq/seqUtil.html#parseRunInfo"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#iggytools.iggyseq.seqUtil.parseRunInfo" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="iggytools.iggyseq.seqUtil.setPermissions">
+<code class="descclassname">iggytools.iggyseq.seqUtil.</code><code class="descname">setPermissions</code><span class="sig-paren">(</span><em>item</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/iggytools/iggyseq/seqUtil.html#setPermissions"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#iggytools.iggyseq.seqUtil.setPermissions" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</div>
+<div class="section" id="module-iggytools.iggyseq">
+<span id="module-contents"></span><h2>Module contents<a class="headerlink" href="#module-iggytools.iggyseq" title="Permalink to this headline">¶</a></h2>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../index.html">iggytools 0.1 documentation</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &copy; Copyright 2015, Chris Williams.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.3.1.
+    </div>
+  </body>
+</html>

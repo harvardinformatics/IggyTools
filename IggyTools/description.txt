@@ -1,0 +1,3 @@
+Iggyref downloads genomes and databases from EBI, Ensembl, NCBI and other sources. 
+Some postprocessing is performed, such as decompression, format coversion and the 
+generation of bowtie2 indexes for fasta files. 

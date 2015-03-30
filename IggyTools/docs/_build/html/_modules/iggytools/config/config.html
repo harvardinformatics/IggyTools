@@ -1,0 +1,165 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>iggytools.config.config &mdash; iggytools 0.1 documentation</title>
+    
+    <link rel="stylesheet" href="../../../_static/sphinxdoc.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../',
+        VERSION:     '0.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../_static/doctools.js"></script>
+    <link rel="top" title="iggytools 0.1 documentation" href="../../../index.html" />
+    <link rel="up" title="Module code" href="../../index.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../../index.html">iggytools 0.1 documentation</a> &raquo;</li>
+          <li><a href="../../index.html" accesskey="U">Module code</a> &raquo;</li> 
+      </ul>
+    </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <h1>Source code for iggytools.config.config</h1><div class="highlight"><pre>
+<span class="kn">import</span> <span class="nn">os.path</span> <span class="kn">as</span> <span class="nn">path</span>
+<span class="kn">import</span> <span class="nn">sys</span><span class="o">,</span> <span class="nn">os</span><span class="o">,</span> <span class="nn">yaml</span><span class="o">,</span> <span class="nn">imp</span><span class="o">,</span> <span class="nn">re</span><span class="o">,</span> <span class="nn">logging</span>
+<span class="kn">from</span> <span class="nn">collections</span> <span class="kn">import</span> <span class="n">namedtuple</span>
+<span class="kn">from</span> <span class="nn">iggytools.utils.util</span> <span class="kn">import</span> <span class="n">mkdir_p</span><span class="p">,</span> <span class="n">copy</span><span class="p">,</span> <span class="n">getUserHome</span>
+
+<div class="viewcode-block" id="iggytools_prefDir_setup"><a class="viewcode-back" href="../../../_rst/iggytools.config.html#iggytools.config.config.iggytools_prefDir_setup">[docs]</a><span class="k">def</span> <span class="nf">iggytools_prefDir_setup</span><span class="p">(</span><span class="n">customPrefDir</span><span class="p">):</span> <span class="c">#create preferences if not already present</span>
+    <span class="n">userHome</span> <span class="o">=</span> <span class="n">getUserHome</span><span class="p">()</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">customPrefDir</span><span class="p">:</span>  
+        <span class="n">iggytools_prefDir</span> <span class="o">=</span> <span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">userHome</span><span class="p">,</span> <span class="s">&#39;.iggytools&#39;</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">iggytools_prefDir</span> <span class="o">=</span> <span class="n">customPrefDir</span>
+
+    <span class="n">iggyref_prefFile</span> <span class="o">=</span> <span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">iggytools_prefDir</span> <span class="p">,</span><span class="s">&#39;iggyref_settings.yaml&#39;</span><span class="p">)</span>
+    <span class="n">iggytools_srcDir</span> <span class="o">=</span> <span class="n">imp</span><span class="o">.</span><span class="n">find_module</span><span class="p">(</span><span class="s">&#39;iggytools&#39;</span><span class="p">)[</span><span class="mi">1</span><span class="p">]</span>
+
+    <span class="c">#create iggyref pref file if it doesn&#39;t exist</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="n">iggyref_prefFile</span><span class="p">):</span>
+        <span class="n">mkdir_p</span><span class="p">(</span><span class="n">iggytools_prefDir</span><span class="p">)</span>
+        <span class="n">iggyref_prefTemplate</span> <span class="o">=</span> <span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">iggytools_srcDir</span><span class="p">,</span> <span class="s">&#39;config&#39;</span><span class="p">,</span> <span class="s">&#39;preferenceTemplates&#39;</span><span class="p">,</span> <span class="s">&#39;iggyref_settings.yaml&#39;</span><span class="p">)</span>
+        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">iggyref_prefTemplate</span><span class="p">,</span> <span class="s">&#39;r&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">fh</span><span class="p">:</span>
+            <span class="n">contents</span> <span class="o">=</span> <span class="n">fh</span><span class="o">.</span><span class="n">read</span><span class="p">()</span>
+        <span class="n">contents</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="s">&#39;&lt;path_to_repository_directory&gt;&#39;</span><span class="p">,</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">userHome</span><span class="p">,</span> <span class="s">&#39;iggyref&#39;</span><span class="p">),</span> <span class="n">contents</span><span class="p">)</span> <span class="c"># set repo dir to $HOME/iggyref by default</span>
+        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">iggyref_prefFile</span><span class="p">,</span> <span class="s">&#39;w&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">fh</span><span class="p">:</span>
+            <span class="n">fh</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">contents</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="nb">dict</span><span class="p">(</span><span class="n">iggyref</span> <span class="o">=</span> <span class="n">iggyref_prefFile</span><span class="p">)</span>  <span class="c">#dict of prefFiles for iggytools</span>
+</div>
+<div class="viewcode-block" id="get_iggyref_preferences"><a class="viewcode-back" href="../../../_rst/iggytools.config.html#iggytools.config.config.get_iggyref_preferences">[docs]</a><span class="k">def</span> <span class="nf">get_iggyref_preferences</span><span class="p">(</span><span class="n">customPrefDir</span> <span class="o">=</span> <span class="bp">None</span><span class="p">):</span>
+    <span class="n">prefFiles</span> <span class="o">=</span> <span class="n">iggytools_prefDir_setup</span><span class="p">(</span><span class="n">customPrefDir</span><span class="p">)</span>
+    <span class="n">iggyref_prefFile</span> <span class="o">=</span> <span class="n">prefFiles</span><span class="p">[</span><span class="s">&#39;iggyref&#39;</span><span class="p">]</span>
+
+    <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">iggyref_prefFile</span><span class="p">,</span> <span class="s">&#39;r&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">fh</span><span class="p">:</span>
+        <span class="n">pref</span> <span class="o">=</span> <span class="n">yaml</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">fh</span><span class="p">)</span>
+
+    <span class="c">#preferences container</span>
+    <span class="n">p</span> <span class="o">=</span> <span class="n">namedtuple</span><span class="p">(</span><span class="s">&#39;p&#39;</span><span class="p">,</span> <span class="s">&#39;WORK_DIR TEMP_DIR LOG_DIR DOWNLOAD_DIR DEBUG_DIR REPO_DIR&#39;</span> \
+                             <span class="o">+</span> <span class="s">&#39;DB_TYPE MYSQL_HOST MYSQL_DB MYSQL_USER MYSQL_PASS&#39;</span> \
+                             <span class="o">+</span> <span class="s">&#39;DEBUG LOG_LEVEL&#39;</span><span class="p">)</span>
+    <span class="c">#directory preferencecs</span>
+    <span class="n">p</span><span class="o">.</span><span class="n">REPO_DIR</span>     <span class="o">=</span> <span class="n">pref</span><span class="p">[</span><span class="s">&#39;IGGYREF_REPOSITORY_DIR&#39;</span><span class="p">]</span>
+    <span class="n">p</span><span class="o">.</span><span class="n">WORK_DIR</span>     <span class="o">=</span> <span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span> <span class="n">p</span><span class="o">.</span><span class="n">REPO_DIR</span><span class="p">,</span> <span class="s">&#39;.work&#39;</span>    <span class="p">)</span>
+    <span class="n">p</span><span class="o">.</span><span class="n">LOG_DIR</span>      <span class="o">=</span> <span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span> <span class="n">p</span><span class="o">.</span><span class="n">WORK_DIR</span><span class="p">,</span> <span class="s">&#39;log&#39;</span>      <span class="p">)</span>
+    <span class="n">p</span><span class="o">.</span><span class="n">DOWNLOAD_DIR</span> <span class="o">=</span> <span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span> <span class="n">p</span><span class="o">.</span><span class="n">WORK_DIR</span><span class="p">,</span> <span class="s">&#39;download&#39;</span> <span class="p">)</span>
+    <span class="n">p</span><span class="o">.</span><span class="n">INTERMED_DIR</span> <span class="o">=</span> <span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span> <span class="n">p</span><span class="o">.</span><span class="n">WORK_DIR</span><span class="p">,</span> <span class="s">&#39;intermed&#39;</span> <span class="p">)</span>
+    <span class="n">p</span><span class="o">.</span><span class="n">TEMP_DIR</span>     <span class="o">=</span> <span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span> <span class="n">p</span><span class="o">.</span><span class="n">WORK_DIR</span><span class="p">,</span> <span class="s">&#39;temp&#39;</span>     <span class="p">)</span>
+    <span class="n">p</span><span class="o">.</span><span class="n">DEBUG_DIR</span>    <span class="o">=</span> <span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span> <span class="n">p</span><span class="o">.</span><span class="n">WORK_DIR</span><span class="p">,</span> <span class="s">&#39;debug&#39;</span>    <span class="p">)</span>
+
+    <span class="c">#database preferences</span>
+    <span class="n">p</span><span class="o">.</span><span class="n">DB_TYPE</span>    <span class="o">=</span> <span class="n">pref</span><span class="p">[</span><span class="s">&#39;IGGYREF_DB_TYPE&#39;</span><span class="p">]</span>
+    <span class="n">p</span><span class="o">.</span><span class="n">MYSQL_HOST</span> <span class="o">=</span> <span class="n">pref</span><span class="p">[</span><span class="s">&#39;IGGYREF_MYSQL_HOST&#39;</span><span class="p">]</span>
+    <span class="n">p</span><span class="o">.</span><span class="n">MYSQL_DB</span>   <span class="o">=</span> <span class="n">pref</span><span class="p">[</span><span class="s">&#39;IGGYREF_MYSQL_DB&#39;</span><span class="p">]</span>
+    <span class="n">p</span><span class="o">.</span><span class="n">MYSQL_USER</span> <span class="o">=</span> <span class="n">pref</span><span class="p">[</span><span class="s">&#39;IGGYREF_MYSQL_USER&#39;</span><span class="p">]</span>
+    <span class="n">p</span><span class="o">.</span><span class="n">MYSQL_PASS</span> <span class="o">=</span> <span class="n">pref</span><span class="p">[</span><span class="s">&#39;IGGYREF_MYSQL_PASS&#39;</span><span class="p">]</span>
+
+    <span class="c">#other preferences</span>
+    <span class="n">debug</span> <span class="o">=</span> <span class="n">pref</span><span class="p">[</span><span class="s">&#39;DEBUG&#39;</span><span class="p">]</span>
+    <span class="k">if</span> <span class="p">(</span> <span class="nb">type</span><span class="p">(</span><span class="n">debug</span><span class="p">)</span> <span class="o">==</span> <span class="nb">str</span> <span class="ow">and</span> <span class="n">re</span><span class="o">.</span><span class="n">match</span><span class="p">(</span><span class="s">&quot;true&quot;</span><span class="p">,</span> <span class="n">debug</span><span class="p">,</span> <span class="n">re</span><span class="o">.</span><span class="n">IGNORECASE</span><span class="p">)</span> <span class="p">)</span> <span class="ow">or</span> \
+       <span class="p">(</span> <span class="nb">type</span><span class="p">(</span><span class="n">debug</span><span class="p">)</span> <span class="o">==</span> <span class="nb">bool</span> <span class="ow">and</span> <span class="n">debug</span> <span class="p">):</span>
+        <span class="n">p</span><span class="o">.</span><span class="n">DEBUG</span> <span class="o">=</span> <span class="bp">True</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">p</span><span class="o">.</span><span class="n">DEBUG</span> <span class="o">=</span> <span class="bp">False</span>
+
+    <span class="n">levelString</span> <span class="o">=</span> <span class="n">pref</span><span class="p">[</span><span class="s">&#39;IGGYREF_LOGGING_LEVEL&#39;</span><span class="p">]</span>
+    <span class="k">if</span> <span class="n">re</span><span class="o">.</span><span class="n">match</span><span class="p">(</span><span class="s">&#39;warn&#39;</span><span class="p">,</span> <span class="n">levelString</span><span class="p">,</span> <span class="n">re</span><span class="o">.</span><span class="n">IGNORECASE</span><span class="p">):</span>
+        <span class="n">p</span><span class="o">.</span><span class="n">LOG_LEVEL</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">WARNING</span>
+    <span class="k">elif</span> <span class="n">re</span><span class="o">.</span><span class="n">match</span><span class="p">(</span><span class="s">&#39;info&#39;</span><span class="p">,</span> <span class="n">levelString</span><span class="p">,</span> <span class="n">re</span><span class="o">.</span><span class="n">IGNORECASE</span><span class="p">):</span>
+        <span class="n">p</span><span class="o">.</span><span class="n">LOG_LEVEL</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">INFO</span>
+    <span class="k">elif</span> <span class="n">re</span><span class="o">.</span><span class="n">match</span><span class="p">(</span><span class="s">&#39;debug&#39;</span><span class="p">,</span> <span class="n">levelString</span><span class="p">,</span> <span class="n">re</span><span class="o">.</span><span class="n">IGNORECASE</span><span class="p">):</span>
+        <span class="n">p</span><span class="o">.</span><span class="n">LOG_LEVEL</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">DEBUG</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s">&#39;Unrecognized logging level: </span><span class="si">%s</span><span class="s">&#39;</span> <span class="o">%</span> <span class="n">levelString</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">p</span></div>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../../index.html">iggytools 0.1 documentation</a> &raquo;</li>
+          <li><a href="../../index.html" >Module code</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2015, Chris Williams.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.3.
+    </div>
+  </body>
+</html>

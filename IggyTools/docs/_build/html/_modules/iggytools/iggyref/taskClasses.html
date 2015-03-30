@@ -1,0 +1,247 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>iggytools.iggyref.taskClasses &mdash; iggytools 0.1 documentation</title>
+    
+    <link rel="stylesheet" href="../../../_static/sphinxdoc.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../',
+        VERSION:     '0.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../_static/doctools.js"></script>
+    <link rel="top" title="iggytools 0.1 documentation" href="../../../index.html" />
+    <link rel="up" title="Module code" href="../../index.html" /> 
+  </head>
+  <body role="document">
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../../index.html">iggytools 0.1 documentation</a> &raquo;</li>
+          <li class="nav-item nav-item-1"><a href="../../index.html" accesskey="U">Module code</a> &raquo;</li> 
+      </ul>
+    </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for iggytools.iggyref.taskClasses</h1><div class="highlight"><pre>
+<span class="kn">import</span> <span class="nn">logging</span><span class="o">,</span> <span class="nn">traceback</span><span class="o">,</span> <span class="nn">re</span>
+<span class="kn">import</span> <span class="nn">os.path</span> <span class="kn">as</span> <span class="nn">path</span>
+<span class="kn">from</span> <span class="nn">iggytools.utils.util</span> <span class="kn">import</span> <span class="n">flatlist</span>
+<span class="kn">from</span> <span class="nn">iggytools.iggyref.rFileClass</span> <span class="kn">import</span> <span class="n">rFile</span>
+<span class="kn">from</span> <span class="nn">iggytools.iggyref.postProcess.genePred2gtf</span> <span class="kn">import</span> <span class="n">genePred2gtf</span>
+<span class="kn">from</span> <span class="nn">iggytools.iggyref.postProcess.fasta2index</span> <span class="kn">import</span> <span class="n">fasta2index</span>
+<span class="kn">from</span> <span class="nn">iggytools.iggyref.postProcess.util</span> <span class="kn">import</span> <span class="n">decompress</span><span class="p">,</span> <span class="n">untar</span><span class="p">,</span> <span class="n">concatFiles</span>
+
+<span class="n">log</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="s">&#39;iggyref&#39;</span><span class="p">)</span>
+
+<div class="viewcode-block" id="baseTask"><a class="viewcode-back" href="../../../_rst/iggytools.iggyref.html#iggytools.iggyref.taskClasses.baseTask">[docs]</a><span class="k">class</span> <span class="nc">baseTask</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+
+    <span class="nd">@classmethod</span>
+<div class="viewcode-block" id="baseTask.getInstance"><a class="viewcode-back" href="../../../_rst/iggytools.iggyref.html#iggytools.iggyref.taskClasses.baseTask.getInstance">[docs]</a>    <span class="k">def</span> <span class="nf">getInstance</span><span class="p">(</span><span class="n">cls</span><span class="p">,</span> <span class="n">taskDict</span><span class="p">,</span> <span class="n">C</span><span class="p">):</span>
+        <span class="n">taskName</span> <span class="o">=</span> <span class="n">taskDict</span><span class="p">[</span><span class="s">&#39;taskName&#39;</span><span class="p">]</span>
+        <span class="k">if</span> <span class="n">taskName</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="o">==</span> <span class="s">&#39;unzip&#39;</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">Unzip</span><span class="p">(</span><span class="n">taskDict</span><span class="p">,</span> <span class="n">C</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">taskName</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="o">==</span> <span class="s">&#39;unzip-untar&#39;</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">Unzip_untar</span><span class="p">(</span><span class="n">taskDict</span><span class="p">,</span> <span class="n">C</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">taskName</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="o">==</span> <span class="s">&#39;unzip-untar-merge&#39;</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">Unzip_untar_merge</span><span class="p">(</span><span class="n">taskDict</span><span class="p">,</span> <span class="n">C</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">taskName</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="ow">in</span> <span class="p">[</span><span class="s">&#39;unzip-txt2gtf&#39;</span><span class="p">,</span> <span class="s">&#39;txt2gtf&#39;</span><span class="p">]:</span>
+            <span class="k">return</span> <span class="n">Txt2gtf</span><span class="p">(</span><span class="n">taskDict</span><span class="p">,</span> <span class="n">C</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">taskName</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="o">==</span> <span class="s">&#39;fasta2index&#39;</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">Fasta2index</span><span class="p">(</span><span class="n">taskDict</span><span class="p">,</span> <span class="n">C</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s">&#39;Unrecognized taskName: </span><span class="si">%s</span><span class="s">&#39;</span> <span class="o">%</span> <span class="n">taskName</span><span class="p">)</span>
+</div>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">taskDict</span><span class="p">,</span> <span class="n">C</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">C</span> <span class="o">=</span> <span class="n">C</span>
+
+        <span class="n">inFileNames</span> <span class="o">=</span> <span class="nb">list</span><span class="p">()</span>
+        <span class="k">if</span> <span class="s">&#39;inFiles&#39;</span> <span class="ow">in</span> <span class="n">taskDict</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+            <span class="n">inFileNames</span> <span class="o">=</span> <span class="n">taskDict</span><span class="p">[</span><span class="s">&#39;inFiles&#39;</span><span class="p">]</span>
+        <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="n">inFileNames</span><span class="p">)</span> <span class="o">!=</span> <span class="nb">list</span><span class="p">:</span> <span class="n">inFileNames</span> <span class="o">=</span> <span class="p">[</span><span class="n">inFileNames</span><span class="p">]</span>
+
+        <span class="n">outFileNames</span> <span class="o">=</span> <span class="nb">list</span><span class="p">()</span>
+        <span class="k">if</span> <span class="s">&#39;outFiles&#39;</span> <span class="ow">in</span> <span class="n">taskDict</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+            <span class="n">outFileNames</span> <span class="o">=</span> <span class="n">taskDict</span><span class="p">[</span><span class="s">&#39;outFiles&#39;</span><span class="p">]</span>
+        <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="n">outFileNames</span><span class="p">)</span> <span class="o">!=</span> <span class="nb">list</span><span class="p">:</span> <span class="n">outFileNames</span> <span class="o">=</span> <span class="p">[</span><span class="n">outFileNames</span><span class="p">]</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">inFiles</span> <span class="o">=</span> <span class="nb">list</span><span class="p">()</span>
+        <span class="k">for</span> <span class="n">filename</span> <span class="ow">in</span> <span class="n">inFileNames</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">inFiles</span><span class="o">.</span><span class="n">append</span><span class="p">(</span> <span class="bp">self</span><span class="o">.</span><span class="n">getFileObj</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span> <span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">outFiles</span> <span class="o">=</span> <span class="nb">list</span><span class="p">()</span>
+        <span class="k">for</span> <span class="n">filename</span> <span class="ow">in</span> <span class="n">outFileNames</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">outFiles</span><span class="o">.</span><span class="n">append</span><span class="p">(</span> <span class="bp">self</span><span class="o">.</span><span class="n">getFileObj</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span> <span class="p">)</span>
+
+<div class="viewcode-block" id="baseTask.getFileObj"><a class="viewcode-back" href="../../../_rst/iggytools.iggyref.html#iggytools.iggyref.taskClasses.baseTask.getFileObj">[docs]</a>    <span class="k">def</span> <span class="nf">getFileObj</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filename</span><span class="p">):</span>
+        <span class="n">allFiles</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">C</span><span class="o">.</span><span class="n">allFiles</span><span class="p">()</span>
+        <span class="n">filesNames</span> <span class="o">=</span> <span class="p">[</span><span class="n">x</span><span class="o">.</span><span class="n">name</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">allFiles</span><span class="p">]</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">File</span> <span class="o">=</span> <span class="n">allFiles</span><span class="p">[</span><span class="n">filesNames</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">filename</span><span class="p">)]</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="k">try</span><span class="p">:</span> 
+                <span class="n">File</span> <span class="o">=</span> <span class="n">rFile</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">C</span><span class="o">.</span><span class="n">fileProperties</span><span class="p">[</span><span class="n">filename</span><span class="p">])</span>
+            <span class="k">except</span><span class="p">:</span>
+                <span class="n">File</span> <span class="o">=</span> <span class="n">rFile</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">C</span><span class="o">.</span><span class="n">setLocalFilePath</span><span class="p">(</span><span class="n">File</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">File</span>
+</div>
+<div class="viewcode-block" id="baseTask.validateInOut"><a class="viewcode-back" href="../../../_rst/iggytools.iggyref.html#iggytools.iggyref.taskClasses.baseTask.validateInOut">[docs]</a>    <span class="k">def</span> <span class="nf">validateInOut</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">numIn</span><span class="p">,</span> <span class="n">numOut</span><span class="p">):</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">inFiles</span><span class="p">)</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">flatlist</span><span class="p">(</span><span class="n">numIn</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s">&#39;In </span><span class="si">%s</span><span class="s">: Expected </span><span class="si">%s</span><span class="s"> input file(s) for task </span><span class="si">%s</span><span class="s">, found </span><span class="si">%s</span><span class="s">: </span><span class="si">%s</span><span class="s">&#39;</span><span class="o">%</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">C</span><span class="p">,</span> <span class="n">numIn</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">taskName</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">inFiles</span><span class="p">),</span> <span class="s">&#39;, &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="nb">map</span><span class="p">(</span><span class="nb">str</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">inFiles</span><span class="p">))))</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">outFiles</span><span class="p">)</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">flatlist</span><span class="p">(</span><span class="n">numOut</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s">&#39;In </span><span class="si">%s</span><span class="s">: Expected </span><span class="si">%s</span><span class="s"> output file(s) for task </span><span class="si">%s</span><span class="s">, found </span><span class="si">%s</span><span class="s">: </span><span class="si">%s</span><span class="s">&#39;</span><span class="o">%</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">C</span><span class="p">,</span> <span class="n">numIn</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">taskName</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">outFiles</span><span class="p">),</span> <span class="s">&#39;, &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="nb">map</span><span class="p">(</span><span class="nb">str</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">outFiles</span><span class="p">))))</span>
+</div>
+<div class="viewcode-block" id="baseTask.validateExt"><a class="viewcode-back" href="../../../_rst/iggytools.iggyref.html#iggytools.iggyref.taskClasses.baseTask.validateExt">[docs]</a>    <span class="k">def</span> <span class="nf">validateExt</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filename</span><span class="p">,</span> <span class="n">extensions</span><span class="p">):</span>
+        <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="n">extensions</span><span class="p">)</span> <span class="o">!=</span> <span class="nb">list</span><span class="p">:</span> <span class="n">extensions</span> <span class="o">=</span> <span class="p">[</span><span class="n">extensions</span><span class="p">]</span>
+        <span class="k">for</span> <span class="n">ext</span> <span class="ow">in</span> <span class="n">extensions</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">filename</span><span class="o">.</span><span class="n">lower</span><span class="p">()[</span><span class="o">-</span><span class="nb">len</span><span class="p">(</span><span class="n">ext</span><span class="p">):]</span> <span class="o">==</span> <span class="n">ext</span><span class="o">.</span><span class="n">lower</span><span class="p">():</span>
+                <span class="k">return</span>
+        <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s">&#39;Did not find file extension(s) [&quot;</span><span class="si">%s</span><span class="s">&quot;] in filename </span><span class="si">%s</span><span class="s">. Collection, Task: </span><span class="si">%s</span><span class="s">, </span><span class="si">%s</span><span class="s">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="s">&#39;&quot;, &quot;&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">extensions</span><span class="p">),</span> <span class="n">filename</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">C</span><span class="p">,</span> <span class="bp">self</span><span class="p">))</span>
+    </div>
+    <span class="k">def</span> <span class="nf">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="s">&#39;&lt;Task(</span><span class="si">%s</span><span class="s"> -- </span><span class="si">%s</span><span class="s"> -- </span><span class="si">%s</span><span class="s">)&gt;&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">taskName</span><span class="p">,</span> <span class="s">&#39;,&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="nb">map</span><span class="p">(</span><span class="nb">str</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">inFiles</span><span class="p">)),</span> <span class="s">&#39;,&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="nb">map</span><span class="p">(</span><span class="nb">str</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">outFiles</span><span class="p">)))</span>
+
+</div>
+<div class="viewcode-block" id="Unzip"><a class="viewcode-back" href="../../../_rst/iggytools.iggyref.html#iggytools.iggyref.taskClasses.Unzip">[docs]</a><span class="k">class</span> <span class="nc">Unzip</span><span class="p">(</span><span class="n">baseTask</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">taskDict</span><span class="p">,</span> <span class="n">C</span><span class="p">):</span>
+        <span class="n">baseTask</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">taskDict</span><span class="p">,</span> <span class="n">C</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">taskName</span> <span class="o">=</span> <span class="s">&#39;unzip&#39;</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">validateInOut</span><span class="p">(</span><span class="mi">1</span><span class="p">,[</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">])</span> <span class="c"># 1 input, 0 or 1 outputs </span>
+
+        <span class="n">inFile</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">inFiles</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">validateExt</span><span class="p">(</span><span class="n">inFile</span><span class="o">.</span><span class="n">localPath</span><span class="p">,</span> <span class="p">[</span><span class="s">&#39;.gz&#39;</span><span class="p">])</span>
+
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">outFiles</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">outFileName</span> <span class="o">=</span> <span class="n">inFile</span><span class="o">.</span><span class="n">name</span><span class="p">[:</span><span class="o">-</span><span class="mi">3</span><span class="p">]</span>
+            <span class="n">outFile</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">getFileObj</span><span class="p">(</span><span class="n">outFileName</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">outFiles</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">outFile</span><span class="p">)</span>
+
+<div class="viewcode-block" id="Unzip.run"><a class="viewcode-back" href="../../../_rst/iggytools.iggyref.html#iggytools.iggyref.taskClasses.Unzip.run">[docs]</a>    <span class="k">def</span> <span class="nf">run</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">decompress</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">inFiles</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">localPath</span><span class="p">,</span> <span class="n">destFile</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">outFiles</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">localPath</span><span class="p">)</span>
+
+</div></div>
+<div class="viewcode-block" id="Unzip_untar"><a class="viewcode-back" href="../../../_rst/iggytools.iggyref.html#iggytools.iggyref.taskClasses.Unzip_untar">[docs]</a><span class="k">class</span> <span class="nc">Unzip_untar</span><span class="p">(</span><span class="n">baseTask</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">taskDict</span><span class="p">,</span> <span class="n">C</span><span class="p">):</span>
+        <span class="n">baseTask</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">taskDict</span><span class="p">,</span> <span class="n">C</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">taskName</span> <span class="o">=</span> <span class="s">&#39;unzip-untar&#39;</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">validateInOut</span><span class="p">(</span><span class="mi">1</span><span class="p">,[</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">])</span> <span class="c"># 1 input, 0 or 1 outputs </span>
+
+        <span class="n">inFile</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">inFiles</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">validateExt</span><span class="p">(</span><span class="n">inFile</span><span class="o">.</span><span class="n">localPath</span><span class="p">,</span> <span class="s">&#39;.tar.gz&#39;</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">outFiles</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>  <span class="c">#if output was unspecified, untar files into directory containing input file</span>
+            <span class="n">outFileName</span> <span class="o">=</span> <span class="n">inFile</span><span class="o">.</span><span class="n">name</span><span class="p">[:</span><span class="o">-</span><span class="mi">7</span><span class="p">]</span>
+            <span class="n">outFile</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">getFileObj</span><span class="p">(</span><span class="n">outFileName</span><span class="p">)</span>
+            <span class="n">outFile</span><span class="o">.</span><span class="n">localPath</span> <span class="o">=</span> <span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="n">inFile</span><span class="o">.</span><span class="n">localPath</span><span class="p">)</span>  
+            <span class="bp">self</span><span class="o">.</span><span class="n">outFiles</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">outFile</span><span class="p">)</span>
+
+<div class="viewcode-block" id="Unzip_untar.run"><a class="viewcode-back" href="../../../_rst/iggytools.iggyref.html#iggytools.iggyref.taskClasses.Unzip_untar.run">[docs]</a>    <span class="k">def</span> <span class="nf">run</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">untar</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">inFiles</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">localPath</span><span class="p">,</span> <span class="n">destDir</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">outFiles</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">localPath</span><span class="p">)</span> 
+
+</div></div>
+<div class="viewcode-block" id="Unzip_untar_merge"><a class="viewcode-back" href="../../../_rst/iggytools.iggyref.html#iggytools.iggyref.taskClasses.Unzip_untar_merge">[docs]</a><span class="k">class</span> <span class="nc">Unzip_untar_merge</span><span class="p">(</span><span class="n">baseTask</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">taskDict</span><span class="p">,</span> <span class="n">C</span><span class="p">):</span>
+        <span class="n">baseTask</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">taskDict</span><span class="p">,</span> <span class="n">C</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">taskName</span> <span class="o">=</span> <span class="s">&#39;unzip-untar-merge&#39;</span>  
+        <span class="bp">self</span><span class="o">.</span><span class="n">validateInOut</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">)</span> <span class="c"># 1 input, 2 outputs</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">validateExt</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">inFiles</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">localPath</span><span class="p">,</span> <span class="s">&#39;.tar.gz&#39;</span><span class="p">)</span>
+
+<div class="viewcode-block" id="Unzip_untar_merge.run"><a class="viewcode-back" href="../../../_rst/iggytools.iggyref.html#iggytools.iggyref.taskClasses.Unzip_untar_merge.run">[docs]</a>    <span class="k">def</span> <span class="nf">run</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">untarredDir</span> <span class="o">=</span> <span class="n">untar</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">inFiles</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">localPath</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">outFiles</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">localPath</span><span class="p">)</span>
+        <span class="n">concatFiles</span><span class="p">(</span><span class="n">untarredDir</span><span class="p">,</span> <span class="n">outFile</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">outFiles</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">localPath</span><span class="p">)</span>
+
+</div></div>
+<div class="viewcode-block" id="Txt2gtf"><a class="viewcode-back" href="../../../_rst/iggytools.iggyref.html#iggytools.iggyref.taskClasses.Txt2gtf">[docs]</a><span class="k">class</span> <span class="nc">Txt2gtf</span><span class="p">(</span><span class="n">baseTask</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">taskDict</span><span class="p">,</span> <span class="n">C</span><span class="p">):</span>
+        <span class="n">baseTask</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">taskDict</span><span class="p">,</span> <span class="n">C</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">taskName</span> <span class="o">=</span> <span class="s">&#39;txt2gtf&#39;</span>  
+        <span class="bp">self</span><span class="o">.</span><span class="n">validateInOut</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">)</span> <span class="c"># 1 inputs, 1 output</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">genePredFile</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">inFiles</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">localPath</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">gtfFile</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">outFiles</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">localPath</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">validateExt</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">genePredFile</span><span class="p">,</span> <span class="s">&#39;.txt&#39;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">validateExt</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">gtfFile</span><span class="p">,</span> <span class="s">&#39;.gtf&#39;</span><span class="p">)</span>
+
+<div class="viewcode-block" id="Txt2gtf.run"><a class="viewcode-back" href="../../../_rst/iggytools.iggyref.html#iggytools.iggyref.taskClasses.Txt2gtf.run">[docs]</a>    <span class="k">def</span> <span class="nf">run</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">genePred2gtf</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">genePredFile</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">C</span><span class="o">.</span><span class="n">repo</span><span class="o">.</span><span class="n">source</span><span class="p">,</span> <span class="n">outFile</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">gtfFile</span><span class="p">)</span>
+
+</div></div>
+<div class="viewcode-block" id="Fasta2index"><a class="viewcode-back" href="../../../_rst/iggytools.iggyref.html#iggytools.iggyref.taskClasses.Fasta2index">[docs]</a><span class="k">class</span> <span class="nc">Fasta2index</span><span class="p">(</span><span class="n">baseTask</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">taskDict</span><span class="p">,</span> <span class="n">C</span><span class="p">):</span>
+        <span class="n">baseTask</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">taskDict</span><span class="p">,</span> <span class="n">C</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">taskName</span> <span class="o">=</span> <span class="s">&#39;fasta2index&#39;</span>  
+
+<div class="viewcode-block" id="Fasta2index.run"><a class="viewcode-back" href="../../../_rst/iggytools.iggyref.html#iggytools.iggyref.taskClasses.Fasta2index.run">[docs]</a>    <span class="k">def</span> <span class="nf">run</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">validateInOut</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="mi">0</span><span class="p">)</span> <span class="c"># 1 input, 0 outputs</span>
+        <span class="n">inFile</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">inFiles</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">localPath</span>
+        <span class="n">fasta2index</span><span class="p">(</span><span class="n">inFile</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">C</span><span class="p">)</span></div></div>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../../index.html">iggytools 0.1 documentation</a> &raquo;</li>
+          <li class="nav-item nav-item-1"><a href="../../index.html" >Module code</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &copy; Copyright 2015, Chris Williams.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.3.1.
+    </div>
+  </body>
+</html>

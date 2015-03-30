@@ -1,0 +1,23 @@
+#!/usr/bin/env python 
+from seqmem.manageMem import reportDiskUsage, deleteOldRuns, moveOldPrimaryToArchive, capDirUsage
+from argparse import ArgumentParser
+import sys
+
+def main(argv):
+    parser = ArgumentParser(prog='cron_seqmem', usage='%(prog)s [options]')
+    parser.add_argument("-v","--verbose", help="Verbose mode. Default: %default", default=False, action="store_true", dest="verbose")
+    args = parser.parse_args()
+
+    reportDiskUsage( ['/n/seqcfs', '/n/illumina01'] )
+
+    capDirUsage('/n/ngsdata', 85, 30, copyInSEQCFS = True, verbose = args.verbose)  #delete oldest run folders until disk usage is below 85%, 
+                                                                                    #while retaining runs for at least 30 days
+
+    moveOldPrimaryToArchive(20, args.verbose)                                       #move runs from primary_data to archive/primary_data after 20 days
+
+    deleteOldRuns('/n/illumina01/archive/primary_data', 60, copyInSEQCFS = False, verbose = args.verbose)  #delete runs in specified dir after n days
+    deleteOldRuns('/n/seqcfs/sequencing/analysis_in_progress', 120, copyInSEQCFS = True, verbose=args.verbose) 
+
+
+if __name__ == "__main__":
+    main(sys.argv[1:])

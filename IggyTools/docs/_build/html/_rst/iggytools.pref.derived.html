@@ -1,0 +1,203 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>iggytools.pref.derived package &mdash; iggytools 0.1 documentation</title>
+    
+    <link rel="stylesheet" href="../_static/sphinxdoc.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../',
+        VERSION:     '0.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <link rel="top" title="iggytools 0.1 documentation" href="../index.html" /> 
+  </head>
+  <body role="document">
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../index.html">iggytools 0.1 documentation</a> &raquo;</li> 
+      </ul>
+    </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="../index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">iggytools.pref.derived package</a><ul>
+<li><a class="reference internal" href="#submodules">Submodules</a></li>
+<li><a class="reference internal" href="#module-iggytools.pref.derived.bowtie2_fileClass">iggytools.pref.derived.bowtie2_fileClass module</a></li>
+<li><a class="reference internal" href="#module-iggytools.pref.derived.fastqc_fileClass">iggytools.pref.derived.fastqc_fileClass module</a></li>
+<li><a class="reference internal" href="#module-iggytools.pref.derived.iggypipe_fileClass">iggytools.pref.derived.iggypipe_fileClass module</a></li>
+<li><a class="reference internal" href="#module-iggytools.pref.derived.iggypipe_prefClass">iggytools.pref.derived.iggypipe_prefClass module</a></li>
+<li><a class="reference internal" href="#module-iggytools.pref.derived.iggyref_fileClass">iggytools.pref.derived.iggyref_fileClass module</a></li>
+<li><a class="reference internal" href="#module-iggytools.pref.derived.iggyseq_fileClass">iggytools.pref.derived.iggyseq_fileClass module</a></li>
+<li><a class="reference internal" href="#module-iggytools.pref.derived.trimmomatic_fileClass">iggytools.pref.derived.trimmomatic_fileClass module</a></li>
+<li><a class="reference internal" href="#module-iggytools.pref.derived">Module contents</a></li>
+</ul>
+</li>
+</ul>
+
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="../_sources/_rst/iggytools.pref.derived.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="iggytools-pref-derived-package">
+<h1>iggytools.pref.derived package<a class="headerlink" href="#iggytools-pref-derived-package" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="submodules">
+<h2>Submodules<a class="headerlink" href="#submodules" title="Permalink to this headline">¶</a></h2>
+</div>
+<div class="section" id="module-iggytools.pref.derived.bowtie2_fileClass">
+<span id="iggytools-pref-derived-bowtie2-fileclass-module"></span><h2>iggytools.pref.derived.bowtie2_fileClass module<a class="headerlink" href="#module-iggytools.pref.derived.bowtie2_fileClass" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="iggytools.pref.derived.bowtie2_fileClass.Bowtie2_PrefFile">
+<em class="property">class </em><code class="descclassname">iggytools.pref.derived.bowtie2_fileClass.</code><code class="descname">Bowtie2_PrefFile</code><span class="sig-paren">(</span><em>prefDir</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/iggytools/pref/derived/bowtie2_fileClass.html#Bowtie2_PrefFile"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#iggytools.pref.derived.bowtie2_fileClass.Bowtie2_PrefFile" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="iggytools.pref.html#iggytools.pref.fileClass.BasePrefFile" title="iggytools.pref.fileClass.BasePrefFile"><code class="xref py py-class docutils literal"><span class="pre">iggytools.pref.fileClass.BasePrefFile</span></code></a></p>
+</dd></dl>
+
+</div>
+<div class="section" id="module-iggytools.pref.derived.fastqc_fileClass">
+<span id="iggytools-pref-derived-fastqc-fileclass-module"></span><h2>iggytools.pref.derived.fastqc_fileClass module<a class="headerlink" href="#module-iggytools.pref.derived.fastqc_fileClass" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="iggytools.pref.derived.fastqc_fileClass.Fastqc_PrefFile">
+<em class="property">class </em><code class="descclassname">iggytools.pref.derived.fastqc_fileClass.</code><code class="descname">Fastqc_PrefFile</code><span class="sig-paren">(</span><em>prefDir</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/iggytools/pref/derived/fastqc_fileClass.html#Fastqc_PrefFile"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#iggytools.pref.derived.fastqc_fileClass.Fastqc_PrefFile" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="iggytools.pref.html#iggytools.pref.fileClass.BasePrefFile" title="iggytools.pref.fileClass.BasePrefFile"><code class="xref py py-class docutils literal"><span class="pre">iggytools.pref.fileClass.BasePrefFile</span></code></a></p>
+</dd></dl>
+
+</div>
+<div class="section" id="module-iggytools.pref.derived.iggypipe_fileClass">
+<span id="iggytools-pref-derived-iggypipe-fileclass-module"></span><h2>iggytools.pref.derived.iggypipe_fileClass module<a class="headerlink" href="#module-iggytools.pref.derived.iggypipe_fileClass" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="iggytools.pref.derived.iggypipe_fileClass.Iggypipe_PrefFile">
+<em class="property">class </em><code class="descclassname">iggytools.pref.derived.iggypipe_fileClass.</code><code class="descname">Iggypipe_PrefFile</code><span class="sig-paren">(</span><em>prefDir</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/iggytools/pref/derived/iggypipe_fileClass.html#Iggypipe_PrefFile"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#iggytools.pref.derived.iggypipe_fileClass.Iggypipe_PrefFile" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="iggytools.pref.html#iggytools.pref.fileClass.BasePrefFile" title="iggytools.pref.fileClass.BasePrefFile"><code class="xref py py-class docutils literal"><span class="pre">iggytools.pref.fileClass.BasePrefFile</span></code></a></p>
+<dl class="method">
+<dt id="iggytools.pref.derived.iggypipe_fileClass.Iggypipe_PrefFile.load">
+<code class="descname">load</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/iggytools/pref/derived/iggypipe_fileClass.html#Iggypipe_PrefFile.load"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#iggytools.pref.derived.iggypipe_fileClass.Iggypipe_PrefFile.load" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-iggytools.pref.derived.iggypipe_prefClass">
+<span id="iggytools-pref-derived-iggypipe-prefclass-module"></span><h2>iggytools.pref.derived.iggypipe_prefClass module<a class="headerlink" href="#module-iggytools.pref.derived.iggypipe_prefClass" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="iggytools.pref.derived.iggypipe_prefClass.Iggypipe_Preferences">
+<em class="property">class </em><code class="descclassname">iggytools.pref.derived.iggypipe_prefClass.</code><code class="descname">Iggypipe_Preferences</code><span class="sig-paren">(</span><em>iggytools_prefDir</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/iggytools/pref/derived/iggypipe_prefClass.html#Iggypipe_Preferences"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#iggytools.pref.derived.iggypipe_prefClass.Iggypipe_Preferences" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="iggytools.pref.html#iggytools.pref.toolClass.BaseToolPref" title="iggytools.pref.toolClass.BaseToolPref"><code class="xref py py-class docutils literal"><span class="pre">iggytools.pref.toolClass.BaseToolPref</span></code></a></p>
+<dl class="method">
+<dt id="iggytools.pref.derived.iggypipe_prefClass.Iggypipe_Preferences.getPreferences">
+<code class="descname">getPreferences</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/iggytools/pref/derived/iggypipe_prefClass.html#Iggypipe_Preferences.getPreferences"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#iggytools.pref.derived.iggypipe_prefClass.Iggypipe_Preferences.getPreferences" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-iggytools.pref.derived.iggyref_fileClass">
+<span id="iggytools-pref-derived-iggyref-fileclass-module"></span><h2>iggytools.pref.derived.iggyref_fileClass module<a class="headerlink" href="#module-iggytools.pref.derived.iggyref_fileClass" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="iggytools.pref.derived.iggyref_fileClass.Iggyref_PrefFile">
+<em class="property">class </em><code class="descclassname">iggytools.pref.derived.iggyref_fileClass.</code><code class="descname">Iggyref_PrefFile</code><span class="sig-paren">(</span><em>prefDir</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/iggytools/pref/derived/iggyref_fileClass.html#Iggyref_PrefFile"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#iggytools.pref.derived.iggyref_fileClass.Iggyref_PrefFile" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="iggytools.pref.html#iggytools.pref.fileClass.BasePrefFile" title="iggytools.pref.fileClass.BasePrefFile"><code class="xref py py-class docutils literal"><span class="pre">iggytools.pref.fileClass.BasePrefFile</span></code></a></p>
+<dl class="method">
+<dt id="iggytools.pref.derived.iggyref_fileClass.Iggyref_PrefFile.getVars">
+<code class="descname">getVars</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/iggytools/pref/derived/iggyref_fileClass.html#Iggyref_PrefFile.getVars"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#iggytools.pref.derived.iggyref_fileClass.Iggyref_PrefFile.getVars" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-iggytools.pref.derived.iggyseq_fileClass">
+<span id="iggytools-pref-derived-iggyseq-fileclass-module"></span><h2>iggytools.pref.derived.iggyseq_fileClass module<a class="headerlink" href="#module-iggytools.pref.derived.iggyseq_fileClass" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="iggytools.pref.derived.iggyseq_fileClass.Iggyseq_PrefFile">
+<em class="property">class </em><code class="descclassname">iggytools.pref.derived.iggyseq_fileClass.</code><code class="descname">Iggyseq_PrefFile</code><span class="sig-paren">(</span><em>prefDir</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/iggytools/pref/derived/iggyseq_fileClass.html#Iggyseq_PrefFile"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#iggytools.pref.derived.iggyseq_fileClass.Iggyseq_PrefFile" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="iggytools.pref.html#iggytools.pref.fileClass.BasePrefFile" title="iggytools.pref.fileClass.BasePrefFile"><code class="xref py py-class docutils literal"><span class="pre">iggytools.pref.fileClass.BasePrefFile</span></code></a></p>
+<dl class="method">
+<dt id="iggytools.pref.derived.iggyseq_fileClass.Iggyseq_PrefFile.getVars">
+<code class="descname">getVars</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/iggytools/pref/derived/iggyseq_fileClass.html#Iggyseq_PrefFile.getVars"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#iggytools.pref.derived.iggyseq_fileClass.Iggyseq_PrefFile.getVars" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-iggytools.pref.derived.trimmomatic_fileClass">
+<span id="iggytools-pref-derived-trimmomatic-fileclass-module"></span><h2>iggytools.pref.derived.trimmomatic_fileClass module<a class="headerlink" href="#module-iggytools.pref.derived.trimmomatic_fileClass" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="iggytools.pref.derived.trimmomatic_fileClass.Trimmomatic_PrefFile">
+<em class="property">class </em><code class="descclassname">iggytools.pref.derived.trimmomatic_fileClass.</code><code class="descname">Trimmomatic_PrefFile</code><span class="sig-paren">(</span><em>prefDir</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/iggytools/pref/derived/trimmomatic_fileClass.html#Trimmomatic_PrefFile"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#iggytools.pref.derived.trimmomatic_fileClass.Trimmomatic_PrefFile" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="iggytools.pref.html#iggytools.pref.fileClass.BasePrefFile" title="iggytools.pref.fileClass.BasePrefFile"><code class="xref py py-class docutils literal"><span class="pre">iggytools.pref.fileClass.BasePrefFile</span></code></a></p>
+</dd></dl>
+
+</div>
+<div class="section" id="module-iggytools.pref.derived">
+<span id="module-contents"></span><h2>Module contents<a class="headerlink" href="#module-iggytools.pref.derived" title="Permalink to this headline">¶</a></h2>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../index.html">iggytools 0.1 documentation</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &copy; Copyright 2015, Chris Williams.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.3.1.
+    </div>
+  </body>
+</html>

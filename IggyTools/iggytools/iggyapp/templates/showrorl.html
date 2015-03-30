@@ -1,0 +1,13 @@
+{% extends "base.html" %}
+
+{% block body %}
+
+<p><b>{{rorl.run_name}}</b></p>
+
+{% for field,value in rorl.items %}
+  {% if field != "id" and field != "run_name" and field != "specs" %}
+    <li><b>{{ field|capfirst }}</b>: {{ value }}</li>
+  {% endif %}
+{% endfor %}
+
+{% endblock %}  

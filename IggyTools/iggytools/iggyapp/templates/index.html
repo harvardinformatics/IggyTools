@@ -1,0 +1,127 @@
+{% extends "base.html" %}
+{% load staticfiles %}
+{% block head %}
+{% endblock %}  
+
+{% block body %}
+
+<style>
+  .bpadded {
+     margin-bottom: 15px;
+  }
+</style>
+
+<p>View metrics by lane or by run?</p>
+<div id="select_run_or_lane" class="bpadded"></div>
+
+<p>View runs/lanes from one machine or all machines?</p>
+<div id="select_machine" class="bpadded"></div>
+
+<p>Select date range:</p>
+<div id="select_date_range" class="bpadded"></div>
+
+<p>Select a metric to view in a time-series plot and histogram:</p>
+<div id="barplot_select_data_type" class="bpadded"></div>
+
+<button id="makeBarBtn">Show Bar Plots</button> 
+
+<p>Select two metrics to view in a scatter plot:</p>
+<div id="scatterplot_select_data_typeX" class="bpadded"></div>
+<div id="scatterplot_select_data_typeY" class="bpadded"></div>
+
+<button id="makeScatterBtn">Show Scatter Plot</button> 
+
+<div id="mychart"></div>
+
+<script>
+$(function(){
+
+  var quark = new quarkLib();
+  console.log("quark: " + typeof(quark));
+
+  //load menus
+  $("#select_run_or_lane").load("{% static 'seqstats/html/select_run_or_lane.html' %}", function() {
+    $("#select_run_or_lane").find(".select_run_or_lane").attr("id", "rorl_menu");
+  });
+  $("#select_machine").load("{% static 'seqstats/html/select_machine.html' %}", function() {
+    $("#select_machine").find(".select_machine").attr("id", "machine_menu");
+  });
+  $("#select_date_range").load("{% static 'seqstats/html/select_date_range.html' %}", function() {
+    $("#select_date_range").find(".select_date_range").attr("id", "date_menu");
+  });
+  $("#barplot_select_data_type").load("{% static 'seqstats/html/select_data_type.html' %}", function() {
+    $("#barplot_select_data_type").find(".select_data_type").attr("id", "barplot_menu");
+  });
+
+  $("#scatterplot_select_data_typeX").load("{% static 'seqstats/html/select_data_type.html' %}", function() {
+    $("#scatterplot_select_data_typeX").find(".select_data_type").attr("id", "scatterplot_menuX");
+  });
+  $("#scatterplot_select_data_typeY").load("{% static 'seqstats/html/select_data_type.html' %}", function() {
+    $("#scatterplot_select_data_typeY").find(".select_data_type").attr("id", "scatterplot_menuY");
+  });
+
+  function addParams(myUrl) {
+    if ($("#date_menu").val() != "") {
+      myUrl = myUrl + "&date_range=" + $("#date_menu").val()
+    }
+    if ($("#machine_menu").val() != "") {
+      myUrl = myUrl + "&machine_name=" + $("#machine_menu").val()
+    }
+    if ($("#rorl_menu").val() != "") {
+      myUrl = myUrl + "&rorl=" + $("#rorl_menu").val()
+    }
+    return myUrl;
+  }
+
+  function makeBar(){
+    var dataSelection = $("#barplot_menu").val();
+    var dataUrl = "/seqstats/getldata?data_type=" + dataSelection;
+    dataUrl = addParams(dataUrl);
+    console.log("dataUrl: " + dataUrl);
+    $.getJSON( dataUrl,function( plotObj ) {
+      //make time-series bar plot
+      plotObj["plot_title"]="Time Series of " + $("#barplot_menu option:selected").text();
+      quark.seqBarPlot("#mychart",plotObj)
+
+      console.log("plotObj:");
+      console.log(plotObj);
+
+      //make histogram
+      var dataType = "";  //dataType tells the histogram function how to scale the x axis
+      if (dataSelection == "perc_q_ge_30" || dataSelection == "percent_pf_clusters") {
+         dataType = "Percent";
+      } else if (dataSelection == "cluster_density" || dataSelection == "cluster_density") {
+         dataType = "Cluster Density";
+      }
+      plotObj["plot_title"]="Histogram of " + $("#barplot_menu option:selected").text();
+      quark.seqHistogram("#mychart",plotObj,dataType)
+    });
+  }
+
+  function makeScatter(){
+    var plotData = {};
+    //Nest getJSON calls so they're both sure to have completed before scatterplot function is called:
+    var xUrl =  "/seqstats/getldata?data_type=" + $("#scatterplot_menuX").val()
+    xUrl = addParams(xUrl);
+    console.log("xUrl: " + xUrl);
+    $.getJSON( xUrl, function( xObj ) {
+      plotData.x = xObj
+      var yUrl =  "/seqstats/getldata?data_type=" + $("#scatterplot_menuY").val()
+      yUrl = addParams(yUrl);
+      console.log("yUrl: " + yUrl);
+      $.getJSON(  yUrl ,function( yObj ) {
+        plotData.y = yObj
+        plotData["plot_title"]=$("#scatterplot_menuY option:selected").text() + " vs. " + $("#scatterplot_menuX option:selected").text();
+        quark.seqScatterPlot("#mychart",plotData)
+      });
+    });
+  }
+
+
+  document.getElementById("makeBarBtn").addEventListener("click", makeBar, false)
+  document.getElementById("makeScatterBtn").addEventListener("click", makeScatter, false)
+
+});
+</script>
+
+{% endblock %}  

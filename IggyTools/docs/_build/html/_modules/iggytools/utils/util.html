@@ -1,0 +1,563 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>iggytools.utils.util &mdash; iggytools 0.1 documentation</title>
+    
+    <link rel="stylesheet" href="../../../_static/sphinxdoc.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../',
+        VERSION:     '0.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../_static/doctools.js"></script>
+    <link rel="top" title="iggytools 0.1 documentation" href="../../../index.html" />
+    <link rel="up" title="Module code" href="../../index.html" /> 
+  </head>
+  <body role="document">
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../../index.html">iggytools 0.1 documentation</a> &raquo;</li>
+          <li class="nav-item nav-item-1"><a href="../../index.html" accesskey="U">Module code</a> &raquo;</li> 
+      </ul>
+    </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for iggytools.utils.util</h1><div class="highlight"><pre>
+<span class="kn">import</span> <span class="nn">subprocess</span><span class="o">,</span> <span class="nn">sys</span><span class="o">,</span> <span class="nn">os</span><span class="o">,</span> <span class="nn">select</span><span class="o">,</span> <span class="nn">filecmp</span><span class="o">,</span> <span class="nn">traceback</span>
+<span class="kn">import</span> <span class="nn">os.path</span> <span class="kn">as</span> <span class="nn">path</span>
+<span class="kn">import</span> <span class="nn">shutil</span><span class="o">,</span> <span class="nn">errno</span><span class="o">,</span> <span class="nn">re</span><span class="o">,</span> <span class="nn">stat</span><span class="o">,</span> <span class="nn">platform</span>
+<span class="kn">import</span> <span class="nn">hashlib</span><span class="o">,</span> <span class="nn">gzip</span><span class="o">,</span> <span class="nn">tarfile</span><span class="o">,</span> <span class="nn">glob</span>
+<span class="kn">import</span> <span class="nn">distutils.dir_util</span>
+<span class="kn">from</span> <span class="nn">collections</span> <span class="kn">import</span> <span class="n">namedtuple</span>
+<span class="kn">from</span> <span class="nn">contextlib</span> <span class="kn">import</span> <span class="n">contextmanager</span>
+
+
+<div class="viewcode-block" id="Command"><a class="viewcode-back" href="../../../_rst/iggytools.utils.html#iggytools.utils.util.Command">[docs]</a><span class="k">class</span> <span class="nc">Command</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>  <span class="c"># Run command and yield stdout lines.</span>
+
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">cmd</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">p</span> <span class="o">=</span> <span class="n">subprocess</span><span class="o">.</span><span class="n">Popen</span><span class="p">(</span> <span class="p">[</span><span class="s">&#39;/bin/bash&#39;</span><span class="p">,</span> <span class="s">&#39;-c&#39;</span><span class="p">,</span> <span class="n">cmd</span><span class="p">],</span>
+                                   <span class="n">shell</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span>
+                                   <span class="n">stdin</span><span class="o">=</span><span class="nb">open</span><span class="p">(</span><span class="s">&#39;/dev/null&#39;</span><span class="p">,</span> <span class="s">&#39;r&#39;</span><span class="p">),</span>
+                                   <span class="n">stdout</span><span class="o">=</span><span class="n">subprocess</span><span class="o">.</span><span class="n">PIPE</span><span class="p">,</span>
+                                   <span class="n">stderr</span><span class="o">=</span><span class="n">subprocess</span><span class="o">.</span><span class="n">PIPE</span> <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">command</span> <span class="o">=</span> <span class="n">cmd</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">pid</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">p</span><span class="o">.</span><span class="n">pid</span>
+
+
+<div class="viewcode-block" id="Command.run"><a class="viewcode-back" href="../../../_rst/iggytools.utils.html#iggytools.utils.util.Command.run">[docs]</a>    <span class="k">def</span> <span class="nf">run</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+
+        <span class="n">p</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">p</span>
+
+        <span class="n">BLOCK_SIZE</span> <span class="o">=</span> <span class="mi">4096</span>
+
+        <span class="n">stdoutDone</span><span class="p">,</span> <span class="n">stderrDone</span> <span class="o">=</span> <span class="bp">False</span><span class="p">,</span> <span class="bp">False</span>
+        <span class="n">out</span> <span class="o">=</span> <span class="s">&#39;&#39;</span>
+        <span class="k">while</span> <span class="ow">not</span> <span class="p">(</span><span class="n">stdoutDone</span> <span class="ow">and</span> <span class="n">stderrDone</span><span class="p">):</span>  <span class="c"># Be sure to fully iterate this or you will probably leave orphans.</span>
+            <span class="n">rfds</span><span class="p">,</span> <span class="n">ignored</span><span class="p">,</span> <span class="n">ignored2</span> <span class="o">=</span> <span class="n">select</span><span class="o">.</span><span class="n">select</span><span class="p">([</span><span class="n">p</span><span class="o">.</span><span class="n">stdout</span><span class="o">.</span><span class="n">fileno</span><span class="p">(),</span> <span class="n">p</span><span class="o">.</span><span class="n">stderr</span><span class="o">.</span><span class="n">fileno</span><span class="p">()],</span> <span class="p">[],</span> <span class="p">[])</span>
+            <span class="k">if</span> <span class="n">p</span><span class="o">.</span><span class="n">stdout</span><span class="o">.</span><span class="n">fileno</span><span class="p">()</span> <span class="ow">in</span> <span class="n">rfds</span><span class="p">:</span>
+                <span class="n">s</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="n">p</span><span class="o">.</span><span class="n">stdout</span><span class="o">.</span><span class="n">fileno</span><span class="p">(),</span> <span class="n">BLOCK_SIZE</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">s</span><span class="o">==</span><span class="s">&#39;&#39;</span><span class="p">:</span> <span class="n">stdoutDone</span> <span class="o">=</span> <span class="bp">True</span>
+                <span class="k">if</span> <span class="n">s</span><span class="p">:</span>
+                    <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span>
+                    <span class="n">j</span> <span class="o">=</span> <span class="n">s</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="s">&#39;</span><span class="se">\n</span><span class="s">&#39;</span><span class="p">)</span>
+                    <span class="k">while</span> <span class="n">j</span><span class="o">!=-</span><span class="mi">1</span><span class="p">:</span>
+                        <span class="k">yield</span> <span class="n">out</span> <span class="o">+</span> <span class="n">s</span><span class="p">[</span><span class="n">i</span><span class="p">:</span><span class="n">j</span><span class="o">+</span><span class="mi">1</span><span class="p">]</span>
+                        <span class="n">out</span> <span class="o">=</span> <span class="s">&#39;&#39;</span>
+                        <span class="n">i</span> <span class="o">=</span> <span class="n">j</span><span class="o">+</span><span class="mi">1</span>
+                        <span class="n">j</span> <span class="o">=</span> <span class="n">s</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="s">&#39;</span><span class="se">\n</span><span class="s">&#39;</span><span class="p">,</span><span class="n">i</span><span class="p">)</span>
+                    <span class="n">out</span> <span class="o">+=</span> <span class="n">s</span><span class="p">[</span><span class="n">i</span><span class="p">:]</span>
+            <span class="k">if</span> <span class="n">p</span><span class="o">.</span><span class="n">stderr</span><span class="o">.</span><span class="n">fileno</span><span class="p">()</span> <span class="ow">in</span> <span class="n">rfds</span><span class="p">:</span>
+                <span class="n">s</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="n">p</span><span class="o">.</span><span class="n">stderr</span><span class="o">.</span><span class="n">fileno</span><span class="p">(),</span> <span class="n">BLOCK_SIZE</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">s</span><span class="o">==</span><span class="s">&#39;&#39;</span><span class="p">:</span> <span class="n">stderrDone</span> <span class="o">=</span> <span class="bp">True</span>
+                <span class="k">if</span> <span class="n">s</span><span class="p">:</span>
+                    <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span>
+                    <span class="n">j</span> <span class="o">=</span> <span class="n">s</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="s">&#39;</span><span class="se">\n</span><span class="s">&#39;</span><span class="p">)</span>
+                    <span class="k">while</span> <span class="n">j</span><span class="o">!=-</span><span class="mi">1</span><span class="p">:</span>
+                        <span class="k">yield</span> <span class="n">out</span> <span class="o">+</span> <span class="n">s</span><span class="p">[</span><span class="n">i</span><span class="p">:</span><span class="n">j</span><span class="o">+</span><span class="mi">1</span><span class="p">]</span>
+                        <span class="n">out</span> <span class="o">=</span> <span class="s">&#39;&#39;</span>
+                        <span class="n">i</span> <span class="o">=</span> <span class="n">j</span><span class="o">+</span><span class="mi">1</span>
+                        <span class="n">j</span> <span class="o">=</span> <span class="n">s</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="s">&#39;</span><span class="se">\n</span><span class="s">&#39;</span><span class="p">,</span><span class="n">i</span><span class="p">)</span>
+                    <span class="n">out</span> <span class="o">+=</span> <span class="n">s</span><span class="p">[</span><span class="n">i</span><span class="p">:]</span>
+        <span class="k">if</span> <span class="n">out</span><span class="o">!=</span><span class="s">&#39;&#39;</span><span class="p">:</span>
+            <span class="k">yield</span> <span class="n">out</span> 
+        <span class="n">p</span><span class="o">.</span><span class="n">wait</span><span class="p">()</span>
+
+</div></div>
+<div class="viewcode-block" id="Command_toFile"><a class="viewcode-back" href="../../../_rst/iggytools.utils.html#iggytools.utils.util.Command_toFile">[docs]</a><span class="k">class</span> <span class="nc">Command_toFile</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>  <span class="c">#run command obj, exposing pid and logging both command and output to file</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">command</span><span class="p">,</span> <span class="n">outputFile</span><span class="p">,</span> <span class="n">append</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">echo</span><span class="o">=</span><span class="bp">True</span><span class="p">):</span>
+
+        <span class="k">if</span> <span class="n">append</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">mode</span> <span class="o">=</span> <span class="s">&#39;a&#39;</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">mode</span> <span class="o">=</span> <span class="s">&#39;w&#39;</span>
+
+        <span class="n">parentDir</span> <span class="o">=</span> <span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="n">outputFile</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">path</span><span class="o">.</span><span class="n">isdir</span><span class="p">(</span><span class="n">parentDir</span><span class="p">):</span>
+            <span class="n">mkdir_p</span><span class="p">(</span><span class="n">parentDir</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">outputFile</span> <span class="o">=</span> <span class="n">outputFile</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">echo</span> <span class="o">=</span> <span class="n">echo</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">cmd</span> <span class="o">=</span> <span class="n">Command</span><span class="p">(</span><span class="n">command</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">pid</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">cmd</span><span class="o">.</span><span class="n">pid</span>
+
+
+<div class="viewcode-block" id="Command_toFile.run"><a class="viewcode-back" href="../../../_rst/iggytools.utils.html#iggytools.utils.util.Command_toFile.run">[docs]</a>    <span class="k">def</span> <span class="nf">run</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">fh</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">outputFile</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">mode</span><span class="p">)</span>
+        <span class="n">fh</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s">&#39;</span><span class="se">\n\n</span><span class="s">&#39;</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">cmd</span><span class="o">.</span><span class="n">command</span> <span class="o">+</span> <span class="s">&#39;</span><span class="se">\n\n</span><span class="s">&#39;</span><span class="p">)</span> <span class="c">#write command to file</span>
+
+        <span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">cmd</span><span class="o">.</span><span class="n">run</span><span class="p">():</span>
+            <span class="n">line</span> <span class="o">=</span> <span class="n">line</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+            <span class="k">if</span> <span class="n">line</span> <span class="o">!=</span> <span class="s">&#39;&#39;</span><span class="p">:</span>
+                <span class="n">fh</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">line</span> <span class="o">+</span> <span class="s">&#39;</span><span class="se">\n</span><span class="s">&#39;</span><span class="p">)</span> <span class="c">#write command output to file</span>
+                <span class="n">fh</span><span class="o">.</span><span class="n">flush</span><span class="p">()</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">echo</span><span class="p">:</span> <span class="k">print</span> <span class="n">line</span>
+
+        <span class="n">fh</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+
+</div></div>
+<div class="viewcode-block" id="Command_toStdout"><a class="viewcode-back" href="../../../_rst/iggytools.utils.html#iggytools.utils.util.Command_toStdout">[docs]</a><span class="k">class</span> <span class="nc">Command_toStdout</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>  <span class="c">#run command obj, exposing pid and printing output</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">command</span><span class="p">):</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">cmd</span> <span class="o">=</span> <span class="n">Command</span><span class="p">(</span><span class="n">command</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">pid</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">cmd</span><span class="o">.</span><span class="n">pid</span>
+
+<div class="viewcode-block" id="Command_toStdout.run"><a class="viewcode-back" href="../../../_rst/iggytools.utils.html#iggytools.utils.util.Command_toStdout.run">[docs]</a>    <span class="k">def</span> <span class="nf">run</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">cmd</span><span class="o">.</span><span class="n">run</span><span class="p">():</span>
+            <span class="k">print</span> <span class="n">line</span>
+
+</div></div>
+<div class="viewcode-block" id="shquote"><a class="viewcode-back" href="../../../_rst/iggytools.utils.html#iggytools.utils.util.shquote">[docs]</a><span class="k">def</span> <span class="nf">shquote</span><span class="p">(</span><span class="n">text</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Return the given text as a single, safe string in sh code.</span>
+
+<span class="sd">    Note that this leaves literal newlines alone; sh and bash are fine with </span>
+<span class="sd">    that, but other tools may require special handling.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="s">&quot;&#39;</span><span class="si">%s</span><span class="s">&#39;&quot;</span> <span class="o">%</span> <span class="n">text</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s">&quot;&#39;&quot;</span><span class="p">,</span> <span class="s">r&quot;&#39;\&#39;&#39;&quot;</span><span class="p">)</span>
+
+</div>
+<div class="viewcode-block" id="sbatch"><a class="viewcode-back" href="../../../_rst/iggytools.utils.html#iggytools.utils.util.sbatch">[docs]</a><span class="k">def</span> <span class="nf">sbatch</span><span class="p">(</span><span class="n">scriptFile</span><span class="p">):</span>  <span class="c">#submit a job to slurm</span>
+
+    <span class="n">p</span> <span class="o">=</span> <span class="n">subprocess</span><span class="o">.</span><span class="n">Popen</span><span class="p">(</span>
+        <span class="p">[</span><span class="s">&#39;/bin/bash&#39;</span><span class="p">,</span> <span class="s">&#39;-c&#39;</span><span class="p">,</span> <span class="s">&#39;sbatch </span><span class="si">%s</span><span class="s">&#39;</span> <span class="o">%</span> <span class="n">scriptFile</span><span class="p">],</span>
+        <span class="n">shell</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span>
+        <span class="n">stdin</span><span class="o">=</span><span class="nb">open</span><span class="p">(</span><span class="s">&#39;/dev/null&#39;</span><span class="p">,</span> <span class="s">&#39;r&#39;</span><span class="p">),</span>
+        <span class="n">stdout</span><span class="o">=</span><span class="n">subprocess</span><span class="o">.</span><span class="n">PIPE</span><span class="p">,</span>
+        <span class="n">stderr</span><span class="o">=</span><span class="n">subprocess</span><span class="o">.</span><span class="n">PIPE</span>
+    <span class="p">)</span>
+    <span class="n">out</span> <span class="o">=</span> <span class="s">&#39;</span><span class="se">\n</span><span class="s">&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">p</span><span class="o">.</span><span class="n">communicate</span><span class="p">())</span>  <span class="c">#concat stdout, stderr</span>
+
+    <span class="n">match</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">match</span><span class="p">(</span><span class="s">&#39;Submitted batch job ([0-9]+)\s*$&#39;</span><span class="p">,</span> <span class="n">out</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">match</span><span class="p">:</span>
+        <span class="k">return</span> <span class="nb">int</span><span class="p">(</span><span class="n">match</span><span class="o">.</span><span class="n">group</span><span class="p">(</span><span class="mi">1</span><span class="p">))</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s">&#39;Unable to submit slurm script </span><span class="si">%s</span><span class="s">:</span><span class="se">\n</span><span class="s">  </span><span class="si">%s</span><span class="s">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">scriptFile</span><span class="p">,</span> <span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">()))</span>
+
+</div>
+<div class="viewcode-block" id="printJobStatus"><a class="viewcode-back" href="../../../_rst/iggytools.utils.html#iggytools.utils.util.printJobStatus">[docs]</a><span class="k">def</span> <span class="nf">printJobStatus</span><span class="p">(</span><span class="n">jobID</span><span class="p">):</span>  
+
+    <span class="n">p</span> <span class="o">=</span> <span class="n">subprocess</span><span class="o">.</span><span class="n">Popen</span><span class="p">(</span>
+        <span class="p">[</span><span class="s">&#39;/bin/bash&#39;</span><span class="p">,</span> <span class="s">&#39;-c&#39;</span><span class="p">,</span> <span class="s">&#39;squeue -j </span><span class="si">%s</span><span class="s">&#39;</span> <span class="o">%</span> <span class="n">jobID</span><span class="p">],</span>
+        <span class="n">shell</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span>
+        <span class="n">stdin</span><span class="o">=</span><span class="nb">open</span><span class="p">(</span><span class="s">&#39;/dev/null&#39;</span><span class="p">,</span> <span class="s">&#39;r&#39;</span><span class="p">),</span>
+        <span class="n">stdout</span><span class="o">=</span><span class="n">subprocess</span><span class="o">.</span><span class="n">PIPE</span><span class="p">,</span>
+        <span class="n">stderr</span><span class="o">=</span><span class="n">subprocess</span><span class="o">.</span><span class="n">PIPE</span>
+    <span class="p">)</span>
+    <span class="n">output</span><span class="p">,</span> <span class="n">errors</span> <span class="o">=</span> <span class="n">p</span><span class="o">.</span><span class="n">communicate</span><span class="p">()</span> 
+
+    <span class="k">if</span> <span class="n">errors</span> <span class="ow">and</span> <span class="n">output</span><span class="p">:</span>
+        <span class="k">print</span> <span class="n">output</span>
+        <span class="k">return</span>
+
+    <span class="n">p</span> <span class="o">=</span> <span class="n">subprocess</span><span class="o">.</span><span class="n">Popen</span><span class="p">(</span>
+        <span class="p">[</span><span class="s">&#39;/bin/bash&#39;</span><span class="p">,</span> <span class="s">&#39;-c&#39;</span><span class="p">,</span> <span class="s">&#39;sacct -j </span><span class="si">%s</span><span class="s">&#39;</span> <span class="o">%</span> <span class="n">jobID</span><span class="p">],</span>
+        <span class="n">shell</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span>
+        <span class="n">stdin</span><span class="o">=</span><span class="nb">open</span><span class="p">(</span><span class="s">&#39;/dev/null&#39;</span><span class="p">,</span> <span class="s">&#39;r&#39;</span><span class="p">),</span>
+        <span class="n">stdout</span><span class="o">=</span><span class="n">subprocess</span><span class="o">.</span><span class="n">PIPE</span><span class="p">,</span>
+        <span class="n">stderr</span><span class="o">=</span><span class="n">subprocess</span><span class="o">.</span><span class="n">PIPE</span>
+        <span class="p">)</span>
+    <span class="n">output</span><span class="p">,</span> <span class="n">errors</span> <span class="o">=</span> <span class="n">p</span><span class="o">.</span><span class="n">communicate</span><span class="p">()</span>  
+
+    <span class="k">if</span> <span class="n">errors</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s">&#39;Unable to get job status for </span><span class="si">%s</span><span class="s">:</span><span class="se">\n</span><span class="si">%s</span><span class="s">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">jobID</span><span class="p">,</span> <span class="n">errors</span><span class="p">))</span>
+
+    <span class="k">print</span> <span class="n">output</span>
+
+</div>
+<div class="viewcode-block" id="errScan"><a class="viewcode-back" href="../../../_rst/iggytools.utils.html#iggytools.utils.util.errScan">[docs]</a><span class="k">def</span> <span class="nf">errScan</span><span class="p">(</span><span class="n">logFile</span><span class="p">):</span>  <span class="c">#scan a log file for error messages</span>
+    <span class="n">errs</span> <span class="o">=</span> <span class="s">&#39;&#39;</span>
+
+    <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">logFile</span><span class="p">,</span> <span class="s">&#39;r&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">fh</span><span class="p">:</span>
+        <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">line</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">fh</span><span class="p">):</span>
+            <span class="k">if</span> <span class="n">re</span><span class="o">.</span><span class="n">search</span><span class="p">(</span><span class="s">&#39;error|exception|fail&#39;</span><span class="p">,</span> <span class="n">line</span><span class="p">,</span> <span class="n">re</span><span class="o">.</span><span class="n">IGNORECASE</span><span class="p">):</span>
+                <span class="n">errs</span> <span class="o">+=</span> <span class="s">&#39;Error on Line </span><span class="si">%s</span><span class="s">: </span><span class="si">%s</span><span class="se">\n</span><span class="s">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="n">line</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">errs</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s">&#39;Error(s) found in file </span><span class="si">%s</span><span class="s">: </span><span class="si">%s</span><span class="s">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">logFile</span><span class="p">,</span> <span class="n">errs</span><span class="p">))</span>
+
+</div>
+<div class="viewcode-block" id="rsync"><a class="viewcode-back" href="../../../_rst/iggytools.utils.html#iggytools.utils.util.rsync">[docs]</a><span class="k">def</span> <span class="nf">rsync</span><span class="p">(</span><span class="n">srcDir</span><span class="p">,</span> <span class="n">targetDir</span><span class="p">,</span> <span class="n">logFile</span><span class="p">):</span>
+    <span class="n">mkdir_p</span><span class="p">(</span><span class="n">targetDir</span><span class="p">)</span>
+    <span class="n">command</span> <span class="o">=</span> <span class="s">&quot;rsync -av --exclude &#39;*.gz&#39; </span><span class="si">%s</span><span class="s">/ </span><span class="si">%s</span><span class="s">/&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">srcDir</span><span class="p">,</span> <span class="n">targetDir</span><span class="p">)</span>
+
+    <span class="n">s</span> <span class="o">=</span> <span class="n">Shell</span><span class="p">(</span><span class="n">command</span><span class="p">,</span> <span class="n">logFile</span><span class="p">,</span> <span class="n">append</span><span class="o">=</span><span class="bp">False</span><span class="p">)</span>
+    <span class="n">s</span><span class="o">.</span><span class="n">run</span><span class="p">()</span>
+
+    <span class="n">errScan</span><span class="p">(</span><span class="n">logFile</span><span class="p">)</span>
+
+</div>
+<div class="viewcode-block" id="recursiveChmod"><a class="viewcode-back" href="../../../_rst/iggytools.utils.html#iggytools.utils.util.recursiveChmod">[docs]</a><span class="k">def</span> <span class="nf">recursiveChmod</span><span class="p">(</span><span class="n">item</span><span class="p">,</span> <span class="n">filePermissions</span><span class="p">,</span> <span class="n">dirPermissions</span><span class="p">):</span>
+    <span class="k">for</span> <span class="n">root</span><span class="p">,</span><span class="n">dirs</span><span class="p">,</span><span class="n">files</span> <span class="ow">in</span> <span class="n">os</span><span class="o">.</span><span class="n">walk</span><span class="p">(</span><span class="n">item</span><span class="p">):</span>
+
+        <span class="k">for</span> <span class="n">d</span> <span class="ow">in</span> <span class="n">dirs</span><span class="p">:</span>
+            <span class="n">os</span><span class="o">.</span><span class="n">chmod</span><span class="p">(</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">root</span><span class="p">,</span><span class="n">d</span><span class="p">),</span> <span class="n">dirPermissions</span><span class="p">)</span>
+
+        <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">files</span><span class="p">:</span>
+            <span class="n">os</span><span class="o">.</span><span class="n">chmod</span><span class="p">(</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">root</span><span class="p">,</span><span class="n">f</span><span class="p">),</span> <span class="n">filePermissions</span><span class="p">)</span>
+
+</div>
+<div class="viewcode-block" id="mkdir_p"><a class="viewcode-back" href="../../../_rst/iggytools.utils.html#iggytools.utils.util.mkdir_p">[docs]</a><span class="k">def</span> <span class="nf">mkdir_p</span><span class="p">(</span><span class="n">myDir</span><span class="p">):</span>  <span class="c">#implements bash&#39;s mkdir -p</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">path</span><span class="o">.</span><span class="n">isdir</span><span class="p">(</span><span class="n">myDir</span><span class="p">):</span>
+        <span class="n">os</span><span class="o">.</span><span class="n">makedirs</span><span class="p">(</span><span class="n">myDir</span><span class="p">)</span>
+
+</div>
+<div class="viewcode-block" id="email"><a class="viewcode-back" href="../../../_rst/iggytools.utils.html#iggytools.utils.util.email">[docs]</a><span class="k">def</span> <span class="nf">email</span><span class="p">(</span><span class="n">users</span><span class="p">,</span> <span class="n">subject</span><span class="p">,</span> <span class="n">message</span><span class="p">):</span>  <span class="c">#users can be mix of email addresses and local usernames, in a list or comma-separated str</span>
+
+    <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="n">users</span><span class="p">)</span> <span class="o">==</span> <span class="nb">str</span><span class="p">:</span>
+        <span class="n">users</span> <span class="o">=</span> <span class="n">users</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s">&#39;,&#39;</span><span class="p">)</span>
+
+    <span class="k">for</span> <span class="n">user</span> <span class="ow">in</span> <span class="n">users</span><span class="p">:</span>
+        <span class="n">cmd</span> <span class="o">=</span> <span class="n">Command</span><span class="p">(</span><span class="s">&quot;echo </span><span class="se">\&quot;</span><span class="s">&quot;</span> <span class="o">+</span> <span class="n">message</span> <span class="o">+</span> <span class="s">&quot;</span><span class="se">\&quot;</span><span class="s">|  mail -s </span><span class="se">\&quot;</span><span class="s">&quot;</span> <span class="o">+</span> <span class="n">subject</span> <span class="o">+</span> <span class="s">&quot;</span><span class="se">\&quot;</span><span class="s"> &quot;</span> <span class="o">+</span> <span class="n">user</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">error</span> <span class="ow">in</span> <span class="n">cmd</span><span class="o">.</span><span class="n">run</span><span class="p">():</span>
+            <span class="k">raise</span><span class="p">(</span><span class="n">error</span><span class="p">)</span>  <span class="c">#if anything is written to stdout/stderr from this cmd, it is an error</span>
+
+</div>
+<div class="viewcode-block" id="append"><a class="viewcode-back" href="../../../_rst/iggytools.utils.html#iggytools.utils.util.append">[docs]</a><span class="k">def</span> <span class="nf">append</span><span class="p">(</span><span class="n">text</span><span class="p">,</span> <span class="n">filename</span><span class="p">,</span> <span class="n">echo</span> <span class="o">=</span> <span class="bp">False</span><span class="p">):</span>
+    <span class="k">if</span> <span class="n">echo</span><span class="p">:</span> 
+        <span class="k">print</span> <span class="n">text</span>
+
+    <span class="n">fh</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="s">&#39;a&#39;</span><span class="p">)</span>
+    <span class="n">fh</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">text</span> <span class="o">+</span> <span class="s">&quot;</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">)</span> <span class="c">#append text to file                                                                                                              </span>
+
+    <span class="n">fh</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+
+</div>
+<div class="viewcode-block" id="copy"><a class="viewcode-back" href="../../../_rst/iggytools.utils.html#iggytools.utils.util.copy">[docs]</a><span class="k">def</span> <span class="nf">copy</span><span class="p">(</span><span class="n">src</span><span class="p">,</span> <span class="n">dst</span><span class="p">):</span>  <span class="c">#copy a file or directory. Note that dst is the target itself, not the parent directory </span>
+    <span class="n">mkdir_p</span><span class="p">(</span> <span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="n">dst</span><span class="p">)</span> <span class="p">)</span>
+
+    <span class="k">try</span><span class="p">:</span>
+        <span class="c">#copy a directory</span>
+        <span class="n">shutil</span><span class="o">.</span><span class="n">copytree</span><span class="p">(</span><span class="n">src</span><span class="p">,</span> <span class="n">dst</span><span class="p">)</span>  <span class="c">#note: dst must not exist</span>
+
+    <span class="k">except</span> <span class="ne">OSError</span> <span class="k">as</span> <span class="n">exc</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">exc</span><span class="o">.</span><span class="n">errno</span> <span class="o">==</span> <span class="n">errno</span><span class="o">.</span><span class="n">ENOTDIR</span><span class="p">:</span>
+            <span class="c">#copy a file</span>
+            <span class="n">shutil</span><span class="o">.</span><span class="n">copy2</span><span class="p">(</span><span class="n">src</span><span class="p">,</span> <span class="n">dst</span><span class="p">)</span>  <span class="c">#dst can be a file or directory </span>
+        <span class="k">else</span><span class="p">:</span> <span class="k">raise</span>
+
+</div>
+<div class="viewcode-block" id="pysync"><a class="viewcode-back" href="../../../_rst/iggytools.utils.html#iggytools.utils.util.pysync">[docs]</a><span class="k">def</span> <span class="nf">pysync</span><span class="p">(</span><span class="n">src</span><span class="p">,</span> <span class="n">dest</span><span class="p">):</span>  <span class="c">#update dest with contents of src</span>
+    <span class="n">mkdir_p</span><span class="p">(</span><span class="n">dest</span><span class="p">)</span>
+    <span class="n">dcmp</span> <span class="o">=</span> <span class="n">filecmp</span><span class="o">.</span><span class="n">dircmp</span><span class="p">(</span><span class="n">src</span><span class="p">,</span> <span class="n">dest</span><span class="p">)</span>
+
+    <span class="n">toCopy</span> <span class="o">=</span> <span class="n">find_missingAndDiffFiles</span><span class="p">(</span><span class="n">dcmp</span><span class="p">)</span>
+
+    <span class="k">for</span> <span class="n">s</span><span class="p">,</span> <span class="n">d</span> <span class="ow">in</span> <span class="n">toCopy</span><span class="p">:</span>
+        <span class="n">copy</span><span class="p">(</span><span class="n">s</span><span class="p">,</span><span class="n">d</span><span class="p">)</span>
+
+</div>
+<div class="viewcode-block" id="find_missingAndDiffFiles"><a class="viewcode-back" href="../../../_rst/iggytools.utils.html#iggytools.utils.util.find_missingAndDiffFiles">[docs]</a><span class="k">def</span> <span class="nf">find_missingAndDiffFiles</span><span class="p">(</span><span class="n">dcmp</span><span class="p">,</span> <span class="n">toCopy</span> <span class="o">=</span> <span class="bp">None</span><span class="p">):</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">toCopy</span><span class="p">:</span>
+        <span class="n">toCopy</span> <span class="o">=</span> <span class="nb">list</span><span class="p">()</span>
+
+    <span class="k">print</span> <span class="s">&#39;Examining left and right dirs: </span><span class="si">%s</span><span class="s">, </span><span class="si">%s</span><span class="s">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">dcmp</span><span class="o">.</span><span class="n">left</span><span class="p">,</span> <span class="n">dcmp</span><span class="o">.</span><span class="n">right</span><span class="p">)</span>
+
+    <span class="k">for</span> <span class="n">src_itemName</span> <span class="ow">in</span> <span class="n">dcmp</span><span class="o">.</span><span class="n">left_only</span><span class="p">:</span>  <span class="c">#files and dirs that exist only in left</span>
+        <span class="n">srcItem_absPath</span> <span class="o">=</span> <span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">dcmp</span><span class="o">.</span><span class="n">left</span><span class="p">,</span> <span class="n">src_itemName</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="p">(</span> <span class="ow">not</span> <span class="n">re</span><span class="o">.</span><span class="n">match</span><span class="p">(</span><span class="s">&#39;^\.|.*~|.*\.gz&#39;</span><span class="p">,</span> <span class="n">src_itemName</span><span class="p">)</span> <span class="c">#skip dot files, emacs backup files, zip files</span>
+             <span class="ow">and</span> <span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span> <span class="n">srcItem_absPath</span> <span class="p">)</span> <span class="p">):</span> <span class="c">#item is a file, not a directory</span>
+            <span class="n">destItem_absPath</span> <span class="o">=</span> <span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">dcmp</span><span class="o">.</span><span class="n">right</span><span class="p">,</span> <span class="n">src_itemName</span><span class="p">)</span>
+            <span class="n">toCopy</span><span class="o">.</span><span class="n">append</span><span class="p">(</span> <span class="p">(</span><span class="n">srcItem_absPath</span><span class="p">,</span> <span class="n">destItem_absPath</span><span class="p">)</span> <span class="p">)</span> <span class="c">#append non-ignored files that exist only in left</span>
+
+    <span class="k">for</span> <span class="n">src_itemName</span> <span class="ow">in</span> <span class="n">dcmp</span><span class="o">.</span><span class="n">diff_files</span><span class="p">:</span>  <span class="c">#files that differ in left and right</span>
+        <span class="n">srcItem_absPath</span> <span class="o">=</span> <span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">dcmp</span><span class="o">.</span><span class="n">left</span><span class="p">,</span> <span class="n">src_itemName</span><span class="p">)</span>
+        <span class="n">destItem_absPath</span> <span class="o">=</span> <span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">dcmp</span><span class="o">.</span><span class="n">right</span><span class="p">,</span> <span class="n">src_itemName</span><span class="p">)</span>
+        <span class="n">toCopy</span><span class="o">.</span><span class="n">append</span><span class="p">(</span> <span class="p">(</span><span class="n">srcItem_absPath</span><span class="p">,</span> <span class="n">destItem_absPath</span><span class="p">)</span> <span class="p">)</span> <span class="c">#append files that differ</span>
+
+    <span class="k">for</span> <span class="n">sub_dcmp</span> <span class="ow">in</span> <span class="n">dcmp</span><span class="o">.</span><span class="n">subdirs</span><span class="o">.</span><span class="n">values</span><span class="p">():</span>
+        <span class="n">find_missingAndDiffFiles</span><span class="p">(</span><span class="n">sub_dcmp</span><span class="p">,</span> <span class="n">toCopy</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">toCopy</span>
+
+</div>
+<div class="viewcode-block" id="copy_preserve_nonoverlapping"><a class="viewcode-back" href="../../../_rst/iggytools.utils.html#iggytools.utils.util.copy_preserve_nonoverlapping">[docs]</a><span class="k">def</span> <span class="nf">copy_preserve_nonoverlapping</span><span class="p">(</span><span class="n">src</span><span class="p">,</span> <span class="n">dst</span><span class="p">):</span>  <span class="c">#Recursively copy contents of src into dst, while preserving existing dst-only files.</span>
+    <span class="n">distutils</span><span class="o">.</span><span class="n">dir_util</span><span class="o">.</span><span class="n">copy_tree</span><span class="p">(</span><span class="n">src</span><span class="p">,</span> <span class="n">dst</span><span class="p">)</span>
+
+</div>
+<div class="viewcode-block" id="insert"><a class="viewcode-back" href="../../../_rst/iggytools.utils.html#iggytools.utils.util.insert">[docs]</a><span class="k">def</span> <span class="nf">insert</span><span class="p">(</span><span class="n">src</span><span class="p">,</span> <span class="n">dst</span><span class="p">,</span> <span class="n">action</span> <span class="o">=</span> <span class="s">&#39;copy&#39;</span><span class="p">,</span> <span class="n">symlinks</span> <span class="o">=</span> <span class="bp">False</span><span class="p">,</span> <span class="n">ignore</span> <span class="o">=</span> <span class="bp">None</span><span class="p">):</span>    <span class="c"># Recursively move or copy files to destination, while preserving existing dst-only files.</span>
+    <span class="k">if</span> <span class="n">action</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">[</span><span class="s">&#39;copy&#39;</span><span class="p">,</span> <span class="s">&#39;move&#39;</span><span class="p">]:</span>                                     <span class="c"># See shutil.copytree doc for info on ignore parameter</span>
+        <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s">&#39;Unrecognized action </span><span class="si">%s</span><span class="s">&#39;</span> <span class="o">%</span> <span class="n">action</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">dst</span><span class="p">):</span>
+        <span class="n">os</span><span class="o">.</span><span class="n">makedirs</span><span class="p">(</span><span class="n">dst</span><span class="p">)</span>
+        <span class="c">#shutil.copystat(src, dst)</span>
+
+    <span class="n">dirContents</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">listdir</span><span class="p">(</span><span class="n">src</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">ignore</span><span class="p">:</span>
+        <span class="n">excluded</span> <span class="o">=</span> <span class="n">ignore</span><span class="p">(</span><span class="n">src</span><span class="p">,</span> <span class="n">dirContents</span><span class="p">)</span>
+        <span class="n">dirContents</span> <span class="o">=</span> <span class="p">[</span><span class="n">x</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">dirContents</span> <span class="k">if</span> <span class="n">x</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">excluded</span><span class="p">]</span>
+
+    <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">dirContents</span><span class="p">:</span>
+        <span class="n">s</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">src</span><span class="p">,</span> <span class="n">item</span><span class="p">)</span>
+        <span class="n">d</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">dst</span><span class="p">,</span> <span class="n">item</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">symlinks</span> <span class="ow">and</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">islink</span><span class="p">(</span><span class="n">s</span><span class="p">):</span>
+            <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">lexists</span><span class="p">(</span><span class="n">d</span><span class="p">):</span>
+                <span class="n">os</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">d</span><span class="p">)</span>
+            <span class="n">os</span><span class="o">.</span><span class="n">symlink</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">readlink</span><span class="p">(</span><span class="n">s</span><span class="p">),</span> <span class="n">d</span><span class="p">)</span>
+
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">st</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">lstat</span><span class="p">(</span><span class="n">s</span><span class="p">)</span>
+                <span class="n">mode</span> <span class="o">=</span> <span class="n">stat</span><span class="o">.</span><span class="n">S_IMODE</span><span class="p">(</span><span class="n">st</span><span class="o">.</span><span class="n">st_mode</span><span class="p">)</span>
+                <span class="n">os</span><span class="o">.</span><span class="n">lchmod</span><span class="p">(</span><span class="n">d</span><span class="p">,</span> <span class="n">mode</span><span class="p">)</span>
+
+            <span class="k">except</span><span class="p">:</span>
+                <span class="k">pass</span> <span class="c"># lchmod not available</span>
+
+        <span class="k">elif</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isdir</span><span class="p">(</span><span class="n">s</span><span class="p">):</span>
+            <span class="n">insert</span><span class="p">(</span><span class="n">s</span><span class="p">,</span> <span class="n">d</span><span class="p">,</span> <span class="n">action</span><span class="p">,</span> <span class="n">symlinks</span><span class="p">,</span> <span class="n">ignore</span><span class="p">)</span>
+
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">action</span> <span class="o">==</span> <span class="s">&#39;copy&#39;</span><span class="p">:</span>
+                <span class="n">shutil</span><span class="o">.</span><span class="n">copy2</span><span class="p">(</span><span class="n">s</span><span class="p">,</span> <span class="n">d</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">os</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">d</span><span class="p">)</span>
+                <span class="n">shutil</span><span class="o">.</span><span class="n">move</span><span class="p">(</span><span class="n">s</span><span class="p">,</span> <span class="n">d</span><span class="p">)</span>
+
+</div>
+<div class="viewcode-block" id="intersect"><a class="viewcode-back" href="../../../_rst/iggytools.utils.html#iggytools.utils.util.intersect">[docs]</a><span class="k">def</span> <span class="nf">intersect</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">):</span>
+     <span class="k">return</span> <span class="nb">list</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">a</span><span class="p">)</span> <span class="o">&amp;</span> <span class="nb">set</span><span class="p">(</span><span class="n">b</span><span class="p">))</span>
+
+</div>
+<div class="viewcode-block" id="unique"><a class="viewcode-back" href="../../../_rst/iggytools.utils.html#iggytools.utils.util.unique">[docs]</a><span class="k">def</span> <span class="nf">unique</span><span class="p">(</span><span class="n">a</span><span class="p">):</span>
+     <span class="k">return</span> <span class="nb">list</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">a</span><span class="p">))</span>
+
+</div>
+<div class="viewcode-block" id="touch"><a class="viewcode-back" href="../../../_rst/iggytools.utils.html#iggytools.utils.util.touch">[docs]</a><span class="k">def</span> <span class="nf">touch</span><span class="p">(</span><span class="n">fname</span><span class="p">):</span>
+    <span class="nb">open</span><span class="p">(</span><span class="n">fname</span><span class="p">,</span> <span class="s">&#39;a&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+
+</div>
+<div class="viewcode-block" id="filestem"><a class="viewcode-back" href="../../../_rst/iggytools.utils.html#iggytools.utils.util.filestem">[docs]</a><span class="k">def</span> <span class="nf">filestem</span><span class="p">(</span><span class="n">fname</span><span class="p">):</span>
+    <span class="k">return</span> <span class="n">path</span><span class="o">.</span><span class="n">basename</span><span class="p">(</span><span class="n">path</span><span class="o">.</span><span class="n">splitext</span><span class="p">(</span><span class="n">fname</span><span class="p">)[</span><span class="mi">0</span><span class="p">])</span>
+
+</div>
+<div class="viewcode-block" id="md5Checksum"><a class="viewcode-back" href="../../../_rst/iggytools.utils.html#iggytools.utils.util.md5Checksum">[docs]</a><span class="k">def</span> <span class="nf">md5Checksum</span><span class="p">(</span><span class="n">afile</span><span class="p">,</span> <span class="n">blocksize</span><span class="o">=</span><span class="mi">65536</span><span class="p">):</span>
+    <span class="n">hasher</span> <span class="o">=</span> <span class="n">hashlib</span><span class="o">.</span><span class="n">md5</span><span class="p">()</span>
+
+    <span class="n">fh</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="n">afile</span><span class="p">,</span> <span class="s">&#39;rb&#39;</span><span class="p">)</span>
+    <span class="n">buf</span> <span class="o">=</span> <span class="n">fh</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="n">blocksize</span><span class="p">)</span>
+
+    <span class="k">while</span> <span class="nb">len</span><span class="p">(</span><span class="n">buf</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="n">hasher</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">buf</span><span class="p">)</span>
+        <span class="n">buf</span> <span class="o">=</span> <span class="n">fh</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="n">blocksize</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">hasher</span><span class="o">.</span><span class="n">hexdigest</span><span class="p">()</span>
+
+</div>
+<div class="viewcode-block" id="sumChecksum"><a class="viewcode-back" href="../../../_rst/iggytools.utils.html#iggytools.utils.util.sumChecksum">[docs]</a><span class="k">def</span> <span class="nf">sumChecksum</span><span class="p">(</span><span class="n">afile</span><span class="p">):</span>
+    <span class="n">cmdObj</span> <span class="o">=</span> <span class="n">Command</span><span class="p">(</span><span class="s">&#39;sum &#39;</span> <span class="o">+</span> <span class="n">afile</span><span class="p">)</span>
+    <span class="n">cmd</span> <span class="o">=</span> <span class="n">cmdObj</span><span class="o">.</span><span class="n">run</span><span class="p">()</span>
+    <span class="n">out</span> <span class="o">=</span> <span class="n">cmd</span><span class="o">.</span><span class="n">next</span><span class="p">()</span><span class="o">.</span><span class="n">rstrip</span><span class="p">()</span>
+    <span class="k">if</span> <span class="n">re</span><span class="o">.</span><span class="n">search</span><span class="p">(</span><span class="s">&#39;error|exception|fail&#39;</span><span class="p">,</span> <span class="n">out</span><span class="p">,</span> <span class="n">re</span><span class="o">.</span><span class="n">IGNORECASE</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s">&#39;Error occurred while runnig sum on </span><span class="si">%s</span><span class="s">: </span><span class="si">%s</span><span class="s">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">afile</span><span class="p">,</span> <span class="n">out</span><span class="p">))</span>
+    <span class="k">return</span> <span class="s">&#39;_&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">out</span><span class="o">.</span><span class="n">split</span><span class="p">())</span>
+
+</div>
+<div class="viewcode-block" id="reverseComp"><a class="viewcode-back" href="../../../_rst/iggytools.utils.html#iggytools.utils.util.reverseComp">[docs]</a><span class="k">def</span> <span class="nf">reverseComp</span><span class="p">(</span><span class="n">seq</span><span class="p">):</span>
+    <span class="n">baseChars</span> <span class="o">=</span> <span class="s">&#39;ATCGNTAGCNatcgntagcn&#39;</span>
+    <span class="n">seqDict</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
+
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">5</span><span class="p">)</span> <span class="o">+</span> <span class="nb">range</span><span class="p">(</span><span class="mi">10</span><span class="p">,</span><span class="mi">15</span><span class="p">):</span>
+        <span class="n">seqDict</span><span class="p">[</span><span class="n">baseChars</span><span class="p">[</span><span class="n">i</span><span class="p">]]</span>  <span class="o">=</span> <span class="n">baseChars</span><span class="p">[</span><span class="n">i</span><span class="o">+</span><span class="mi">5</span><span class="p">]</span>
+
+    <span class="n">seqDict</span><span class="p">[</span><span class="s">&#39;-&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s">&#39;-&#39;</span>
+
+    <span class="k">return</span> <span class="s">&quot;&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="n">seqDict</span><span class="p">[</span><span class="n">base</span><span class="p">]</span> <span class="k">for</span> <span class="n">base</span> <span class="ow">in</span> <span class="nb">reversed</span><span class="p">(</span><span class="n">seq</span><span class="p">)])</span>
+
+</div>
+<div class="viewcode-block" id="deleteItem"><a class="viewcode-back" href="../../../_rst/iggytools.utils.html#iggytools.utils.util.deleteItem">[docs]</a><span class="k">def</span> <span class="nf">deleteItem</span><span class="p">(</span><span class="n">item</span><span class="p">):</span>
+    <span class="k">if</span> <span class="n">path</span><span class="o">.</span><span class="n">isdir</span><span class="p">(</span><span class="n">item</span><span class="p">):</span>
+        <span class="n">shutil</span><span class="o">.</span><span class="n">rmtree</span><span class="p">(</span><span class="n">item</span><span class="p">,</span> <span class="n">ignore_errors</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+
+    <span class="k">elif</span> <span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="n">item</span><span class="p">):</span>
+        <span class="n">os</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">item</span><span class="p">)</span>
+
+</div>
+<div class="viewcode-block" id="flatten"><a class="viewcode-back" href="../../../_rst/iggytools.utils.html#iggytools.utils.util.flatten">[docs]</a><span class="k">def</span> <span class="nf">flatten</span><span class="p">(</span><span class="n">x</span><span class="p">):</span>
+    <span class="n">result</span> <span class="o">=</span> <span class="p">[]</span>
+
+    <span class="k">for</span> <span class="n">elem</span> <span class="ow">in</span> <span class="n">x</span><span class="p">:</span>
+
+        <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">elem</span><span class="p">,</span> <span class="s">&quot;__iter__&quot;</span><span class="p">)</span> <span class="ow">and</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">elem</span><span class="p">,</span> <span class="nb">basestring</span><span class="p">):</span>
+            <span class="n">result</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">flatten</span><span class="p">(</span><span class="n">elem</span><span class="p">))</span>
+
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">result</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">elem</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">result</span>
+
+</div>
+<div class="viewcode-block" id="flatlist"><a class="viewcode-back" href="../../../_rst/iggytools.utils.html#iggytools.utils.util.flatlist">[docs]</a><span class="k">def</span> <span class="nf">flatlist</span><span class="p">(</span><span class="n">x</span><span class="p">):</span> <span class="c">#ensure a list is passed to flatten()</span>
+    <span class="k">return</span> <span class="n">flatten</span><span class="p">([</span><span class="n">x</span><span class="p">])</span>
+
+</div>
+<div class="viewcode-block" id="dict2namedtuple"><a class="viewcode-back" href="../../../_rst/iggytools.utils.html#iggytools.utils.util.dict2namedtuple">[docs]</a><span class="k">def</span> <span class="nf">dict2namedtuple</span><span class="p">(</span><span class="n">dictionary</span><span class="p">):</span>
+    <span class="k">return</span> <span class="n">namedtuple</span><span class="p">(</span><span class="s">&#39;NamedTuple&#39;</span><span class="p">,</span> <span class="n">dictionary</span><span class="o">.</span><span class="n">keys</span><span class="p">())(</span><span class="o">**</span><span class="n">dictionary</span><span class="p">)</span>
+
+</div>
+<div class="viewcode-block" id="gzNotEmpty"><a class="viewcode-back" href="../../../_rst/iggytools.utils.html#iggytools.utils.util.gzNotEmpty">[docs]</a><span class="k">def</span> <span class="nf">gzNotEmpty</span><span class="p">(</span><span class="n">f</span><span class="p">):</span>
+
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="n">f</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s">&#39;File </span><span class="si">%s</span><span class="s"> not found.&#39;</span> <span class="o">%</span> <span class="n">f</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">re</span><span class="o">.</span><span class="n">search</span><span class="p">(</span><span class="s">&#39;.gz$&#39;</span><span class="p">,</span> <span class="n">f</span><span class="p">,</span> <span class="n">flags</span><span class="o">=</span><span class="n">re</span><span class="o">.</span><span class="n">IGNORECASE</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s">&#39;Attempt to decompress file not ending in .gz: </span><span class="si">%s</span><span class="s">&#39;</span> <span class="o">%</span> <span class="n">f</span><span class="p">)</span>
+
+    <span class="n">fh</span> <span class="o">=</span> <span class="n">gzip</span><span class="o">.</span><span class="n">open</span><span class="p">(</span><span class="n">f</span><span class="p">,</span> <span class="s">&#39;rb&#39;</span><span class="p">)</span>
+    <span class="n">data</span> <span class="o">=</span> <span class="n">fh</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="mi">100</span><span class="p">)</span>
+    <span class="n">fh</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+
+    <span class="k">if</span> <span class="n">data</span><span class="p">:</span>
+        <span class="k">return</span> <span class="bp">True</span> <span class="c">#gz file contains data</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">return</span> <span class="bp">False</span>
+
+</div>
+<div class="viewcode-block" id="isGZippedFile"><a class="viewcode-back" href="../../../_rst/iggytools.utils.html#iggytools.utils.util.isGZippedFile">[docs]</a><span class="k">def</span> <span class="nf">isGZippedFile</span><span class="p">(</span><span class="n">filename</span><span class="p">):</span>
+    <span class="k">if</span> <span class="n">re</span><span class="o">.</span><span class="n">search</span><span class="p">(</span><span class="s">r&#39;(?&lt;!\.tar)\.gz$&#39;</span><span class="p">,</span> <span class="n">filename</span><span class="p">,</span> <span class="n">re</span><span class="o">.</span><span class="n">IGNORECASE</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">True</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">return</span> <span class="bp">False</span>
+
+</div>
+<div class="viewcode-block" id="getUserHome"><a class="viewcode-back" href="../../../_rst/iggytools.utils.html#iggytools.utils.util.getUserHome">[docs]</a><span class="k">def</span> <span class="nf">getUserHome</span><span class="p">():</span>
+    <span class="k">if</span> <span class="s">&#39;HOME&#39;</span> <span class="ow">in</span> <span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="o">.</span><span class="n">keys</span><span class="p">()</span> <span class="ow">and</span> <span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="p">[</span><span class="s">&#39;HOME&#39;</span><span class="p">]:</span> <span class="c">#determine user&#39;s home directory</span>
+        <span class="k">return</span> <span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="p">[</span><span class="s">&#39;HOME&#39;</span><span class="p">]</span>
+
+    <span class="k">elif</span> <span class="s">&#39;USERPROFILE&#39;</span> <span class="ow">in</span> <span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="o">.</span><span class="n">keys</span><span class="p">()</span> <span class="ow">and</span> <span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="p">[</span><span class="s">&#39;USERPROFILE&#39;</span><span class="p">]:</span>
+        <span class="k">return</span> <span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="p">[</span><span class="s">&#39;USERPROFILE&#39;</span><span class="p">]</span>
+
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s">&#39;Unable to determine user home directory&#39;</span><span class="p">)</span>
+
+</div>
+<div class="viewcode-block" id="get_3p_dirname"><a class="viewcode-back" href="../../../_rst/iggytools.utils.html#iggytools.utils.util.get_3p_dirname">[docs]</a><span class="k">def</span> <span class="nf">get_3p_dirname</span><span class="p">():</span>
+    <span class="n">system</span> <span class="o">=</span> <span class="n">platform</span><span class="o">.</span><span class="n">system</span><span class="p">()</span>
+
+    <span class="k">if</span> <span class="n">re</span><span class="o">.</span><span class="n">match</span><span class="p">(</span><span class="s">&#39;linux&#39;</span><span class="p">,</span> <span class="n">system</span><span class="p">,</span> <span class="n">re</span><span class="o">.</span><span class="n">IGNORECASE</span><span class="p">):</span> <span class="c">#matches from beg. </span>
+        <span class="k">return</span> <span class="s">&#39;linux-x86_64&#39;</span>
+
+    <span class="k">elif</span> <span class="n">re</span><span class="o">.</span><span class="n">match</span><span class="p">(</span><span class="s">&#39;windows|cygwin&#39;</span><span class="p">,</span> <span class="n">system</span><span class="p">,</span> <span class="n">re</span><span class="o">.</span><span class="n">IGNORECASE</span><span class="p">):</span>
+        <span class="k">return</span> <span class="s">&#39;win64&#39;</span>
+
+    <span class="k">elif</span> <span class="n">re</span><span class="o">.</span><span class="n">match</span><span class="p">(</span><span class="s">&#39;darwin&#39;</span><span class="p">,</span> <span class="n">system</span><span class="p">,</span> <span class="n">re</span><span class="o">.</span><span class="n">IGNORECASE</span><span class="p">):</span>
+        <span class="k">return</span> <span class="s">&#39;macos-x86_64&#39;</span>
+
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s">&#39;Unrecognized system: </span><span class="si">%s</span><span class="s">&#39;</span> <span class="o">%</span> <span class="n">system</span><span class="p">)</span>
+    
+</div>
+<div class="viewcode-block" id="upperFirst"><a class="viewcode-back" href="../../../_rst/iggytools.utils.html#iggytools.utils.util.upperFirst">[docs]</a><span class="k">def</span> <span class="nf">upperFirst</span><span class="p">(</span><span class="n">a</span><span class="p">):</span>  <span class="c">#capitalize first letter of string</span>
+    <span class="k">return</span> <span class="n">a</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span> <span class="o">+</span> <span class="n">a</span><span class="p">[</span><span class="mi">1</span><span class="p">:]</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span>
+
+</div>
+<div class="viewcode-block" id="str2list_byComma"><a class="viewcode-back" href="../../../_rst/iggytools.utils.html#iggytools.utils.util.str2list_byComma">[docs]</a><span class="k">def</span> <span class="nf">str2list_byComma</span><span class="p">(</span><span class="n">a</span><span class="p">):</span>
+    <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="n">a</span><span class="p">)</span> <span class="o">==</span> <span class="nb">list</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">a</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">a</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s">&#39;,&#39;</span><span class="p">)</span>
+</div>
+<span class="nd">@contextmanager</span>
+<div class="viewcode-block" id="suppress_stdout"><a class="viewcode-back" href="../../../_rst/iggytools.utils.html#iggytools.utils.util.suppress_stdout">[docs]</a><span class="k">def</span> <span class="nf">suppress_stdout</span><span class="p">():</span>
+
+    <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">devnull</span><span class="p">,</span> <span class="s">&quot;w&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">devnull</span><span class="p">:</span>
+        <span class="n">old_stdout</span> <span class="o">=</span> <span class="n">sys</span><span class="o">.</span><span class="n">stdout</span>
+        <span class="n">sys</span><span class="o">.</span><span class="n">stdout</span> <span class="o">=</span> <span class="n">devnull</span>
+
+        <span class="k">try</span><span class="p">:</span>  
+            <span class="k">yield</span>
+
+        <span class="k">finally</span><span class="p">:</span>
+            <span class="n">sys</span><span class="o">.</span><span class="n">stdout</span> <span class="o">=</span> <span class="n">old_stdout</span></div>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../../index.html">iggytools 0.1 documentation</a> &raquo;</li>
+          <li class="nav-item nav-item-1"><a href="../../index.html" >Module code</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &copy; Copyright 2015, Chris Williams.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.3.1.
+    </div>
+  </body>
+</html>

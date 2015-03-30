@@ -1,0 +1,220 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>iggytools.iggyref.sources.ensembl.ensemblCollectionClass &mdash; iggytools 0.1 documentation</title>
+    
+    <link rel="stylesheet" href="../../../../../_static/sphinxdoc.css" type="text/css" />
+    <link rel="stylesheet" href="../../../../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../../../',
+        VERSION:     '0.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../../../_static/doctools.js"></script>
+    <link rel="top" title="iggytools 0.1 documentation" href="../../../../../index.html" />
+    <link rel="up" title="Module code" href="../../../../index.html" /> 
+  </head>
+  <body role="document">
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../../../../index.html">iggytools 0.1 documentation</a> &raquo;</li>
+          <li class="nav-item nav-item-1"><a href="../../../../index.html" accesskey="U">Module code</a> &raquo;</li> 
+      </ul>
+    </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../../../../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for iggytools.iggyref.sources.ensembl.ensemblCollectionClass</h1><div class="highlight"><pre>
+<span class="kn">import</span> <span class="nn">os.path</span> <span class="kn">as</span> <span class="nn">path</span>
+<span class="kn">import</span> <span class="nn">os</span><span class="o">,</span> <span class="nn">types</span><span class="o">,</span> <span class="nn">re</span><span class="o">,</span> <span class="nn">glob</span><span class="o">,</span> <span class="nn">ftplib</span><span class="o">,</span> <span class="nn">posixpath</span>
+<span class="kn">from</span> <span class="nn">iggytools.iggyref.baseCollectionClass</span> <span class="kn">import</span> <span class="n">baseCollection</span>
+<span class="kn">from</span> <span class="nn">iggytools.utils.util</span> <span class="kn">import</span> <span class="n">flatlist</span>
+
+<span class="c"># ensembl Collection class</span>
+
+<div class="viewcode-block" id="releaseMatch"><a class="viewcode-back" href="../../../../../_rst/iggytools.iggyref.sources.ensembl.html#iggytools.iggyref.sources.ensembl.ensemblCollectionClass.releaseMatch">[docs]</a><span class="k">def</span> <span class="nf">releaseMatch</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">minVersion</span> <span class="o">=</span> <span class="bp">None</span><span class="p">):</span>
+    <span class="n">match</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">match</span><span class="p">(</span><span class="s">r&#39;release-([0-9]+)$&#39;</span><span class="p">,</span> <span class="n">name</span><span class="p">)</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">match</span><span class="p">:</span>
+        <span class="k">return</span> <span class="o">-</span><span class="mi">1</span>
+
+    <span class="n">version</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">match</span><span class="o">.</span><span class="n">group</span><span class="p">(</span><span class="mi">1</span><span class="p">))</span>
+
+    <span class="k">if</span> <span class="n">minVersion</span> <span class="ow">and</span> <span class="n">version</span> <span class="o">&lt;</span> <span class="n">minVersion</span><span class="p">:</span>
+        <span class="k">return</span> <span class="o">-</span><span class="mi">1</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">version</span>
+
+</div>
+<div class="viewcode-block" id="getPrimaryID"><a class="viewcode-back" href="../../../../../_rst/iggytools.iggyref.sources.ensembl.html#iggytools.iggyref.sources.ensembl.ensemblCollectionClass.getPrimaryID">[docs]</a><span class="k">def</span> <span class="nf">getPrimaryID</span><span class="p">(</span><span class="n">fileList</span><span class="p">,</span> <span class="n">regex</span><span class="p">,</span> <span class="n">searchDir</span><span class="p">):</span> <span class="c">#determine primaryID from filename</span>
+
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">fileList</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s">&#39;Found no file with which to determine primaryID. searchDir: </span><span class="si">%s</span><span class="s">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">searchDir</span><span class="p">))</span>
+
+    <span class="k">return</span> <span class="n">re</span><span class="o">.</span><span class="n">search</span><span class="p">(</span><span class="s">r&#39;\.([^.]+)&#39;</span> <span class="o">+</span> <span class="n">regex</span><span class="p">,</span><span class="n">fileList</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span><span class="o">.</span><span class="n">group</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+
+</div>
+<div class="viewcode-block" id="getSearchPattern"><a class="viewcode-back" href="../../../../../_rst/iggytools.iggyref.sources.ensembl.html#iggytools.iggyref.sources.ensembl.ensemblCollectionClass.getSearchPattern">[docs]</a><span class="k">def</span> <span class="nf">getSearchPattern</span><span class="p">(</span><span class="n">fileList</span><span class="p">):</span>
+
+    <span class="n">pattern</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
+
+    <span class="k">if</span> <span class="nb">sum</span><span class="p">([</span><span class="nb">bool</span><span class="p">(</span><span class="n">re</span><span class="o">.</span><span class="n">match</span><span class="p">(</span><span class="s">r&#39;.+\.dna_sm\.primary_assembly\.fa\.gz&#39;</span><span class="p">,</span> <span class="n">x</span><span class="p">))</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">fileList</span><span class="p">])</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="n">pattern</span><span class="p">[</span><span class="s">&#39;glob&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s">&#39;*.dna_sm.primary_assembly.fa.gz&#39;</span>
+        <span class="n">pattern</span><span class="p">[</span><span class="s">&#39;regex&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s">r&#39;\.dna_sm\.primary_assembly\.fa\.gz&#39;</span>
+
+    <span class="k">elif</span> <span class="nb">sum</span><span class="p">([</span><span class="nb">bool</span><span class="p">(</span><span class="n">re</span><span class="o">.</span><span class="n">match</span><span class="p">(</span><span class="s">r&#39;.+\.dna_sm\.toplevel\.fa\.gz&#39;</span><span class="p">,</span> <span class="n">x</span><span class="p">))</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">fileList</span><span class="p">])</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="n">pattern</span><span class="p">[</span><span class="s">&#39;glob&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s">&#39;*.dna_sm.toplevel.fa.gz&#39;</span>
+        <span class="n">pattern</span><span class="p">[</span><span class="s">&#39;regex&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s">r&#39;\.dna_sm\.toplevel\.fa\.gz&#39;</span>
+
+    <span class="k">else</span><span class="p">:</span> 
+        <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s">&#39;Unable to deteremine search string for file list: </span><span class="si">%s</span><span class="s">&#39;</span> <span class="o">%</span> <span class="s">&#39;, &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">fileList</span><span class="p">))</span>
+
+    <span class="k">return</span> <span class="n">pattern</span>
+
+
+</div>
+<div class="viewcode-block" id="ensemblCollection"><a class="viewcode-back" href="../../../../../_rst/iggytools.iggyref.sources.ensembl.html#iggytools.iggyref.sources.ensembl.ensemblCollectionClass.ensemblCollection">[docs]</a><span class="k">class</span> <span class="nc">ensemblCollection</span><span class="p">(</span><span class="n">baseCollection</span><span class="p">):</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">primaryID</span><span class="p">,</span> <span class="n">repo</span><span class="p">,</span> <span class="n">ftpConn</span> <span class="o">=</span> <span class="bp">None</span><span class="p">):</span>
+        <span class="n">baseCollection</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">primaryID</span><span class="p">,</span> <span class="n">repo</span><span class="p">,</span> <span class="n">ftpConn</span><span class="p">)</span>
+                        
+        <span class="c">#set primaryID and localCollectionDir</span>
+        <span class="n">pattern</span> <span class="o">=</span> <span class="n">getSearchPattern</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">properties</span><span class="p">[</span><span class="s">&#39;fileList&#39;</span><span class="p">])</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">ftpConn</span><span class="p">:</span>  <span class="c">#look in local file system for top-level release dir</span>
+            <span class="n">localSearchDir</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">repo</span><span class="o">.</span><span class="n">downloadDir</span>
+            <span class="n">dirList</span> <span class="o">=</span> <span class="p">[</span><span class="n">x</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">os</span><span class="o">.</span><span class="n">listdir</span><span class="p">(</span><span class="n">localSearchDir</span><span class="p">)</span> <span class="k">if</span> <span class="n">path</span><span class="o">.</span><span class="n">isdir</span><span class="p">(</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">localSearchDir</span><span class="p">,</span><span class="n">x</span><span class="p">))]</span> <span class="c">#***</span>
+            <span class="n">version</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span>
+            <span class="n">releaseDir</span> <span class="o">=</span> <span class="s">&#39;&#39;</span>
+            <span class="k">for</span> <span class="n">mydir</span> <span class="ow">in</span> <span class="n">dirList</span><span class="p">:</span>
+                <span class="n">ver</span> <span class="o">=</span> <span class="n">releaseMatch</span><span class="p">(</span><span class="n">mydir</span><span class="p">,</span> <span class="n">minVersion</span> <span class="o">=</span> <span class="mi">77</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">ver</span> <span class="o">&gt;</span> <span class="n">version</span><span class="p">:</span>
+                    <span class="n">releaseDir</span> <span class="o">=</span> <span class="n">mydir</span>
+                    <span class="n">version</span> <span class="o">=</span> <span class="n">ver</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">releaseDir</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s">&#39;No release dir found in ensembl repository directory </span><span class="si">%s</span><span class="s">&#39;</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">repo</span><span class="o">.</span><span class="n">downloadDir</span><span class="p">)</span>
+
+            <span class="bp">self</span><span class="o">.</span><span class="n">downloadDir</span> <span class="o">=</span> <span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">repo</span><span class="o">.</span><span class="n">downloadDir</span><span class="p">,</span> <span class="n">releaseDir</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">secondaryID</span><span class="p">)</span>
+            <span class="n">files</span> <span class="o">=</span> <span class="n">glob</span><span class="o">.</span><span class="n">glob</span><span class="p">(</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">downloadDir</span><span class="p">,</span> <span class="n">pattern</span><span class="p">[</span><span class="s">&#39;glob&#39;</span><span class="p">]))</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">primaryID</span> <span class="o">=</span> <span class="n">getPrimaryID</span><span class="p">(</span><span class="n">files</span><span class="p">,</span> <span class="n">pattern</span><span class="p">[</span><span class="s">&#39;regex&#39;</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">downloadDir</span><span class="p">)</span>
+
+        <span class="k">else</span><span class="p">:</span>  <span class="c">#look at the collection&#39;s ftp path to determine release dir</span>
+
+            <span class="c">#find latest release directory</span>
+            <span class="n">releaseDir</span> <span class="o">=</span> <span class="s">&#39;&#39;</span>
+            <span class="n">version</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span>
+            <span class="n">ftpSearchDir</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">repo</span><span class="o">.</span><span class="n">properties</span><span class="p">[</span><span class="s">&#39;ftpPath&#39;</span><span class="p">]</span>
+            <span class="n">itemList</span> <span class="o">=</span> <span class="n">ftpConn</span><span class="o">.</span><span class="n">getDirContents</span><span class="p">(</span><span class="n">ftpSearchDir</span><span class="p">)</span>
+            <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">itemList</span><span class="p">:</span>  
+                <span class="n">ver</span> <span class="o">=</span> <span class="n">releaseMatch</span><span class="p">(</span><span class="n">item</span><span class="p">,</span> <span class="n">minVersion</span> <span class="o">=</span> <span class="mi">77</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">ver</span> <span class="o">==</span> <span class="o">-</span><span class="mi">1</span><span class="p">:</span> 
+                    <span class="k">continue</span>
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">ftpConn</span><span class="o">.</span><span class="n">getDirContents</span><span class="p">(</span><span class="n">posixpath</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">ftpSearchDir</span><span class="p">,</span><span class="n">item</span><span class="p">),</span> <span class="s">&#39;fasta&#39;</span><span class="p">))</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>  
+                        <span class="k">continue</span> <span class="c">#item does not contain fasta directory</span>
+                <span class="k">except</span> <span class="n">ftplib</span><span class="o">.</span><span class="n">error_perm</span><span class="p">:</span>
+                    <span class="k">continue</span> <span class="c">#item was a file, not a directory</span>
+                <span class="k">if</span> <span class="n">ver</span> <span class="o">&gt;</span> <span class="n">version</span><span class="p">:</span>
+                    <span class="n">version</span> <span class="o">=</span> <span class="n">ver</span>
+                    <span class="n">releaseDir</span> <span class="o">=</span> <span class="n">item</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">releaseDir</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s">&#39;releaseDir not found in </span><span class="si">%s</span><span class="s">&#39;</span> <span class="o">%</span> <span class="n">ftpSearchDir</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">collectionFtpPath</span> <span class="o">=</span> <span class="n">posixpath</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">ftpSearchDir</span><span class="p">,</span> <span class="n">releaseDir</span><span class="p">)</span>
+
+            <span class="n">pathMatch</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">match</span><span class="p">(</span><span class="s">&#39;.*/(release-([0-9]+))&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">collectionFtpPath</span><span class="p">)</span>
+            <span class="n">releaseDir</span> <span class="o">=</span> <span class="n">pathMatch</span><span class="o">.</span><span class="n">group</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+            <span class="n">version</span> <span class="o">=</span> <span class="n">pathMatch</span><span class="o">.</span><span class="n">group</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">downloadDir</span> <span class="o">=</span> <span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">repo</span><span class="o">.</span><span class="n">downloadDir</span><span class="p">,</span> <span class="n">releaseDir</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">secondaryID</span><span class="p">)</span>
+
+            <span class="n">ftpSearchDir</span> <span class="o">=</span> <span class="n">posixpath</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">collectionFtpPath</span><span class="p">,</span><span class="s">&#39;fasta&#39;</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">secondaryID</span><span class="o">.</span><span class="n">lower</span><span class="p">(),</span><span class="s">&#39;dna&#39;</span><span class="p">)</span>
+            <span class="n">files</span> <span class="o">=</span> <span class="n">ftpConn</span><span class="o">.</span><span class="n">getDirContents</span><span class="p">(</span><span class="n">ftpSearchDir</span><span class="p">,</span> <span class="n">pattern</span><span class="p">[</span><span class="s">&#39;regex&#39;</span><span class="p">])</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">primaryID</span> <span class="o">=</span> <span class="n">getPrimaryID</span><span class="p">(</span><span class="n">files</span><span class="p">,</span> <span class="n">pattern</span><span class="p">[</span><span class="s">&#39;regex&#39;</span><span class="p">],</span> <span class="n">ftpSearchDir</span><span class="p">)</span>
+
+        <span class="c"># Map filename placeholders to versioned filenames</span>
+        <span class="n">fileMap</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
+        <span class="n">rawFilenames</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">getRawFilenames</span><span class="p">()</span>
+        <span class="k">for</span> <span class="n">rawName</span> <span class="ow">in</span> <span class="n">rawFilenames</span><span class="p">:</span>
+            <span class="n">parts</span> <span class="o">=</span> <span class="n">rawName</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s">&#39;PRIMARYID_PLACEHOLDER&#39;</span><span class="p">)</span>
+            <span class="n">tempName</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">primaryID</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">parts</span><span class="p">)</span>
+            <span class="n">parts</span> <span class="o">=</span> <span class="n">tempName</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s">&#39;RELEASE_PLACEHOLDER&#39;</span><span class="p">)</span>
+            <span class="n">fileMap</span><span class="p">[</span><span class="n">rawName</span><span class="p">]</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">version</span><span class="p">))</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">parts</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">finalDir</span> <span class="o">=</span> <span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">repo</span><span class="o">.</span><span class="n">finalDir</span><span class="p">,</span> <span class="n">releaseDir</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">secondaryID</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">collectionSetup</span><span class="p">(</span><span class="n">fileMap</span><span class="p">)</span>
+
+
+<div class="viewcode-block" id="ensemblCollection.setLocalFilePath"><a class="viewcode-back" href="../../../../../_rst/iggytools.iggyref.sources.ensembl.html#iggytools.iggyref.sources.ensembl.ensemblCollectionClass.ensemblCollection.setLocalFilePath">[docs]</a>    <span class="k">def</span> <span class="nf">setLocalFilePath</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">File</span><span class="p">):</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">File</span><span class="o">.</span><span class="n">localPath</span><span class="p">:</span>
+            <span class="n">File</span><span class="o">.</span><span class="n">localPath</span> <span class="o">=</span> <span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">downloadDir</span><span class="p">,</span> <span class="n">File</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+
+</div>
+<div class="viewcode-block" id="ensemblCollection.setFtpFilePath"><a class="viewcode-back" href="../../../../../_rst/iggytools.iggyref.sources.ensembl.html#iggytools.iggyref.sources.ensembl.ensemblCollectionClass.ensemblCollection.setFtpFilePath">[docs]</a>    <span class="k">def</span> <span class="nf">setFtpFilePath</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">File</span><span class="p">):</span>
+        <span class="n">File</span><span class="o">.</span><span class="n">ftpPath</span> <span class="o">=</span> <span class="n">posixpath</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">collectionFtpPath</span><span class="p">,</span> <span class="n">File</span><span class="o">.</span><span class="n">ftpSubDir</span><span class="p">,</span> <span class="n">File</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+
+</div>
+<div class="viewcode-block" id="ensemblCollection.setChecksumFtpFilePath"><a class="viewcode-back" href="../../../../../_rst/iggytools.iggyref.sources.ensembl.html#iggytools.iggyref.sources.ensembl.ensemblCollectionClass.ensemblCollection.setChecksumFtpFilePath">[docs]</a>    <span class="k">def</span> <span class="nf">setChecksumFtpFilePath</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">File</span><span class="p">):</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">File</span><span class="o">.</span><span class="n">checksumFile</span><span class="p">:</span> <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s">&#39;File.checksumFile must be set&#39;</span><span class="p">)</span>
+        <span class="n">File</span><span class="o">.</span><span class="n">checksumFtpPath</span> <span class="o">=</span> <span class="n">posixpath</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">collectionFtpPath</span><span class="p">,</span> <span class="n">File</span><span class="o">.</span><span class="n">ftpSubDir</span><span class="p">,</span> <span class="n">File</span><span class="o">.</span><span class="n">checksumFile</span><span class="p">)</span></div></div>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../../../../index.html">iggytools 0.1 documentation</a> &raquo;</li>
+          <li class="nav-item nav-item-1"><a href="../../../../index.html" >Module code</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &copy; Copyright 2015, Chris Williams.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.3.1.
+    </div>
+  </body>
+</html>

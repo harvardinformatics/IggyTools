@@ -1,0 +1,27 @@
+
+
+source new-modules.sh; module load fastqc/0.11.2-fasrc01 
+fastqc \
+  --outdir /n/informatics/IggyTools/iggytools/iggypipeline/test/Fastqc \
+  --threads 4 \
+  --noextract \
+  --nogroup \
+  /n/informatics/IggyTools/iggytools/iggypipeline/test/samp1.fastq
+
+
+Unloading module centos6/python-2.7.3.
+Started analysis of samp1.fastq
+Approx 5% complete for samp1.fastq
+Approx 10% complete for samp1.fastq
+Approx 20% complete for samp1.fastq
+Approx 25% complete for samp1.fastq
+Approx 35% complete for samp1.fastq
+Approx 40% complete for samp1.fastq
+Approx 50% complete for samp1.fastq
+Approx 55% complete for samp1.fastq
+Approx 60% complete for samp1.fastq
+Approx 70% complete for samp1.fastq
+Approx 75% complete for samp1.fastq
+Approx 85% complete for samp1.fastq
+Approx 90% complete for samp1.fastq
+Analysis complete for samp1.fastq

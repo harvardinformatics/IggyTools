@@ -1,0 +1,48 @@
+{% extends "base.html" %}
+{% load staticfiles %}
+{% block head %}
+{% endblock %}  
+
+{% block body %}
+
+<style>
+  .bpadded {
+     margin-bottom: 15px;
+  }
+</style>
+
+<script>
+$(function(){
+//for testing, request and display plots as minilims would.
+
+  function httpGet(url)
+  {
+    var xmlHttp = null;
+    xmlHttp = new XMLHttpRequest();
+    xmlHttp.open( "GET", url, false );
+    xmlHttp.send( null );
+    return xmlHttp.responseText;
+  }
+
+  //test if a minilims plot can be made for this run
+  var run_name = "140523_D00365_0221_BH8UYUADXX";
+  var plotTestUrl = "/seqstats/ml_plot_test?run=" + run_name;
+  var resp = httpGet(plotTestUrl);
+
+  console.log("resp:");
+  console.log(resp);
+
+  if (resp == "Success") {
+    var ifrm = document.createElement('iframe');
+    ifrm.setAttribute('id', 'ifrm'); 
+    ifrm.setAttribute('src', "/seqstats/minilims?run=" + run_name); 
+    ifrm.setAttribute('frameborder',0);
+    ifrm.setAttribute('height',"820px");
+    ifrm.setAttribute('width',"820px");
+    document.body.appendChild(ifrm); 
+  }
+
+});
+</script>
+
+{% endblock %}  

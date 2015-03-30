@@ -1,0 +1,19 @@
+Metadata-Version: 1.1
+Name: iggytools
+Version: 0.1
+Summary: Genome and database downloader
+Home-page: http://github.com/harvardinformatics/iggytools
+Author: Chris Williams
+Author-email: wilcliams@gmail.com
+License: GPLv3
+Description: Iggyref downloads genomes and databases from EBI, Ensembl, NCBI and other sources. 
+        Some postprocessing is performed, such as decompression, format coversion and the 
+        generation of bowtie2 indexes for fasta files. 
+        
+Platform: UNKNOWN
+Classifier: Programming Language :: Python
+Classifier: Development Status :: 4 - Beta
+Classifier: Intended Audience :: Developers
+Classifier: Operating System :: OS Independent
+Classifier: Topic :: Scientific/Engineering :: Bio-Informatics
+Classifier: Natural Language :: English

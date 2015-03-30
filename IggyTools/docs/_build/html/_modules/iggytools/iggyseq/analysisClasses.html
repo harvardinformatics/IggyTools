@@ -1,0 +1,700 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>iggytools.iggyseq.analysisClasses &mdash; iggytools 0.1 documentation</title>
+    
+    <link rel="stylesheet" href="../../../_static/sphinxdoc.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../',
+        VERSION:     '0.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../_static/doctools.js"></script>
+    <link rel="top" title="iggytools 0.1 documentation" href="../../../index.html" />
+    <link rel="up" title="Module code" href="../../index.html" /> 
+  </head>
+  <body role="document">
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../../index.html">iggytools 0.1 documentation</a> &raquo;</li>
+          <li class="nav-item nav-item-1"><a href="../../index.html" accesskey="U">Module code</a> &raquo;</li> 
+      </ul>
+    </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for iggytools.iggyseq.analysisClasses</h1><div class="highlight"><pre>
+<span class="kn">import</span> <span class="nn">os.path</span> <span class="kn">as</span> <span class="nn">path</span>
+<span class="kn">from</span> <span class="nn">iggytools.iggyseq.seqprep</span> <span class="kn">import</span> <span class="n">countUndetInd</span>
+<span class="kn">from</span> <span class="nn">iggytools.iggyseq.seqUtil</span> <span class="kn">import</span> <span class="n">parseRunInfo</span><span class="p">,</span> <span class="n">fastqGz_checksums</span>
+<span class="kn">from</span> <span class="nn">iggytools.utils.util</span> <span class="kn">import</span> <span class="n">flatten</span><span class="p">,</span> <span class="n">mkdir_p</span><span class="p">,</span> <span class="n">gzNotEmpty</span>
+<span class="kn">import</span> <span class="nn">os</span><span class="o">,</span> <span class="nn">re</span><span class="o">,</span> <span class="nn">glob</span><span class="o">,</span> <span class="nn">traceback</span>
+<span class="kn">from</span> <span class="nn">lxml</span> <span class="kn">import</span> <span class="n">etree</span><span class="p">,</span> <span class="n">html</span>
+<span class="kn">from</span> <span class="nn">abc</span> <span class="kn">import</span> <span class="n">ABCMeta</span><span class="p">,</span> <span class="n">abstractmethod</span>
+
+<span class="k">try</span><span class="p">:</span>
+    <span class="kn">from</span> <span class="nn">collections</span> <span class="kn">import</span> <span class="n">OrderedDict</span>
+<span class="k">except</span> <span class="ne">ImportError</span><span class="p">:</span>
+    <span class="kn">from</span> <span class="nn">ordereddict</span> <span class="kn">import</span> <span class="n">OrderedDict</span> <span class="c"># for python 2.6 and earlier, use backport </span>
+
+<span class="kn">import</span> <span class="nn">locale</span>  <span class="c">#for printing of commas in numbers using format()</span>
+<span class="n">ignored</span> <span class="o">=</span> <span class="n">locale</span><span class="o">.</span><span class="n">setlocale</span><span class="p">(</span><span class="n">locale</span><span class="o">.</span><span class="n">LC_ALL</span><span class="p">,</span> <span class="s">&#39;&#39;</span><span class="p">)</span> <span class="c"># empty string for platform&#39;s default setting</span>
+
+<div class="viewcode-block" id="IlluminaNextGenAnalysis"><a class="viewcode-back" href="../../../_rst/iggytools.iggyseq.html#iggytools.iggyseq.analysisClasses.IlluminaNextGenAnalysis">[docs]</a><span class="k">class</span> <span class="nc">IlluminaNextGenAnalysis</span><span class="p">:</span>
+
+    <span class="n">__metaclass__</span> <span class="o">=</span> <span class="n">ABCMeta</span>
+
+
+    <span class="nd">@classmethod</span>
+<div class="viewcode-block" id="IlluminaNextGenAnalysis.getInstance"><a class="viewcode-back" href="../../../_rst/iggytools.iggyseq.html#iggytools.iggyseq.analysisClasses.IlluminaNextGenAnalysis.getInstance">[docs]</a>    <span class="k">def</span> <span class="nf">getInstance</span><span class="p">(</span><span class="n">cls</span><span class="p">,</span> <span class="n">analysisName</span><span class="p">,</span> <span class="n">run</span><span class="p">):</span>
+
+        <span class="k">if</span> <span class="n">run</span><span class="o">.</span><span class="n">runType</span> <span class="o">==</span> <span class="s">&#39;HiSeq&#39;</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">HiSeqAnalysis</span><span class="p">(</span><span class="n">analysisName</span><span class="p">,</span> <span class="n">run</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">run</span><span class="o">.</span><span class="n">runType</span> <span class="o">==</span> <span class="s">&#39;NextSeq&#39;</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">NextSeqAnalysis</span><span class="p">(</span><span class="n">analysisName</span><span class="p">,</span> <span class="n">run</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s">&#39;Unrecognized run type: </span><span class="si">%s</span><span class="s">&#39;</span> <span class="o">%</span> <span class="n">run</span><span class="o">.</span><span class="n">runType</span><span class="p">)</span>
+
+</div>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">analysisName</span><span class="p">,</span> <span class="n">run</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="n">analysisName</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">Run</span> <span class="o">=</span> <span class="n">run</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">index1Length</span> <span class="o">=</span> <span class="bp">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">index2Length</span> <span class="o">=</span> <span class="bp">None</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">subIDs</span> <span class="o">=</span> <span class="nb">list</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">sampleIDs</span> <span class="o">=</span> <span class="nb">list</span><span class="p">()</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">ssSampleLines</span> <span class="o">=</span> <span class="nb">list</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ssLineIndices</span> <span class="o">=</span> <span class="nb">list</span><span class="p">()</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">processingDir</span> <span class="o">=</span> <span class="bp">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">finishingDir</span> <span class="o">=</span> <span class="bp">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">finalDir</span> <span class="o">=</span> <span class="bp">None</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">ssFile</span> <span class="o">=</span> <span class="bp">None</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">Run</span><span class="o">.</span><span class="n">processingDir</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">processingDir</span> <span class="o">=</span> <span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">Run</span><span class="o">.</span><span class="n">processingDir</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">Run</span><span class="o">.</span><span class="n">finishingDir</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">finishingDir</span> <span class="o">=</span> <span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">Run</span><span class="o">.</span><span class="n">finishingDir</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">Run</span><span class="o">.</span><span class="n">finalDir</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">finalDir</span> <span class="o">=</span> <span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">Run</span><span class="o">.</span><span class="n">finalDir</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">warnings</span> <span class="o">=</span> <span class="nb">list</span><span class="p">()</span>
+
+
+    <span class="nd">@abstractmethod</span>
+<div class="viewcode-block" id="IlluminaNextGenAnalysis.writeSamplesheet"><a class="viewcode-back" href="../../../_rst/iggytools.iggyseq.html#iggytools.iggyseq.analysisClasses.IlluminaNextGenAnalysis.writeSamplesheet">[docs]</a>    <span class="k">def</span> <span class="nf">writeSamplesheet</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">outDir</span> <span class="o">=</span> <span class="bp">None</span><span class="p">):</span>
+        <span class="k">pass</span>
+
+</div>
+    <span class="nd">@abstractmethod</span>
+<div class="viewcode-block" id="IlluminaNextGenAnalysis.bcl2fastq"><a class="viewcode-back" href="../../../_rst/iggytools.iggyseq.html#iggytools.iggyseq.analysisClasses.IlluminaNextGenAnalysis.bcl2fastq">[docs]</a>    <span class="k">def</span> <span class="nf">bcl2fastq</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">pass</span>
+
+</div>
+    <span class="nd">@abstractmethod</span>
+<div class="viewcode-block" id="IlluminaNextGenAnalysis.gather_analysis_fastq"><a class="viewcode-back" href="../../../_rst/iggytools.iggyseq.html#iggytools.iggyseq.analysisClasses.IlluminaNextGenAnalysis.gather_analysis_fastq">[docs]</a>    <span class="k">def</span> <span class="nf">gather_analysis_fastq</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">pass</span>
+
+</div>
+    <span class="nd">@abstractmethod</span>
+<div class="viewcode-block" id="IlluminaNextGenAnalysis.copy_reports_to_finishing"><a class="viewcode-back" href="../../../_rst/iggytools.iggyseq.html#iggytools.iggyseq.analysisClasses.IlluminaNextGenAnalysis.copy_reports_to_finishing">[docs]</a>    <span class="k">def</span> <span class="nf">copy_reports_to_finishing</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">pass</span>
+
+</div>
+    <span class="nd">@abstractmethod</span>
+<div class="viewcode-block" id="IlluminaNextGenAnalysis.summarizeDemuxResults"><a class="viewcode-back" href="../../../_rst/iggytools.iggyseq.html#iggytools.iggyseq.analysisClasses.IlluminaNextGenAnalysis.summarizeDemuxResults">[docs]</a>    <span class="k">def</span> <span class="nf">summarizeDemuxResults</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">pass</span>
+
+</div>
+<div class="viewcode-block" id="IlluminaNextGenAnalysis.makeBasesMask"><a class="viewcode-back" href="../../../_rst/iggytools.iggyseq.html#iggytools.iggyseq.analysisClasses.IlluminaNextGenAnalysis.makeBasesMask">[docs]</a>    <span class="k">def</span> <span class="nf">makeBasesMask</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">index1Length</span><span class="p">,</span> <span class="n">index2Length</span><span class="p">):</span>  
+        <span class="n">index1Length</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">index1Length</span><span class="p">)</span>
+        <span class="n">index2Length</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">index2Length</span><span class="p">)</span>
+        
+        <span class="n">runinfo_index_numcycles</span> <span class="o">=</span> <span class="nb">list</span><span class="p">()</span>
+
+        <span class="n">r</span><span class="p">,</span> <span class="n">ignored</span> <span class="o">=</span> <span class="n">parseRunInfo</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">Run</span><span class="o">.</span><span class="n">runinfoFile</span><span class="p">)</span> <span class="c">#example: {&#39;Read1&#39;: {&#39;num_cycles&#39;: 76, &#39;is_index&#39;: &#39;N&#39;}, &#39;Read2&#39;: {&#39;num_cycles&#39;: 7, &#39;is_index&#39;: &#39;Y&#39;}}  </span>
+
+        <span class="n">basesMask</span> <span class="o">=</span> <span class="s">&#39;Y&#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span> <span class="nb">int</span><span class="p">(</span><span class="n">r</span><span class="p">[</span><span class="s">&#39;Read1&#39;</span><span class="p">][</span><span class="s">&#39;num_cycles&#39;</span><span class="p">])</span> <span class="o">-</span> <span class="mi">1</span> <span class="p">)</span> <span class="o">+</span> <span class="s">&#39;N&#39;</span>  <span class="c">#Read1 is never an index</span>
+
+        <span class="k">if</span> <span class="s">&#39;Read2&#39;</span> <span class="ow">in</span> <span class="n">r</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+
+            <span class="k">if</span> <span class="n">r</span><span class="p">[</span><span class="s">&#39;Read2&#39;</span><span class="p">][</span><span class="s">&#39;is_index&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="s">&#39;Y&#39;</span><span class="p">:</span> <span class="c">#then Read2 is an index</span>
+
+                <span class="n">read2_numcycles</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">r</span><span class="p">[</span><span class="s">&#39;Read2&#39;</span><span class="p">][</span><span class="s">&#39;num_cycles&#39;</span><span class="p">])</span>
+
+                <span class="k">if</span> <span class="n">index1Length</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+                    <span class="n">basesMask</span> <span class="o">+=</span> <span class="s">&#39;,I&#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">index1Length</span><span class="p">)</span> <span class="o">+</span> <span class="s">&#39;N&#39;</span> <span class="o">*</span> <span class="p">(</span><span class="n">read2_numcycles</span> <span class="o">-</span> <span class="n">index1Length</span><span class="p">)</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">basesMask</span> <span class="o">+=</span> <span class="s">&#39;,&#39;</span> <span class="o">+</span> <span class="s">&#39;N&#39;</span> <span class="o">*</span> <span class="n">read2_numcycles</span>
+
+                <span class="n">runinfo_index_numcycles</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">read2_numcycles</span><span class="p">)</span>
+
+            <span class="k">else</span><span class="p">:</span> <span class="c">#then Read2 is not an index</span>
+                <span class="n">basesMask</span> <span class="o">+=</span> <span class="s">&#39;,Y&#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span> <span class="nb">int</span><span class="p">(</span><span class="n">r</span><span class="p">[</span><span class="s">&#39;Read2&#39;</span><span class="p">][</span><span class="s">&#39;num_cycles&#39;</span><span class="p">])</span> <span class="o">-</span> <span class="mi">1</span> <span class="p">)</span> <span class="o">+</span> <span class="s">&#39;N&#39;</span>
+
+            <span class="k">if</span> <span class="s">&#39;Read3&#39;</span> <span class="ow">in</span> <span class="n">r</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+
+                <span class="k">if</span> <span class="n">r</span><span class="p">[</span><span class="s">&#39;Read3&#39;</span><span class="p">][</span><span class="s">&#39;is_index&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="s">&#39;Y&#39;</span><span class="p">:</span> <span class="c">#then Read3 is an index</span>
+                    <span class="n">read3_numcycles</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">r</span><span class="p">[</span><span class="s">&#39;Read3&#39;</span><span class="p">][</span><span class="s">&#39;num_cycles&#39;</span><span class="p">])</span>
+
+                    <span class="k">if</span> <span class="n">index2Length</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+                        <span class="n">basesMask</span> <span class="o">+=</span> <span class="s">&#39;,I&#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">index2Length</span><span class="p">)</span> <span class="o">+</span> <span class="s">&#39;N&#39;</span> <span class="o">*</span> <span class="p">(</span><span class="n">read3_numcycles</span> <span class="o">-</span> <span class="n">index2Length</span><span class="p">)</span>
+
+                    <span class="k">else</span><span class="p">:</span>
+                        <span class="n">basesMask</span> <span class="o">+=</span> <span class="s">&#39;,&#39;</span> <span class="o">+</span> <span class="s">&#39;N&#39;</span> <span class="o">*</span> <span class="n">read3_numcycles</span>
+
+                    <span class="n">runinfo_index_numcycles</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">read3_numcycles</span><span class="p">)</span>
+
+                <span class="k">else</span><span class="p">:</span> <span class="c">#then Read3 is not an index</span>
+                    <span class="n">basesMask</span> <span class="o">+=</span> <span class="s">&#39;,Y&#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span> <span class="nb">int</span><span class="p">(</span><span class="n">r</span><span class="p">[</span><span class="s">&#39;Read3&#39;</span><span class="p">][</span><span class="s">&#39;num_cycles&#39;</span><span class="p">])</span> <span class="o">-</span> <span class="mi">1</span> <span class="p">)</span> <span class="o">+</span> <span class="s">&#39;N&#39;</span>
+
+                <span class="k">if</span> <span class="s">&#39;Read4&#39;</span> <span class="ow">in</span> <span class="n">r</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span> <span class="c">#Read4 is never an index</span>
+                    <span class="n">basesMask</span> <span class="o">+=</span> <span class="s">&#39;,Y&#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span> <span class="nb">int</span><span class="p">(</span><span class="n">r</span><span class="p">[</span><span class="s">&#39;Read4&#39;</span><span class="p">][</span><span class="s">&#39;num_cycles&#39;</span><span class="p">])</span> <span class="o">-</span> <span class="mi">1</span> <span class="p">)</span> <span class="o">+</span> <span class="s">&#39;N&#39;</span>
+
+        <span class="c"># Check if index lengths in samplesheet and runinfo file agree</span>
+
+        <span class="k">if</span> <span class="p">(</span><span class="n">index1Length</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="ow">or</span> <span class="nb">len</span><span class="p">(</span><span class="n">runinfo_index_numcycles</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">)</span> \
+                <span class="ow">and</span> <span class="n">index1Length</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">[</span> <span class="n">runinfo_index_numcycles</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">runinfo_index_numcycles</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">-</span> <span class="mi">1</span> <span class="p">]:</span>
+
+            <span class="bp">self</span><span class="o">.</span><span class="n">warnings</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s">&#39;In analysis </span><span class="si">%s</span><span class="s">: Unusual combination of samplesheet index length and runinfo num cycles for 1st index. Index length: </span><span class="si">%s</span><span class="s">. RunInfo num cycles: </span><span class="si">%s</span><span class="s">&#39;</span> 
+                            <span class="o">%</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">index1Length</span><span class="p">,</span> <span class="n">runinfo_index_numcycles</span><span class="p">[</span><span class="mi">0</span><span class="p">]))</span>
+
+        <span class="k">if</span> <span class="p">(</span><span class="n">index2Length</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="ow">or</span> <span class="nb">len</span><span class="p">(</span><span class="n">runinfo_index_numcycles</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">)</span> \
+                <span class="ow">and</span> <span class="n">index2Length</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">[</span> <span class="n">runinfo_index_numcycles</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">runinfo_index_numcycles</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="mi">1</span> <span class="p">]:</span>
+
+            <span class="bp">self</span><span class="o">.</span><span class="n">warnings</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s">&#39;In analysis </span><span class="si">%s</span><span class="s">: Unusual combination of samplesheet index length and runinfo num cycles for 2nd index. Index length: </span><span class="si">%s</span><span class="s">. RunInfo num cycles: </span><span class="si">%s</span><span class="s">&#39;</span> 
+                            <span class="o">%</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">index2Length</span><span class="p">,</span> <span class="n">runinfo_index_numcycles</span><span class="p">[</span><span class="mi">1</span><span class="p">]))</span>
+
+        <span class="k">return</span> <span class="n">basesMask</span>
+
+</div>
+<div class="viewcode-block" id="IlluminaNextGenAnalysis.calcCheckSums"><a class="viewcode-back" href="../../../_rst/iggytools.iggyseq.html#iggytools.iggyseq.analysisClasses.IlluminaNextGenAnalysis.calcCheckSums">[docs]</a>    <span class="k">def</span> <span class="nf">calcCheckSums</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">Run</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="s">&#39;Calculating checksums...&#39;</span><span class="p">)</span>
+
+        <span class="n">fastqGz_checksums</span><span class="p">(</span> <span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">finishingDir</span><span class="p">,</span> <span class="s">&#39;Fastq&#39;</span><span class="p">)</span> <span class="p">)</span>
+
+</div>
+<div class="viewcode-block" id="IlluminaNextGenAnalysis.countUndetIndices"><a class="viewcode-back" href="../../../_rst/iggytools.iggyseq.html#iggytools.iggyseq.analysisClasses.IlluminaNextGenAnalysis.countUndetIndices">[docs]</a>    <span class="k">def</span> <span class="nf">countUndetIndices</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">undetFastq</span> <span class="o">=</span> <span class="n">glob</span><span class="o">.</span><span class="n">glob</span><span class="p">(</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">finishingDir</span><span class="p">,</span> <span class="s">&#39;Fastq&#39;</span><span class="p">,</span> <span class="s">&#39;*Undetermined*.R1.fastq.gz&#39;</span><span class="p">))</span>  <span class="c">#index counts should be the same whether tallied from R1 or R2</span>
+
+        <span class="k">if</span> <span class="n">undetFastq</span><span class="p">:</span>
+            <span class="n">undetFastq</span> <span class="o">=</span> <span class="n">undetFastq</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+
+            <span class="k">if</span> <span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="n">undetFastq</span><span class="p">):</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">Run</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="s">&#39;Tallying undetermined indices...&#39;</span><span class="p">)</span>
+                <span class="n">countUndetInd</span><span class="o">.</span><span class="n">count</span><span class="p">(</span><span class="n">undetFastq</span><span class="p">,</span> <span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">finishingDir</span><span class="p">,</span> <span class="s">&#39;QC&#39;</span><span class="p">))</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">Run</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="s">&#39;No undetermined indices found to count.&#39;</span><span class="p">)</span>
+
+</div>
+<div class="viewcode-block" id="IlluminaNextGenAnalysis.fastQC"><a class="viewcode-back" href="../../../_rst/iggytools.iggyseq.html#iggytools.iggyseq.analysisClasses.IlluminaNextGenAnalysis.fastQC">[docs]</a>    <span class="k">def</span> <span class="nf">fastQC</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">Run</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="s">&#39;Running FastQC...&#39;</span><span class="p">)</span>
+
+        <span class="n">outDir</span> <span class="o">=</span> <span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">finishingDir</span><span class="p">,</span> <span class="s">&#39;QC&#39;</span><span class="p">)</span>
+        <span class="n">mkdir_p</span><span class="p">(</span><span class="n">outDir</span><span class="p">)</span>
+
+        <span class="n">fastqDir</span> <span class="o">=</span> <span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">finishingDir</span><span class="p">,</span> <span class="s">&#39;Fastq&#39;</span><span class="p">)</span>
+
+        <span class="k">for</span> <span class="n">filename</span> <span class="ow">in</span> <span class="n">os</span><span class="o">.</span><span class="n">listdir</span><span class="p">(</span><span class="n">fastqDir</span><span class="p">):</span>
+            <span class="k">if</span> <span class="n">re</span><span class="o">.</span><span class="n">match</span><span class="p">(</span><span class="s">&#39;\S+.fastq.gz&#39;</span><span class="p">,</span> <span class="n">filename</span><span class="p">)</span> <span class="ow">and</span> <span class="n">gzNotEmpty</span><span class="p">(</span> <span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">fastqDir</span><span class="p">,</span> <span class="n">filename</span><span class="p">)</span> <span class="p">):</span>
+                <span class="n">command</span> <span class="o">=</span> <span class="s">&#39;source new-modules.sh; module load legacy/0.0.1-fasrc01; module load centos6/fastqc-0.10.1 </span><span class="se">\n</span><span class="s">&#39;</span> <span class="o">+</span> \
+                          <span class="s">&#39;fastqc -t 4 --noextract --nogroup -o &#39;</span> <span class="o">+</span> <span class="n">outDir</span> <span class="o">+</span> <span class="s">&#39; &#39;</span> <span class="o">+</span> <span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">fastqDir</span><span class="p">,</span><span class="n">filename</span><span class="p">)</span>
+
+                <span class="bp">self</span><span class="o">.</span><span class="n">Run</span><span class="o">.</span><span class="n">shell</span><span class="p">(</span><span class="n">command</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">Run</span><span class="o">.</span><span class="n">logFile</span><span class="p">)</span>
+
+</div>
+<div class="viewcode-block" id="IlluminaNextGenAnalysis.validateFinalDir"><a class="viewcode-back" href="../../../_rst/iggytools.iggyseq.html#iggytools.iggyseq.analysisClasses.IlluminaNextGenAnalysis.validateFinalDir">[docs]</a>    <span class="k">def</span> <span class="nf">validateFinalDir</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">Run</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="s">&#39;Checking for required files in finalDir &#39;</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">finalDir</span> <span class="o">+</span> <span class="s">&#39; ...&#39;</span><span class="p">)</span>
+
+        <span class="n">warnings</span> <span class="o">=</span> <span class="nb">list</span><span class="p">()</span>
+
+        <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">flatten</span><span class="p">([</span><span class="bp">self</span><span class="o">.</span><span class="n">finalDir_requiredItems</span><span class="p">,</span> <span class="n">path</span><span class="o">.</span><span class="n">basename</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ssFile</span><span class="p">)]):</span>
+            <span class="n">itemPath</span> <span class="o">=</span> <span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">finalDir</span><span class="p">,</span> <span class="n">item</span><span class="p">)</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="n">itemPath</span><span class="p">)</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">path</span><span class="o">.</span><span class="n">isdir</span><span class="p">(</span><span class="n">itemPath</span><span class="p">):</span>
+                <span class="n">warnings</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s">&#39;Item missing from analysis finalDir: &#39;</span> <span class="o">+</span> <span class="n">itemPath</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">glob</span><span class="o">.</span><span class="n">glob</span><span class="p">(</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">finalDir</span><span class="p">,</span> <span class="s">&#39;Fastq&#39;</span><span class="p">,</span> <span class="s">&#39;*.fastq.gz&#39;</span><span class="p">)))</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="n">warnings</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s">&#39;No fastq.gz files found in analysis finalDir &#39;</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">finalDir</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">warnings</span>
+
+</div>
+<div class="viewcode-block" id="IlluminaNextGenAnalysis.formatTable"><a class="viewcode-back" href="../../../_rst/iggytools.iggyseq.html#iggytools.iggyseq.analysisClasses.IlluminaNextGenAnalysis.formatTable">[docs]</a>    <span class="k">def</span> <span class="nf">formatTable</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">rows</span><span class="p">):</span>
+        <span class="n">lines</span> <span class="o">=</span> <span class="nb">list</span><span class="p">()</span>
+        <span class="n">cols</span> <span class="o">=</span> <span class="nb">zip</span><span class="p">(</span><span class="o">*</span><span class="n">rows</span><span class="p">)</span>
+        <span class="n">colWidths</span> <span class="o">=</span> <span class="p">[</span> <span class="nb">max</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">elem</span><span class="p">)</span> <span class="k">for</span> <span class="n">elem</span> <span class="ow">in</span> <span class="n">col</span><span class="p">)</span> <span class="k">for</span> <span class="n">col</span> <span class="ow">in</span> <span class="n">cols</span> <span class="p">]</span>
+        <span class="n">rowFormat</span> <span class="o">=</span> <span class="s">&#39;    &#39;</span> <span class="o">+</span> <span class="s">&#39;  |  &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="s">&#39;</span><span class="si">%%%d</span><span class="s">s&#39;</span> <span class="o">%</span> <span class="n">width</span> <span class="k">for</span> <span class="n">width</span> <span class="ow">in</span> <span class="n">colWidths</span> <span class="p">])</span>
+        <span class="k">for</span> <span class="n">row</span> <span class="ow">in</span> <span class="n">rows</span><span class="p">:</span>
+            <span class="n">lines</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">rowFormat</span> <span class="o">%</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">row</span><span class="p">))</span>
+        <span class="n">lines</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s">&#39;</span><span class="se">\n</span><span class="s">&#39;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">lines</span>
+
+
+</div></div>
+<div class="viewcode-block" id="HiSeqAnalysis"><a class="viewcode-back" href="../../../_rst/iggytools.iggyseq.html#iggytools.iggyseq.analysisClasses.HiSeqAnalysis">[docs]</a><span class="k">class</span> <span class="nc">HiSeqAnalysis</span><span class="p">(</span><span class="n">IlluminaNextGenAnalysis</span><span class="p">):</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">analysisName</span><span class="p">,</span> <span class="n">Run</span> <span class="o">=</span> <span class="bp">None</span><span class="p">):</span>
+
+        <span class="n">IlluminaNextGenAnalysis</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">analysisName</span><span class="p">,</span> <span class="n">Run</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">finalDir_requiredItems</span> <span class="o">=</span> <span class="p">[</span><span class="s">&#39;Fastq&#39;</span><span class="p">,</span> <span class="s">&#39;QC&#39;</span><span class="p">,</span> <span class="s">&#39;Basecall_Stats&#39;</span><span class="p">]</span>
+
+
+<div class="viewcode-block" id="HiSeqAnalysis.writeSamplesheet"><a class="viewcode-back" href="../../../_rst/iggytools.iggyseq.html#iggytools.iggyseq.analysisClasses.HiSeqAnalysis.writeSamplesheet">[docs]</a>    <span class="k">def</span> <span class="nf">writeSamplesheet</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">outDir</span> <span class="o">=</span> <span class="bp">None</span><span class="p">):</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">outDir</span><span class="p">:</span>
+            <span class="n">outDir</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">Run</span><span class="o">.</span><span class="n">processingDir</span>  <span class="c">#bcl2fastq for HiSeq 2000 requires that analysis processing dir (self.processingDir) not yet exist. Therefore write to Run.processingDir</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">path</span><span class="o">.</span><span class="n">isdir</span><span class="p">(</span><span class="n">outDir</span><span class="p">):</span>
+            <span class="n">mkdir_p</span><span class="p">(</span><span class="n">outDir</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">ssFile</span> <span class="o">=</span> <span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">outDir</span><span class="p">,</span> <span class="s">&#39;SampleSheet.&#39;</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">name</span> <span class="o">+</span> <span class="s">&#39;.csv&#39;</span><span class="p">)</span>
+
+        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ssFile</span><span class="p">,</span> <span class="s">&#39;w&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">fh</span><span class="p">:</span>
+            <span class="n">fh</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">Run</span><span class="o">.</span><span class="n">SampleSheet</span><span class="o">.</span><span class="n">ss</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">+</span> <span class="s">&#39;</span><span class="se">\n</span><span class="s">&#39;</span><span class="p">)</span>  <span class="c">#write out header line </span>
+            <span class="n">fh</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s">&#39;</span><span class="se">\n</span><span class="s">&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">Run</span><span class="o">.</span><span class="n">SampleSheet</span><span class="o">.</span><span class="n">ss</span><span class="p">[</span><span class="n">x</span><span class="p">]</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">ssLineIndices</span><span class="p">]</span> <span class="p">))</span>  <span class="c">#write out lines corresponding to this analysis</span>
+
+</div>
+<div class="viewcode-block" id="HiSeqAnalysis.bcl2fastq"><a class="viewcode-back" href="../../../_rst/iggytools.iggyseq.html#iggytools.iggyseq.analysisClasses.HiSeqAnalysis.bcl2fastq">[docs]</a>    <span class="k">def</span> <span class="nf">bcl2fastq</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>  <span class="c">#run bcl2fastq v1.8.3 analysis </span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">Run</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="s">&#39;Running bcl2fastq...&#39;</span><span class="p">)</span>
+
+        <span class="n">command</span> <span class="o">=</span> <span class="s">&#39;source new-modules.sh; module load legacy/0.0.1-fasrc01; module load centos6/bcl2fastq-1.8.3 </span><span class="se">\n</span><span class="s">&#39;</span> <span class="o">+</span> \
+                  <span class="s">&#39;echo &quot;Using configureBclToFastq.pl:&quot;; which configureBclToFastq.pl</span><span class="se">\n\n</span><span class="s">&#39;</span>
+
+        <span class="n">outDir</span> <span class="o">=</span> <span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">Run</span><span class="o">.</span><span class="n">processingDir</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+        <span class="n">inDir</span> <span class="o">=</span> <span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">Run</span><span class="o">.</span><span class="n">primaryDir</span><span class="p">,</span> <span class="s">&#39;Data&#39;</span><span class="p">,</span> <span class="s">&#39;Intensities&#39;</span><span class="p">,</span> <span class="s">&#39;BaseCalls&#39;</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">Run</span><span class="o">.</span><span class="n">customBasesMask</span><span class="p">:</span>
+            <span class="n">basesMask</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">customBasesMask</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">basesMask</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">makeBasesMask</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">index1Length</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">index2Length</span><span class="p">)</span>
+
+        <span class="n">command</span> <span class="o">+=</span> <span class="s">&#39;configureBclToFastq.pl --input-dir &#39;</span> <span class="o">+</span> <span class="n">inDir</span>                         <span class="o">+</span> <span class="s">&#39; </span><span class="se">\\\n</span><span class="s">&#39;</span> \
+                                       <span class="o">+</span> <span class="s">&#39; --output-dir &#39;</span> <span class="o">+</span> <span class="n">outDir</span>                       <span class="o">+</span> <span class="s">&#39; </span><span class="se">\\\n</span><span class="s">&#39;</span> \
+                                       <span class="o">+</span> <span class="s">&#39; --sample-sheet &#39;</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">ssFile</span>                <span class="o">+</span> <span class="s">&#39; </span><span class="se">\\\n</span><span class="s">&#39;</span> \
+                                       <span class="o">+</span> <span class="s">&#39; --use-bases-mask &#39;</span> <span class="o">+</span> <span class="n">basesMask</span>                <span class="o">+</span> <span class="s">&#39; </span><span class="se">\\\n</span><span class="s">&#39;</span> \
+                                       <span class="o">+</span> <span class="s">&#39; --mismatches &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">Run</span><span class="o">.</span><span class="n">numMismatches</span><span class="p">)</span>  <span class="o">+</span> <span class="s">&#39; </span><span class="se">\\\n</span><span class="s">&#39;</span> \
+                                       <span class="o">+</span> <span class="s">&#39; --ignore-missing-stats&#39;</span>                       <span class="o">+</span> <span class="s">&#39; </span><span class="se">\\\n</span><span class="s">&#39;</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">Run</span><span class="o">.</span><span class="n">ignoreMissingBcl</span><span class="p">:</span>
+            <span class="n">command</span> <span class="o">+=</span> <span class="s">&#39; --ignore-missing-bcl </span><span class="se">\\\n</span><span class="s">&#39;</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">Run</span><span class="o">.</span><span class="n">ignoreMissingControl</span><span class="p">:</span>
+            <span class="n">command</span> <span class="o">+=</span> <span class="s">&#39; --ignore-missing-control </span><span class="se">\\\n</span><span class="s">&#39;</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">Run</span><span class="o">.</span><span class="n">withFailedReads</span><span class="p">:</span>
+            <span class="n">command</span> <span class="o">+=</span> <span class="s">&#39; --with-failed-reads </span><span class="se">\\\n</span><span class="s">&#39;</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">Run</span><span class="o">.</span><span class="n">tileRegex</span><span class="p">:</span>
+            <span class="n">command</span> <span class="o">+=</span> <span class="s">&quot; --tiles &#39;&quot;</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">Run</span><span class="o">.</span><span class="n">tileRegex</span> <span class="o">+</span> <span class="s">&quot;&#39; </span><span class="se">\\\n</span><span class="s">&quot;</span>
+
+        <span class="n">command</span> <span class="o">+=</span> <span class="s">&#39;</span><span class="se">\n</span><span class="s">&#39;</span>  <span class="c">#end line continuation</span>
+
+        <span class="n">command</span> <span class="o">+=</span> <span class="s">&#39;cd &#39;</span> <span class="o">+</span> <span class="n">outDir</span> <span class="o">+</span> <span class="s">&#39;; make -j &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">Run</span><span class="o">.</span><span class="n">numThreads</span><span class="p">)</span> <span class="o">+</span> <span class="s">&#39;</span><span class="se">\n</span><span class="s">&#39;</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">Run</span><span class="o">.</span><span class="n">shell</span><span class="p">(</span><span class="n">command</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">Run</span><span class="o">.</span><span class="n">logFile</span><span class="p">)</span>
+
+</div>
+<div class="viewcode-block" id="HiSeqAnalysis.gather_analysis_fastq"><a class="viewcode-back" href="../../../_rst/iggytools.iggyseq.html#iggytools.iggyseq.analysisClasses.HiSeqAnalysis.gather_analysis_fastq">[docs]</a>    <span class="k">def</span> <span class="nf">gather_analysis_fastq</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">Run</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="s">&#39;Concatenating fastq files...&#39;</span><span class="p">)</span>
+
+        <span class="c">#Example file set to concatenate:</span>
+        <span class="c">#  SampleA_ACAGTG_L001_R1_001.fastq.gz</span>
+        <span class="c">#  SampleA_ACAGTG_L001_R1_002.fastq.gz </span>
+        <span class="c">#  SampleA_ACAGTG_L001_R1_003.fastq.gz </span>
+
+        <span class="n">projectDir</span> <span class="o">=</span> <span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">processingDir</span><span class="p">,</span> <span class="s">&#39;Project_Fastq_Files&#39;</span><span class="p">)</span>
+        <span class="n">sampDirs</span> <span class="o">=</span> <span class="n">glob</span><span class="o">.</span><span class="n">glob</span><span class="p">(</span> <span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">projectDir</span><span class="p">,</span> <span class="s">&#39;Sample_*&#39;</span><span class="p">)</span> <span class="p">)</span>
+        <span class="n">undetDir</span> <span class="o">=</span> <span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">processingDir</span><span class="p">,</span> <span class="s">&#39;Undetermined_indices&#39;</span><span class="p">)</span>
+        <span class="n">undetSampDirs</span> <span class="o">=</span> <span class="n">glob</span><span class="o">.</span><span class="n">glob</span><span class="p">(</span> <span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">undetDir</span><span class="p">,</span> <span class="s">&#39;Sample_*&#39;</span><span class="p">)</span> <span class="p">)</span>
+
+        <span class="n">outDir</span> <span class="o">=</span> <span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">finishingDir</span><span class="p">,</span> <span class="s">&#39;Fastq&#39;</span><span class="p">)</span>
+        <span class="n">mkdir_p</span><span class="p">(</span><span class="n">outDir</span><span class="p">)</span>
+
+        <span class="k">for</span> <span class="n">sampDir</span> <span class="ow">in</span> <span class="n">sampDirs</span> <span class="o">+</span> <span class="n">undetSampDirs</span><span class="p">:</span>
+
+            <span class="k">for</span> <span class="n">filename</span> <span class="ow">in</span> <span class="n">os</span><span class="o">.</span><span class="n">listdir</span><span class="p">(</span><span class="n">sampDir</span><span class="p">):</span>
+
+                <span class="k">for</span> <span class="n">readNumStr</span> <span class="ow">in</span> <span class="p">[</span><span class="s">&#39;1&#39;</span><span class="p">,</span> <span class="s">&#39;2&#39;</span><span class="p">]:</span>
+
+                    <span class="n">labelMatch</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">match</span><span class="p">(</span><span class="s">&#39;(?P&lt;fileLabel&gt;(?P&lt;sampLabel&gt;[\S]+)_L[0-9]+_R&#39;</span><span class="o">+</span><span class="n">readNumStr</span><span class="o">+</span><span class="s">&#39;)_001.fastq.gz&#39;</span><span class="p">,</span> <span class="n">filename</span><span class="p">)</span>
+
+                    <span class="k">if</span> <span class="n">labelMatch</span><span class="p">:</span>
+                        <span class="n">sampLabel</span> <span class="o">=</span> <span class="n">labelMatch</span><span class="o">.</span><span class="n">group</span><span class="p">(</span><span class="s">&#39;sampLabel&#39;</span><span class="p">)</span>
+                        <span class="n">fileLabel</span> <span class="o">=</span> <span class="n">labelMatch</span><span class="o">.</span><span class="n">group</span><span class="p">(</span><span class="s">&#39;fileLabel&#39;</span><span class="p">)</span>
+
+                        <span class="n">mergeFile</span> <span class="o">=</span> <span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">outDir</span><span class="p">,</span> <span class="n">sampLabel</span> <span class="o">+</span> <span class="s">&#39;.R&#39;</span> <span class="o">+</span> <span class="n">readNumStr</span> <span class="o">+</span> <span class="s">&#39;.fastq.gz&#39;</span><span class="p">)</span>
+                        <span class="n">componentFiles</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">([</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">projectDir</span><span class="p">,</span> <span class="n">sampDir</span><span class="p">,</span> <span class="n">f</span><span class="p">)</span> <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">os</span><span class="o">.</span><span class="n">listdir</span><span class="p">(</span><span class="n">sampDir</span><span class="p">)</span> <span class="k">if</span> <span class="n">re</span><span class="o">.</span><span class="n">match</span><span class="p">(</span><span class="n">fileLabel</span> <span class="o">+</span> <span class="s">&#39;_[0-9]+.fastq.gz&#39;</span><span class="p">,</span> <span class="n">f</span><span class="p">)])</span>
+
+                        <span class="bp">self</span><span class="o">.</span><span class="n">Run</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="s">&#39;Concatenating &#39;</span> <span class="o">+</span> <span class="n">sampLabel</span> <span class="o">+</span> <span class="s">&#39; R&#39;</span><span class="o">+</span><span class="n">readNumStr</span><span class="o">+</span><span class="s">&#39; fastq component files:&#39;</span><span class="p">)</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">Run</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="s">&#39;</span><span class="se">\n</span><span class="s">&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="s">&#39;  </span><span class="si">%s</span><span class="s">&#39;</span> <span class="o">%</span> <span class="n">path</span><span class="o">.</span><span class="n">basename</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">componentFiles</span><span class="p">]))</span>
+
+                        <span class="n">fout</span> <span class="o">=</span> <span class="nb">file</span><span class="p">(</span><span class="n">mergeFile</span><span class="p">,</span> <span class="s">&#39;wb&#39;</span><span class="p">)</span>
+
+                        <span class="k">for</span> <span class="n">componentFile</span> <span class="ow">in</span> <span class="n">componentFiles</span><span class="p">:</span>
+                            <span class="n">fin</span>  <span class="o">=</span> <span class="nb">file</span><span class="p">(</span><span class="n">componentFile</span><span class="p">,</span><span class="s">&#39;rb&#39;</span><span class="p">)</span>
+                            <span class="k">while</span> <span class="bp">True</span><span class="p">:</span>
+                                <span class="n">data</span> <span class="o">=</span> <span class="n">fin</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="mi">65536</span><span class="p">)</span>
+                                <span class="k">if</span> <span class="ow">not</span> <span class="n">data</span><span class="p">:</span> <span class="k">break</span>
+                                <span class="n">fout</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+                            <span class="n">fin</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+
+                        <span class="n">fout</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+
+</div>
+<div class="viewcode-block" id="HiSeqAnalysis.copy_reports_to_finishing"><a class="viewcode-back" href="../../../_rst/iggytools.iggyseq.html#iggytools.iggyseq.analysisClasses.HiSeqAnalysis.copy_reports_to_finishing">[docs]</a>    <span class="k">def</span> <span class="nf">copy_reports_to_finishing</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">Run</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="s">&#39;Copying stats files to finishing dir...&#39;</span><span class="p">)</span>
+
+        <span class="c">#find basecall_stats directory to copy </span>
+        <span class="n">items</span> <span class="o">=</span> <span class="n">glob</span><span class="o">.</span><span class="n">glob</span><span class="p">(</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">processingDir</span><span class="p">,</span> <span class="s">&#39;Basecall_Stats_*&#39;</span><span class="p">))</span>
+
+        <span class="k">if</span> <span class="n">items</span><span class="p">:</span>
+            <span class="n">basecallStatsDir</span> <span class="o">=</span> <span class="n">items</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+            <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="p">[</span><span class="s">&#39;Demultiplex_Stats.htm&#39;</span><span class="p">,</span> <span class="s">&#39;Plots&#39;</span><span class="p">,</span> <span class="s">&#39;css&#39;</span><span class="p">,</span> <span class="s">&#39;All.htm&#39;</span><span class="p">,</span> <span class="s">&#39;IVC.htm&#39;</span><span class="p">]:</span>
+                <span class="n">itemPath</span> <span class="o">=</span> <span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">processingDir</span><span class="p">,</span> <span class="n">basecallStatsDir</span><span class="p">,</span> <span class="n">item</span><span class="p">)</span>
+
+                <span class="k">if</span> <span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="n">itemPath</span><span class="p">)</span> <span class="ow">or</span> <span class="n">path</span><span class="o">.</span><span class="n">isdir</span><span class="p">(</span><span class="n">itemPath</span><span class="p">):</span>
+                    <span class="n">newItem</span> <span class="o">=</span> <span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">finishingDir</span><span class="p">,</span> <span class="s">&#39;Basecall_Stats&#39;</span><span class="p">,</span> <span class="n">item</span><span class="p">)</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">Run</span><span class="o">.</span><span class="n">safeCopy</span><span class="p">(</span> <span class="n">itemPath</span><span class="p">,</span> <span class="n">newItem</span> <span class="p">)</span>
+
+        <span class="c">#copy analysis samplesheet to analysis finishingDir</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">Run</span><span class="o">.</span><span class="n">safeCopy</span><span class="p">(</span> <span class="bp">self</span><span class="o">.</span><span class="n">ssFile</span><span class="p">,</span> <span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">finishingDir</span><span class="p">,</span> <span class="n">path</span><span class="o">.</span><span class="n">basename</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ssFile</span><span class="p">))</span> <span class="p">)</span>
+    </div>
+<div class="viewcode-block" id="HiSeqAnalysis.summarizeDemuxResults"><a class="viewcode-back" href="../../../_rst/iggytools.iggyseq.html#iggytools.iggyseq.analysisClasses.HiSeqAnalysis.summarizeDemuxResults">[docs]</a>    <span class="k">def</span> <span class="nf">summarizeDemuxResults</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span> <span class="c">#hiseq analysis</span>
+
+        <span class="n">summary</span> <span class="o">=</span> <span class="nb">list</span><span class="p">()</span>
+
+        <span class="c">## Get stats from html report</span>
+        <span class="n">statsFile</span> <span class="o">=</span> <span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">finalDir</span><span class="p">,</span> <span class="s">&#39;Basecall_Stats&#39;</span><span class="p">,</span> <span class="s">&#39;Demultiplex_Stats.htm&#39;</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="n">statsFile</span><span class="p">):</span>
+            <span class="n">summary</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s">&#39;    No Demultiplex_Stats.htm found in finalDir! Checking finishingDir...</span><span class="se">\n</span><span class="s">&#39;</span><span class="p">)</span>
+            <span class="n">statsFile</span> <span class="o">=</span> <span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">finishingDir</span><span class="p">,</span> <span class="s">&#39;Basecall_Stats&#39;</span><span class="p">,</span> <span class="s">&#39;Demultiplex_Stats.htm&#39;</span><span class="p">)</span>
+
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="n">statsFile</span><span class="p">):</span>
+                <span class="n">summary</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s">&#39;    No Demultiplex_Stats.htm found in finishingDir.</span><span class="se">\n</span><span class="s">&#39;</span><span class="p">)</span>
+
+        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">statsFile</span><span class="p">,</span><span class="s">&#39;r&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">fh</span><span class="p">:</span>
+            <span class="n">stats</span> <span class="o">=</span> <span class="n">fh</span><span class="o">.</span><span class="n">read</span><span class="p">()</span>
+
+        <span class="n">stats</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="s">r&#39;</span><span class="si">% o</span><span class="s">f &amp;gt;= Q30 Bases \(PF\)&#39;</span><span class="p">,</span><span class="s">&#39;% bases Q ge 30&#39;</span><span class="p">,</span><span class="n">stats</span><span class="p">)</span>
+
+        <span class="n">srows</span> <span class="o">=</span> <span class="nb">list</span><span class="p">()</span>
+        <span class="n">tree</span> <span class="o">=</span> <span class="n">html</span><span class="o">.</span><span class="n">fromstring</span><span class="p">(</span><span class="n">stats</span><span class="p">)</span>
+        <span class="n">totalReads</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="n">nsamps</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="k">for</span> <span class="n">tables</span> <span class="ow">in</span> <span class="n">tree</span><span class="o">.</span><span class="n">xpath</span><span class="p">(</span><span class="s">&#39;//table&#39;</span><span class="p">)[</span><span class="mi">0</span><span class="p">:</span><span class="mi">2</span><span class="p">]:</span>
+            <span class="k">for</span> <span class="n">row</span> <span class="ow">in</span> <span class="n">tables</span><span class="o">.</span><span class="n">xpath</span><span class="p">(</span><span class="s">&#39;./tr&#39;</span><span class="p">):</span>
+                <span class="n">cols</span> <span class="o">=</span> <span class="n">row</span><span class="o">.</span><span class="n">xpath</span><span class="p">(</span><span class="s">&#39;./th | ./td&#39;</span><span class="p">);</span>
+
+                <span class="n">samp</span> <span class="o">=</span> <span class="n">cols</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">text</span>
+                <span class="n">reads</span> <span class="o">=</span> <span class="n">cols</span><span class="p">[</span><span class="mi">9</span><span class="p">]</span><span class="o">.</span><span class="n">text</span>
+                <span class="n">perc</span> <span class="o">=</span> <span class="n">cols</span><span class="p">[</span><span class="mi">13</span><span class="p">]</span><span class="o">.</span><span class="n">text</span>
+
+                <span class="n">srows</span><span class="o">.</span><span class="n">append</span><span class="p">([</span><span class="n">samp</span><span class="p">,</span> <span class="n">reads</span><span class="p">,</span> <span class="n">perc</span><span class="p">])</span>
+
+                <span class="k">if</span> <span class="n">re</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="s">&#39;,&#39;</span><span class="p">,</span><span class="s">&#39;&#39;</span><span class="p">,</span><span class="n">reads</span><span class="p">)</span><span class="o">.</span><span class="n">isdigit</span><span class="p">():</span>
+                    <span class="n">totalReads</span> <span class="o">+=</span> <span class="nb">int</span><span class="p">(</span><span class="n">re</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="s">&#39;,&#39;</span><span class="p">,</span><span class="s">&#39;&#39;</span><span class="p">,</span><span class="n">reads</span><span class="p">))</span>
+                    <span class="n">nsamps</span> <span class="o">+=</span> <span class="mi">1</span>
+
+        <span class="n">scols</span> <span class="o">=</span> <span class="nb">zip</span><span class="p">(</span><span class="o">*</span><span class="n">srows</span><span class="p">)</span>
+        <span class="n">colWidths</span> <span class="o">=</span> <span class="p">[</span> <span class="nb">max</span><span class="p">(</span> <span class="p">[</span><span class="nb">len</span><span class="p">(</span><span class="n">elem</span><span class="p">)</span> <span class="k">if</span> <span class="n">elem</span> <span class="k">else</span> <span class="mi">0</span> <span class="k">for</span> <span class="n">elem</span> <span class="ow">in</span> <span class="n">col</span><span class="p">]</span> <span class="p">)</span> <span class="k">for</span> <span class="n">col</span> <span class="ow">in</span> <span class="n">scols</span> <span class="p">]</span>
+        <span class="n">rowFormat</span> <span class="o">=</span> <span class="s">&#39;    &#39;</span> <span class="o">+</span> <span class="s">&#39;  |  &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="s">&#39;</span><span class="si">%%%d</span><span class="s">s&#39;</span> <span class="o">%</span> <span class="n">width</span> <span class="k">for</span> <span class="n">width</span> <span class="ow">in</span> <span class="n">colWidths</span> <span class="p">])</span>
+
+        <span class="c">## Append analysis read count and num samps</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">Run</span><span class="o">.</span><span class="n">SampleSheet</span><span class="o">.</span><span class="n">nonIndexRead2_numCycles</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">note</span> <span class="o">=</span> <span class="s">&#39;R1+R2&#39;</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">note</span> <span class="o">=</span> <span class="s">&#39;R1 only&#39;</span>
+
+        <span class="n">summary</span><span class="o">.</span><span class="n">append</span><span class="p">(</span> <span class="s">&#39;Reads (</span><span class="si">%s</span><span class="s">):  </span><span class="si">%s</span><span class="se">\n</span><span class="s">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">note</span><span class="p">,</span> <span class="n">format</span><span class="p">(</span><span class="n">totalReads</span><span class="p">,</span> <span class="s">&#39;n&#39;</span><span class="p">))</span> <span class="p">)</span>
+        <span class="n">summary</span><span class="o">.</span><span class="n">append</span><span class="p">(</span> <span class="s">&#39;Number of samples:  </span><span class="si">%s</span><span class="se">\n</span><span class="s">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">nsamps</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span> <span class="p">)</span>  <span class="c">#subtract 1 to exclude the undetermined sample</span>
+
+        <span class="k">for</span> <span class="n">row</span> <span class="ow">in</span> <span class="n">srows</span><span class="p">:</span>
+            <span class="n">summary</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">rowFormat</span> <span class="o">%</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">row</span><span class="p">))</span>
+
+        <span class="k">return</span> <span class="n">summary</span>
+
+
+</div></div>
+<div class="viewcode-block" id="NextSeqAnalysis"><a class="viewcode-back" href="../../../_rst/iggytools.iggyseq.html#iggytools.iggyseq.analysisClasses.NextSeqAnalysis">[docs]</a><span class="k">class</span> <span class="nc">NextSeqAnalysis</span><span class="p">(</span><span class="n">IlluminaNextGenAnalysis</span><span class="p">):</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">analysisName</span><span class="p">,</span> <span class="n">Run</span> <span class="o">=</span> <span class="bp">None</span><span class="p">):</span>
+
+        <span class="n">IlluminaNextGenAnalysis</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">analysisName</span><span class="p">,</span> <span class="n">Run</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">finalDir_requiredItems</span> <span class="o">=</span> <span class="p">[</span><span class="s">&#39;Fastq&#39;</span><span class="p">,</span> <span class="s">&#39;QC&#39;</span><span class="p">,</span> <span class="s">&#39;Reports&#39;</span><span class="p">,</span> <span class="s">&#39;Stats&#39;</span><span class="p">]</span>
+
+
+<div class="viewcode-block" id="NextSeqAnalysis.writeSamplesheet"><a class="viewcode-back" href="../../../_rst/iggytools.iggyseq.html#iggytools.iggyseq.analysisClasses.NextSeqAnalysis.writeSamplesheet">[docs]</a>    <span class="k">def</span> <span class="nf">writeSamplesheet</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">outDir</span> <span class="o">=</span> <span class="bp">None</span><span class="p">):</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">outDir</span><span class="p">:</span>
+            <span class="n">outDir</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">processingDir</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">path</span><span class="o">.</span><span class="n">isdir</span><span class="p">(</span><span class="n">outDir</span><span class="p">):</span>
+            <span class="n">mkdir_p</span><span class="p">(</span><span class="n">outDir</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">ssFile</span> <span class="o">=</span> <span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">outDir</span><span class="p">,</span> <span class="s">&#39;SampleSheet.&#39;</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">name</span> <span class="o">+</span> <span class="s">&#39;.csv&#39;</span><span class="p">)</span>
+
+        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ssFile</span><span class="p">,</span> <span class="s">&#39;w&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">fh</span><span class="p">:</span>
+            <span class="n">fh</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s">&#39;</span><span class="se">\n</span><span class="s">&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span> <span class="bp">self</span><span class="o">.</span><span class="n">Run</span><span class="o">.</span><span class="n">SampleSheet</span><span class="o">.</span><span class="n">ss</span><span class="p">[:</span><span class="bp">self</span><span class="o">.</span><span class="n">Run</span><span class="o">.</span><span class="n">SampleSheet</span><span class="o">.</span><span class="n">colNamesLineIndex</span><span class="o">+</span><span class="mi">1</span><span class="p">]</span> <span class="p">))</span>  <span class="c">#write out header portion of samplesheet</span>
+            <span class="n">fh</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s">&#39;</span><span class="se">\n</span><span class="s">&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">Run</span><span class="o">.</span><span class="n">SampleSheet</span><span class="o">.</span><span class="n">ss</span><span class="p">[</span><span class="n">x</span><span class="p">]</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">ssLineIndices</span><span class="p">]</span> <span class="p">))</span>  <span class="c">#write out lines corresponding to this analysis</span>
+
+</div>
+<div class="viewcode-block" id="NextSeqAnalysis.bcl2fastq"><a class="viewcode-back" href="../../../_rst/iggytools.iggyseq.html#iggytools.iggyseq.analysisClasses.NextSeqAnalysis.bcl2fastq">[docs]</a>    <span class="k">def</span> <span class="nf">bcl2fastq</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+
+        <span class="n">command</span> <span class="o">=</span> <span class="s">&#39;source new-modules.sh; module load legacy/0.0.1-fasrc01; module load bcl2fastq2; echo &quot;Using bcl2fastq: &quot;; which bcl2fastq; &#39;</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">Run</span><span class="o">.</span><span class="n">customBasesMask</span><span class="p">:</span>
+            <span class="n">basesMask</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">Run</span><span class="o">.</span><span class="n">customBasesMask</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">basesMask</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">makeBasesMask</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">index1Length</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">index2Length</span><span class="p">)</span>
+
+        <span class="n">command</span> <span class="o">+=</span> <span class="s">&#39;bcl2fastq --runfolder-dir &#39;</span>      <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">Run</span><span class="o">.</span><span class="n">primaryDir</span> \
+                          <span class="o">+</span> <span class="s">&#39; --barcode-mismatches &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">Run</span><span class="o">.</span><span class="n">numMismatches</span><span class="p">)</span> \
+                          <span class="o">+</span> <span class="s">&#39; --output-dir &#39;</span>         <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">processingDir</span> \
+                          <span class="o">+</span> <span class="s">&#39; --use-bases-mask &#39;</span>     <span class="o">+</span> <span class="n">basesMask</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">Run</span><span class="o">.</span><span class="n">maskShortAdapterReads</span><span class="p">:</span>
+            <span class="n">command</span> <span class="o">+=</span> <span class="s">&#39; --mask-short-adapter-reads &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">Run</span><span class="o">.</span><span class="n">maskShortAdapterReads</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">Run</span><span class="o">.</span><span class="n">minTrimmedReadLength</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="n">command</span> <span class="o">+=</span> <span class="s">&#39; --minimum-trimmed-read-length &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">Run</span><span class="o">.</span><span class="n">minTrimmedReadLength</span><span class="p">)</span>
+
+        <span class="n">command</span> <span class="o">+=</span> <span class="s">&#39;; &#39;</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">Run</span><span class="o">.</span><span class="n">shell</span><span class="p">(</span><span class="n">command</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">Run</span><span class="o">.</span><span class="n">logFile</span><span class="p">)</span>
+
+</div>
+<div class="viewcode-block" id="NextSeqAnalysis.gather_analysis_fastq"><a class="viewcode-back" href="../../../_rst/iggytools.iggyseq.html#iggytools.iggyseq.analysisClasses.NextSeqAnalysis.gather_analysis_fastq">[docs]</a>    <span class="k">def</span> <span class="nf">gather_analysis_fastq</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+
+        <span class="c"># Merge per-lane fastq.gz files into one fastq.gz file per sample. (Lanes here refer to NextSeq lanes 1-4)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">Run</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="s">&#39;Concatenating fastq files...&#39;</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">Run</span><span class="o">.</span><span class="n">clearDir</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">finishingDir</span><span class="p">)</span>
+        <span class="n">os</span><span class="o">.</span><span class="n">mkdir</span><span class="p">(</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">finishingDir</span><span class="p">,</span><span class="s">&#39;Fastq&#39;</span><span class="p">))</span>
+
+        <span class="k">for</span> <span class="n">filename</span> <span class="ow">in</span> <span class="n">os</span><span class="o">.</span><span class="n">listdir</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">processingDir</span><span class="p">):</span>
+            <span class="k">for</span> <span class="n">readNumStr</span> <span class="ow">in</span> <span class="p">[</span><span class="s">&#39;1&#39;</span><span class="p">,</span> <span class="s">&#39;2&#39;</span><span class="p">]:</span>
+
+                <span class="n">sampNameMatch</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">match</span><span class="p">(</span><span class="s">&#39;([\S]+)_L001_R&#39;</span><span class="o">+</span><span class="n">readNumStr</span><span class="o">+</span><span class="s">&#39;_001.fastq.gz&#39;</span><span class="p">,</span> <span class="n">filename</span><span class="p">)</span>  <span class="c">#example file name: &#39;mySample_L001_R1_001.fastq.gz&#39;</span>
+
+                <span class="k">if</span> <span class="n">sampNameMatch</span><span class="p">:</span>
+                    <span class="n">sampName</span> <span class="o">=</span> <span class="n">sampNameMatch</span><span class="o">.</span><span class="n">groups</span><span class="p">(</span><span class="mi">1</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+
+                    <span class="bp">self</span><span class="o">.</span><span class="n">Run</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="s">&#39;Merging &#39;</span> <span class="o">+</span> <span class="n">sampName</span> <span class="o">+</span> <span class="s">&#39; R&#39;</span><span class="o">+</span><span class="n">readNumStr</span><span class="o">+</span><span class="s">&#39; fastq files...&#39;</span><span class="p">)</span>
+
+                    <span class="n">mergeFile</span> <span class="o">=</span> <span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">finishingDir</span><span class="p">,</span><span class="s">&#39;Fastq&#39;</span><span class="p">,</span><span class="n">sampName</span> <span class="o">+</span> <span class="s">&#39;.R&#39;</span> <span class="o">+</span> <span class="n">readNumStr</span> <span class="o">+</span> <span class="s">&#39;.fastq.gz&#39;</span><span class="p">)</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">Run</span><span class="o">.</span><span class="n">safeCopy</span><span class="p">(</span> <span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">processingDir</span><span class="p">,</span> <span class="n">sampName</span> <span class="o">+</span> <span class="s">&#39;_L001_R&#39;</span> <span class="o">+</span> <span class="n">readNumStr</span> <span class="o">+</span> <span class="s">&#39;_001.fastq.gz&#39;</span><span class="p">),</span> <span class="n">mergeFile</span> <span class="p">)</span>
+
+                    <span class="n">fout</span> <span class="o">=</span> <span class="nb">file</span><span class="p">(</span><span class="n">mergeFile</span><span class="p">,</span> <span class="s">&#39;ab&#39;</span><span class="p">)</span>
+                    <span class="k">for</span> <span class="n">laneNumStr</span> <span class="ow">in</span> <span class="p">[</span><span class="s">&#39;2&#39;</span><span class="p">,</span><span class="s">&#39;3&#39;</span><span class="p">,</span><span class="s">&#39;4&#39;</span><span class="p">]:</span>
+                        <span class="n">fin</span>  <span class="o">=</span> <span class="nb">file</span><span class="p">(</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">processingDir</span><span class="p">,</span> <span class="n">sampName</span> <span class="o">+</span> <span class="s">&#39;_L00&#39;</span> <span class="o">+</span> <span class="n">laneNumStr</span> <span class="o">+</span> <span class="s">&#39;_R&#39;</span> <span class="o">+</span> <span class="n">readNumStr</span> <span class="o">+</span> <span class="s">&#39;_001.fastq.gz&#39;</span><span class="p">),</span><span class="s">&#39;rb&#39;</span><span class="p">)</span>
+                        <span class="k">while</span> <span class="bp">True</span><span class="p">:</span>
+                            <span class="n">data</span> <span class="o">=</span> <span class="n">fin</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="mi">65536</span><span class="p">)</span>
+                            <span class="k">if</span> <span class="ow">not</span> <span class="n">data</span><span class="p">:</span>
+                                <span class="k">break</span>
+                            <span class="n">fout</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+                        <span class="n">fin</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+                    <span class="n">fout</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+
+</div>
+<div class="viewcode-block" id="NextSeqAnalysis.copy_reports_to_finishing"><a class="viewcode-back" href="../../../_rst/iggytools.iggyseq.html#iggytools.iggyseq.analysisClasses.NextSeqAnalysis.copy_reports_to_finishing">[docs]</a>    <span class="k">def</span> <span class="nf">copy_reports_to_finishing</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">Run</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="s">&#39;Copying stats files to finishing dir...&#39;</span><span class="p">)</span>
+
+        <span class="k">for</span> <span class="n">dirname</span> <span class="ow">in</span> <span class="p">[</span><span class="s">&#39;Stats&#39;</span><span class="p">,</span> <span class="s">&#39;Reports&#39;</span><span class="p">]:</span>
+            <span class="n">src</span> <span class="o">=</span> <span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">processingDir</span><span class="p">,</span> <span class="n">dirname</span><span class="p">)</span>
+            <span class="n">dest</span> <span class="o">=</span> <span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">finishingDir</span><span class="p">,</span> <span class="n">dirname</span><span class="p">)</span>
+
+            <span class="bp">self</span><span class="o">.</span><span class="n">Run</span><span class="o">.</span><span class="n">safeCopy</span><span class="p">(</span><span class="n">src</span><span class="p">,</span> <span class="n">dest</span><span class="p">)</span>
+
+        <span class="c">#copy analysis samplesheet to analysis finishingDir</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">Run</span><span class="o">.</span><span class="n">safeCopy</span><span class="p">(</span> <span class="bp">self</span><span class="o">.</span><span class="n">ssFile</span><span class="p">,</span> <span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">finishingDir</span><span class="p">,</span> <span class="n">path</span><span class="o">.</span><span class="n">basename</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ssFile</span><span class="p">))</span> <span class="p">)</span>
+
+</div>
+<div class="viewcode-block" id="NextSeqAnalysis.summarizeDemuxResults"><a class="viewcode-back" href="../../../_rst/iggytools.iggyseq.html#iggytools.iggyseq.analysisClasses.NextSeqAnalysis.summarizeDemuxResults">[docs]</a>    <span class="k">def</span> <span class="nf">summarizeDemuxResults</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>  <span class="c">#nextseq analysis</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">Run</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="s">&#39;Summarizing demux results...&#39;</span><span class="p">)</span>
+
+        <span class="n">summary</span> <span class="o">=</span> <span class="nb">list</span><span class="p">()</span>
+
+        <span class="c">## Append stats from html report to summary</span>
+        <span class="n">statsFile</span> <span class="o">=</span> <span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">finalDir</span><span class="p">,</span> <span class="s">&#39;Reports&#39;</span><span class="p">,</span> <span class="s">&#39;html&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">Run</span><span class="o">.</span><span class="n">flowcell</span><span class="p">,</span> <span class="s">&#39;all&#39;</span><span class="p">,</span> <span class="s">&#39;all&#39;</span><span class="p">,</span> <span class="s">&#39;all&#39;</span><span class="p">,</span> <span class="s">&#39;laneBarcode.html&#39;</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="n">statsFile</span><span class="p">):</span>
+
+            <span class="n">summary</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s">&#39;    No laneBarecode.html found in finalDir! Checking finishingDir...</span><span class="se">\n</span><span class="s">&#39;</span><span class="p">)</span>
+
+            <span class="n">statsFile</span> <span class="o">=</span> <span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">finishingDir</span><span class="p">,</span><span class="s">&#39;Basecall_Stats&#39;</span><span class="p">,</span><span class="s">&#39;Demultiplex_Stats.htm&#39;</span><span class="p">)</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="n">statsFile</span><span class="p">):</span>
+
+                <span class="n">summary</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s">&#39;    No laneBarecode.html found in finishingDir either.</span><span class="se">\n</span><span class="s">&#39;</span><span class="p">)</span>
+
+                <span class="k">return</span> <span class="n">summary</span>
+
+        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">statsFile</span><span class="p">,</span><span class="s">&#39;r&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">fh</span><span class="p">:</span> 
+            <span class="n">stats</span> <span class="o">=</span> <span class="n">fh</span><span class="o">.</span><span class="n">read</span><span class="p">()</span>
+
+        <span class="n">tree</span> <span class="o">=</span> <span class="n">html</span><span class="o">.</span><span class="n">fromstring</span><span class="p">(</span><span class="n">stats</span><span class="p">)</span>
+        <span class="n">table</span> <span class="o">=</span> <span class="n">tree</span><span class="o">.</span><span class="n">xpath</span><span class="p">(</span><span class="s">&#39;//table&#39;</span><span class="p">)[</span><span class="mi">2</span><span class="p">]</span>  <span class="c">#get &quot;Lane Summary&quot; table</span>
+        <span class="n">rows</span> <span class="o">=</span> <span class="n">table</span><span class="o">.</span><span class="n">xpath</span><span class="p">(</span><span class="s">&#39;./tr&#39;</span><span class="p">)</span>
+        <span class="n">nsamps</span> <span class="o">=</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">rows</span><span class="p">)</span> <span class="o">-</span> <span class="mi">2</span><span class="p">)</span><span class="o">/</span><span class="mf">4.0</span> <span class="c">#nsamps is number of samples per lane, including the &#39;unknown&#39; sample of unassigned reads </span>
+
+        <span class="n">laneStats</span> <span class="o">=</span> <span class="n">OrderedDict</span><span class="p">()</span>
+        <span class="n">sampStats</span> <span class="o">=</span> <span class="n">OrderedDict</span><span class="p">()</span>
+
+        <span class="n">totalReads</span> <span class="o">=</span> <span class="mi">0</span>  <span class="c">#across all 4 nextseq lanes</span>
+        
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span><span class="nb">len</span><span class="p">(</span><span class="n">rows</span><span class="p">)):</span>  <span class="c">#get per-lane and per-sample stats</span>
+            <span class="n">row</span> <span class="o">=</span> <span class="n">rows</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+            <span class="n">cols</span> <span class="o">=</span> <span class="n">row</span><span class="o">.</span><span class="n">xpath</span><span class="p">(</span><span class="s">&#39;./th | ./td&#39;</span><span class="p">);</span>
+
+            <span class="c"># Table cols:</span>
+            <span class="c">#   Lane number</span>
+            <span class="c">#   Project</span>
+            <span class="c">#   Sample</span>
+            <span class="c">#   Barcode sequence</span>
+            <span class="c">#   Raw data:  Clusters</span>
+            <span class="c">#   Raw data:  Perc. of the lane</span>
+            <span class="c">#   Raw data:  Perc. perfect barcode</span>
+            <span class="c">#   Raw data:  Perc. one mismatch barcode</span>
+            <span class="c">#   Filtered data:  Clusters</span>
+            <span class="c">#   Filtered data:  Yield (Mbases)</span>
+            <span class="c">#   Filtered data:  Perc. PF Clusters</span>
+            <span class="c">#   Filtered data:  Perc. &gt;Q30 bases</span>
+            <span class="c">#   Filtered data:  Mean quality score</span>
+
+            <span class="n">lane</span> <span class="o">=</span> <span class="n">cols</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">text</span>
+            <span class="n">samp</span> <span class="o">=</span> <span class="n">cols</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="o">.</span><span class="n">text</span>
+            <span class="n">numReads</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="s">&#39;,&#39;</span><span class="p">,</span><span class="s">&#39;&#39;</span><span class="p">,</span><span class="n">cols</span><span class="p">[</span><span class="mi">8</span><span class="p">]</span><span class="o">.</span><span class="n">text</span><span class="p">)</span>
+            <span class="n">perc_Q30bases</span> <span class="o">=</span> <span class="n">cols</span><span class="p">[</span><span class="mi">11</span><span class="p">]</span><span class="o">.</span><span class="n">text</span>
+            
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">numReads</span><span class="p">:</span>
+                <span class="n">numReads</span> <span class="o">=</span> <span class="mi">0</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">numReads</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">numReads</span><span class="p">)</span>
+                <span class="n">totalReads</span> <span class="o">+=</span> <span class="n">numReads</span>
+
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">perc_Q30bases</span><span class="p">:</span> 
+                <span class="n">perc_Q30bases</span> <span class="o">=</span> <span class="mf">0.0</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">perc_Q30bases</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">perc_Q30bases</span><span class="p">)</span>
+
+            <span class="k">if</span> <span class="n">lane</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">laneStats</span><span class="p">:</span>
+                <span class="n">laneStats</span><span class="p">[</span><span class="n">lane</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span><span class="s">&#39;numReads&#39;</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span> <span class="s">&#39;num_Q30bases&#39;</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span> <span class="s">&#39;perc_Q30bases&#39;</span><span class="p">:</span> <span class="mi">0</span><span class="p">}</span>
+
+            <span class="n">laneStats</span><span class="p">[</span><span class="n">lane</span><span class="p">][</span><span class="s">&#39;numReads&#39;</span><span class="p">]</span> <span class="o">+=</span> <span class="n">numReads</span>
+            <span class="n">laneStats</span><span class="p">[</span><span class="n">lane</span><span class="p">][</span><span class="s">&#39;num_Q30bases&#39;</span><span class="p">]</span> <span class="o">+=</span> <span class="n">perc_Q30bases</span> <span class="o">*</span> <span class="n">numReads</span>
+
+            <span class="k">if</span> <span class="n">samp</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">sampStats</span><span class="p">:</span>
+                <span class="n">sampStats</span><span class="p">[</span><span class="n">samp</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span><span class="s">&#39;numReads&#39;</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span> <span class="s">&#39;num_Q30bases&#39;</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span> <span class="s">&#39;perc_Q30bases&#39;</span><span class="p">:</span> <span class="mi">0</span><span class="p">}</span>
+
+            <span class="n">sampStats</span><span class="p">[</span><span class="n">samp</span><span class="p">][</span><span class="s">&#39;numReads&#39;</span><span class="p">]</span> <span class="o">+=</span> <span class="n">numReads</span>
+            <span class="n">sampStats</span><span class="p">[</span><span class="n">samp</span><span class="p">][</span><span class="s">&#39;num_Q30bases&#39;</span><span class="p">]</span> <span class="o">+=</span> <span class="n">perc_Q30bases</span> <span class="o">*</span> <span class="n">numReads</span>
+
+
+        <span class="n">totalReads</span> <span class="o">=</span> <span class="mi">0</span>  <span class="c">#find the total number of reads across all 4 next seq lanes. (A single lane to the user.)</span>
+        <span class="k">for</span> <span class="n">lane</span> <span class="ow">in</span> <span class="n">laneStats</span><span class="p">:</span>
+            <span class="n">ln</span> <span class="o">=</span> <span class="n">laneStats</span><span class="p">[</span><span class="n">lane</span><span class="p">]</span>
+            <span class="n">totalReads</span> <span class="o">+=</span> <span class="n">ln</span><span class="p">[</span><span class="s">&#39;numReads&#39;</span><span class="p">]</span>
+            <span class="k">if</span> <span class="n">ln</span><span class="p">[</span><span class="s">&#39;numReads&#39;</span><span class="p">]</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="n">ln</span><span class="p">[</span><span class="s">&#39;perc_Q30bases&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">ln</span><span class="p">[</span><span class="s">&#39;num_Q30bases&#39;</span><span class="p">]</span><span class="o">/</span><span class="n">ln</span><span class="p">[</span><span class="s">&#39;numReads&#39;</span><span class="p">]</span>
+
+        <span class="k">for</span> <span class="n">samp</span> <span class="ow">in</span> <span class="n">sampStats</span><span class="p">:</span>
+            <span class="n">s</span> <span class="o">=</span> <span class="n">sampStats</span><span class="p">[</span><span class="n">samp</span><span class="p">]</span>
+            <span class="k">if</span> <span class="n">s</span><span class="p">[</span><span class="s">&#39;numReads&#39;</span><span class="p">]</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="n">s</span><span class="p">[</span><span class="s">&#39;perc_Q30bases&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">s</span><span class="p">[</span><span class="s">&#39;num_Q30bases&#39;</span><span class="p">]</span><span class="o">/</span><span class="n">s</span><span class="p">[</span><span class="s">&#39;numReads&#39;</span><span class="p">]</span>
+
+        <span class="n">laneRows</span> <span class="o">=</span> <span class="p">[[</span><span class="s">&#39;Lane&#39;</span><span class="p">,</span> <span class="s">&#39;Reads&#39;</span><span class="p">,</span> <span class="s">&#39;% Bases &gt;= Q30&#39;</span><span class="p">]]</span> <span class="o">+</span> <span class="p">[[</span><span class="n">lane</span><span class="p">,</span> <span class="n">format</span><span class="p">(</span><span class="n">laneStats</span><span class="p">[</span><span class="n">lane</span><span class="p">][</span><span class="s">&#39;numReads&#39;</span><span class="p">],</span> <span class="s">&#39;n&#39;</span><span class="p">),</span> <span class="s">&#39;</span><span class="si">%.2f</span><span class="s">&#39;</span> <span class="o">%</span> <span class="n">laneStats</span><span class="p">[</span><span class="n">lane</span><span class="p">][</span><span class="s">&#39;perc_Q30bases&#39;</span><span class="p">]]</span> <span class="k">for</span> <span class="n">lane</span> <span class="ow">in</span> <span class="n">laneStats</span><span class="p">]</span>
+        <span class="n">sampRows</span> <span class="o">=</span> <span class="p">[[</span><span class="s">&#39;Sample&#39;</span><span class="p">,</span> <span class="s">&#39;Reads&#39;</span><span class="p">,</span> <span class="s">&#39;% Bases &gt;= Q30&#39;</span><span class="p">]]</span> <span class="o">+</span> <span class="p">[[</span><span class="n">samp</span><span class="p">,</span> <span class="n">format</span><span class="p">(</span><span class="n">sampStats</span><span class="p">[</span><span class="n">samp</span><span class="p">][</span><span class="s">&#39;numReads&#39;</span><span class="p">],</span> <span class="s">&#39;n&#39;</span><span class="p">),</span> <span class="s">&#39;</span><span class="si">%.2f</span><span class="s">&#39;</span> <span class="o">%</span> <span class="n">sampStats</span><span class="p">[</span><span class="n">samp</span><span class="p">][</span><span class="s">&#39;perc_Q30bases&#39;</span><span class="p">]]</span> <span class="k">for</span> <span class="n">samp</span> <span class="ow">in</span> <span class="n">sampStats</span><span class="p">]</span>
+        
+        <span class="c">## Append analysis read count and num samps</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">Run</span><span class="o">.</span><span class="n">SampleSheet</span><span class="o">.</span><span class="n">nonIndexRead1_numCycles</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">note</span> <span class="o">=</span> <span class="s">&#39;R1+R2&#39;</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">note</span> <span class="o">=</span> <span class="s">&#39;R1 only&#39;</span>
+
+        <span class="n">summary</span><span class="o">.</span><span class="n">append</span><span class="p">(</span> <span class="s">&#39;Reads (</span><span class="si">%s</span><span class="s">):  </span><span class="si">%s</span><span class="se">\n</span><span class="s">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">note</span><span class="p">,</span> <span class="n">format</span><span class="p">(</span><span class="n">totalReads</span><span class="p">,</span> <span class="s">&#39;n&#39;</span><span class="p">))</span> <span class="p">)</span>
+        <span class="n">summary</span><span class="o">.</span><span class="n">append</span><span class="p">(</span> <span class="s">&#39;Number of samples:  </span><span class="si">%s</span><span class="se">\n</span><span class="s">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">nsamps</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span> <span class="p">)</span>  <span class="c">#subtract 1 to exclude the undetermined sample</span>
+
+        <span class="c">## Append detailed stats tables</span>
+        <span class="n">summary</span> <span class="o">+=</span> <span class="bp">self</span><span class="o">.</span><span class="n">formatTable</span><span class="p">(</span><span class="n">laneRows</span><span class="p">)</span>
+        <span class="n">summary</span> <span class="o">+=</span> <span class="bp">self</span><span class="o">.</span><span class="n">formatTable</span><span class="p">(</span><span class="n">sampRows</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">summary</span>
+</pre></div></div></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../../index.html">iggytools 0.1 documentation</a> &raquo;</li>
+          <li class="nav-item nav-item-1"><a href="../../index.html" >Module code</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &copy; Copyright 2015, Chris Williams.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.3.1.
+    </div>
+  </body>
+</html>
