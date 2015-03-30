@@ -17,14 +17,13 @@ Below is an example seqprep command for a HiSeq run:
 And a NextSeq run:
     ``seqprep 150305_NS500422_0094_AH57JTBGXX --verbose --mismatches 1 --suppressAdapterTrimming --suffix '_test1'``
 
-However most runs will require no extra options:
-
+However most runs will require no extra options.
     ``seqprep 150305_NS500422_0094_AH57JTBGXX``
 
 Although it's probably a good idea to use ``--verbose`` so you can see log information echoed stdout. Also, if you must reprocess a run,
 it's a good idea to use ``--suffix`` to tack a string onto the end of the output run folder name, so that previous results are not overwritten.
 
-To create run an hourly cron job which runs seqprep on new runs in /n/illumina01/primary_data, add the following line to your crontab file:
+To create run an hourly cron job which runs seqprep on new runs in /n/illumina01/primary_data, add the following line to your crontab file.
     ``0 * * * * /n/informatics/iggy/IggyTools/iggytools/bin/cron_seqprep.sh``
 
 Once a run has begun processing, seqprep_seen.txt will be written to the run folder. If you want this cron job to process a run again,
