@@ -11,15 +11,12 @@ SeqPrep
 Use the command ``seqprep`` to demultiplex runs. To see usage and default parameters, type:
     ``seqprep -h``
 
-Below is an example seqprep command for a HiSeq run.
+Below is an example seqprep command for a HiSeq run:
     ``seqprep 150305_D00365_0435_BH2LLNBCXX --suffix '_test1' --verbose --lanes 2``
-
-And a NextSeq run.
+And a NextSeq run:
     ``seqprep 150305_NS500422_0094_AH57JTBGXX --verbose --mismatches 1 --suppressAdapterTrimming --suffix '_test1'``
-
 However most runs will require no extra options.
     ``seqprep 150305_NS500422_0094_AH57JTBGXX``
-
 Although it's probably a good idea to use ``--verbose`` so you can see log information echoed stdout. Also, if you must reprocess a run,
 it's a good idea to use ``--suffix`` to tack a string onto the end of the output run folder name, so that previous results are not overwritten.
 
@@ -30,7 +27,6 @@ Once a run has begun processing, seqprep_seen.txt will be written to the run fol
 delete this file from the run's primray_data folder.
 
 To see the current state of a processing run, look at log.txt in its log folder:
-
    ``/n/informatics_external/seq/seqprep_log/<run_name>``
 
 Note that if you started processing with the seqprep and specified a suffix, the log folder name will be ``<run_name><suffix>``.
