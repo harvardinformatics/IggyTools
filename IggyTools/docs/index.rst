@@ -11,10 +11,10 @@ SeqPrep
 Use the command ``seqprep`` to demultiplex runs. To see usage and default parameters, type:
     ``seqprep -h``
 
-Below is an example seqprep command for a HiSeq run:
+Below is an example seqprep command for a HiSeq run.
     ``seqprep 150305_D00365_0435_BH2LLNBCXX --suffix '_test1' --verbose --lanes 2``
 
-And a NextSeq run:
+And a NextSeq run.
     ``seqprep 150305_NS500422_0094_AH57JTBGXX --verbose --mismatches 1 --suppressAdapterTrimming --suffix '_test1'``
 
 However most runs will require no extra options.
