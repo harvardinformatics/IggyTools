@@ -10,7 +10,7 @@ class Iggyref_PrefFile(BasePrefFile):
 
         BasePrefFile.__init__(self, 
                               ID = 'iggyref', 
-                              filePath = path.join(prefDir, 'iggyref_settings.yaml'), 
+                              filePath = path.join(path.expanduser(prefDir), 'iggyref_settings.yaml'), 
                               iggytool = 'iggyref')
 
         self.vars = [ PrefVar( name = 'IGGYREF_REPOSITORY_DIR',
@@ -90,7 +90,7 @@ class Iggyref_PrefFile(BasePrefFile):
 
         vDict = dict( [(x.name, x.value) for x in self.vars] )
 
-        vDict['REPO_DIR']      = vDict.pop('IGGYREF_REPOSITORY_DIR')   #rename key
+        vDict['REPO_DIR']      = path.expanduser(vDict.pop('IGGYREF_REPOSITORY_DIR'))   #rename key
 
         vDict['WORK_DIR']      = path.join( vDict['REPO_DIR'], '.work' )
 

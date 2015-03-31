@@ -42,3 +42,35 @@ More information about this bug is in the bcl2fastq release notes:
   http://support.illumina.com/content/dam/illumina-support/documents/documentation/software_documentation/bcl2fastq/bcl2fastq2-v2.15.0-customer-release-notes-15053886-b.pdf
 
 As a workaround, SeqPrep passes a value of 0 to bcl2fastq2 for the minimum trimmed read length.
+
+IggyPipe
+--------
+
+To use IggyPipe, first run the setup script:
+    ``source /n/informatics/iggy/setup.sh``
+
+Below is an example of how to create and run a pipeline with two modules -- FastQC and Bowtie:
+
+.. code-block:: python
+
+   from iggytools.iggypipeline.iggyPipeClass import IggyPipe
+
+   myfastq = '/n/informatics/iggy/IggyTools/iggytools/iggypipeline/test/samp1.fastq'
+   index = '/n/regal/informatics_public/ref/ensembl/release-79/homo_sapiens/Homo_sapiens.GRCh38.cds.all'
+
+   pipe = IggyPipe('Analysis1', pipeDir = '~/iggypipe_test/')  #create a new pipeline
+   pipe.help()                       #print pipeline parameters and methods 
+
+   fastqc = pipe.add('Fastqc')       #add fastqc module
+   fastqc.help()                     #print fastqc input paraemtes, methods and default settings
+   fastqc.input(inFiles = myfastq)   #set input parameters 
+   fastqc.view()                     #view current input settings
+
+   bowtie = pipe.add('Bowtie2')      #add bowtie module
+   bowtie.input(unpaired = myfastq, index_stem = index)   #set inputs
+
+   pipe.view()                       #view all module, slurm settings
+   
+   pipe.run()                        # run locally
+   pipe.srun()                       # run on slurm
+

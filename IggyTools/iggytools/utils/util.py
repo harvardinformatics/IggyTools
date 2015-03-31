@@ -129,7 +129,7 @@ def sbatch(scriptFile):  #submit a job to slurm
     if match:
         return int(match.group(1))
     else:
-        raise Exception('Unable to submit slurm script %s:\n  %s' % (scriptFile, traceback.format_exc()))
+        raise Exception('Unable to submit slurm script %s:\n  %s' % (scriptFile, out))
 
 
 def printJobStatus(jobID):  

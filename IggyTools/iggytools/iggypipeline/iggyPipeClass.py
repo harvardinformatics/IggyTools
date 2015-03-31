@@ -19,7 +19,7 @@ class IggyPipe(object):
 
         #load preferences
         prefObj = Iggytools_Preferences(prefDir = prefDir)
-        self.prefDir = prefObj.prefDir
+        self.prefDir = path.expanduser(prefObj.prefDir)
         self.iggyPref = prefObj.getPreferences()
 
         self.pref = self.iggyPref['iggypipe']['iggypipe']
@@ -31,7 +31,7 @@ class IggyPipe(object):
             self.name = 'iggyproj'
 
         if pipeDir:
-            self.pipeDir = pipeDir
+            self.pipeDir = path.expanduser(pipeDir)
         else:
             self.pipeDir = path.join(self.pref.RESULTS_DIR, self.name)
 
@@ -117,7 +117,7 @@ class IggyPipe(object):
 
     def status(self):  #show status of cluster jobs
 
-        for mod in self.modules()
+        for mod in self.modules():
             print '\nModule: %s' % (mod.name)
             mod.status()
 

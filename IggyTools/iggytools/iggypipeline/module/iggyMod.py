@@ -147,6 +147,8 @@ class IggyMod:
         
         self.db.write_new_module(self, status = 'SUBMITTED')
 
+        if self.verbose:
+            print 'Submitted job %s' % self.jobID
 
     def status(self):
         

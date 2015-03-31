@@ -11,7 +11,7 @@ def main(arg):
 
     parser = argparse.ArgumentParser(arg)
 
-    parser.add_argument('-d', '--prefDir', help='Directory where iggyref preferences file will be created. Default: %(default)s', default = defaultPrefDir)
+    parser.add_argument('-d', '--prefDir', help='Directory where IggyTools preferences files will be created. Default: %(default)s', default = defaultPrefDir)
 
     args = parser.parse_args()
 

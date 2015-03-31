@@ -11,7 +11,7 @@ class Iggypipe_PrefFile(BasePrefFile):
 
         BasePrefFile.__init__(self, 
                               ID = 'iggypipe', 
-                              filePath = path.join(prefDir, 'iggypipe_settings.yaml'), 
+                              filePath = path.join(path.expanduser(prefDir), 'iggypipe_settings.yaml'), 
                               iggytool = 'iggypipe')
 
         self.vars = [ PrefVar( name = 'IGGYPIPE_DIR',
@@ -63,7 +63,7 @@ class Iggypipe_PrefFile(BasePrefFile):
         varNames = [x.name for x in self.vars]
 
         iggypipe_index = varNames.index('IGGYPIPE_DIR')
-        iggypipe_dir = self.vars[iggypipe_index].value
+        iggypipe_dir = path.expanduser(self.vars[iggypipe_index].value)
 
         self.vars.append( PrefVar( name = 'LOG_DIR',
                                    value = path.join(iggypipe_dir, 'log') ) )

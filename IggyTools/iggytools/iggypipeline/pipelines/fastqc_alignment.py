@@ -1,25 +1,20 @@
-
 from iggytools.iggypipeline.iggyPipeClass import IggyPipe
 
-myfastq = '/n/informatics/IggyTools/iggytools/iggypipeline/test/samp1.fastq'
+myfastq = '/n/informatics/iggy/IggyTools/iggytools/iggypipeline/test/samp1.fastq'
 index = '/n/regal/informatics_public/ref/ensembl/release-79/homo_sapiens/Homo_sapiens.GRCh38.cds.all'
 
-pipe = IggyPipe('Analysis1', pipeDir = '/n/informatics/IggyTools/iggytools/iggypipeline/test')
-pipe.help()
+pipe = IggyPipe('Analysis1', pipeDir = '~/iggypipe_test/')  #create a new pipeline
+pipe.help()                       #print pipeline parameters and methods
 
-#add fastqc module
-fastqc = pipe.add('Fastqc')
-fastqc.help()
-fastqc.input(inFiles = myfastq)  
-fastqc.view()
+fastqc = pipe.add('Fastqc')       #add fastqc module
+fastqc.help()                     #print fastqc input paraemtes, methods and default settings
+fastqc.input(inFiles = myfastq)   #set input parameters
+fastqc.view()                     #view current input settings
 
-#add bowtie module
-bowtie = pipe.add('Bowtie2')
-bowtie.input(unpaired = myfastq, index_stem = index)
+bowtie = pipe.add('Bowtie2')      #add bowtie module
+bowtie.input(unpaired = myfastq, index_stem = index)   #set inputs
 
-#view all module, slurm settings
-pipe.view()
+pipe.view()                       #view all module, slurm settings
 
-pipe.run()  # run locally
-pipe.srun()  # run on slurm
-
+pipe.run()                        # run locally
+pipe.srun()                       # run on slurm

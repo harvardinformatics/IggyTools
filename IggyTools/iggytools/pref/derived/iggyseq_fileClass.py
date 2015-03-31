@@ -11,7 +11,7 @@ class Iggyseq_PrefFile(BasePrefFile):
 
         BasePrefFile.__init__(self, 
                               ID = 'iggyseq', 
-                              filePath = path.join(prefDir, 'iggyseq_settings.yaml'), 
+                              filePath = path.join(path.expanduser(prefDir), 'iggyseq_settings.yaml'), 
                               iggytool = 'iggyseq')
 
         self.vars = [ PrefVar( name = 'VERBOSE',
