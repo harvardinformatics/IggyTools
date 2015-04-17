@@ -11,6 +11,10 @@ try:
 except ImportError:
     from ordereddict import OrderedDict # for python 2.6 and earlier, use backport                                                                                                   
 
+def get_analysisName(userLaneLabel, indexType):
+    return 'Lane%s.indexlength_%s' % (userLaneLabel, indexType)
+
+
     
 class BaseSampleSheet:
 
@@ -98,6 +102,28 @@ class BaseSampleSheet:
         return index
 
 
+    def makeNewAnalysis(self, analName, index1Length = 0, index2Length = 0):
+
+        a = IlluminaNextGenAnalysis.getInstance(analName, self.Run)
+
+        a.index1Length = index1Length
+        a.index2Length = index2Length
+
+        self.analyses.append(a)
+
+        return a
+
+
+    def makeNewLane(self, userLaneLabel):
+        
+        lane = Lane(self.Run)
+        lane.userLaneLabel = userLaneLabel
+
+        self.lanes.append(lane)
+
+        return lane
+
+
 
 class SampleSheet_formatA(BaseSampleSheet):
     
@@ -183,10 +209,7 @@ class SampleSheet_formatA(BaseSampleSheet):
             ##
 
             if laneName not in [x.userLaneLabel for x in self.lanes]:
-                #start new lane
-                lane = Lane(self.Run)
-                lane.userLaneLabel = laneName
-                self.lanes.append(lane)
+                lane = self.makeNewLane(laneName)  #start new lane
 
             #set lane index1 length to maximum of index1 real lengths
             if not lane.index1Length or rlen1 > lane.index1Length:
@@ -206,14 +229,10 @@ class SampleSheet_formatA(BaseSampleSheet):
             # Analysis Obj
             ##
 
-            analName = 'Lane' + lane.userLaneLabel + '.indexlength_' + indexType  
-            if analName not in [x.name for x in self.analyses]:
-                #start new analysis
-                analysis = IlluminaNextGenAnalysis.getInstance(analName, self.Run)
-                analysis.index1Length = rlen1
-                analysis.index2Length = rlen2
+            analName = get_analysisName(lane.userLaneLabel, indexType)
 
-                self.analyses.append(analysis)
+            if analName not in [x.name for x in self.analyses]:
+                analysis = self.makeNewAnalysis(analName, rlen1, rlen2)  #start new analysis
 
             analysis.ssSampleLines.append(vDict)        #assign sample to this analysis
             analysis.ssLineIndices.append(i)            #record lines in samplesheet that correspond to this analysis
@@ -236,6 +255,10 @@ class SampleSheet_formatA(BaseSampleSheet):
             self.ss[i] = ','.join( [vDict[x] for x in colNames] )
 
             # Done parsing samplesheet.
+
+        if not self.analyses: #if there was no data in the samplesheet
+            self.makeNewAnalysis(get_analysisName('1', '0'))  #set lane to 1, index length to 0.
+            self.makeNewLane('1')
 
         self.subIDs = unique(flatten([x.subIDs for x in self.analyses]))
 
@@ -340,11 +363,7 @@ class SampleSheet_formatB(BaseSampleSheet):
                     userLaneLabel = lane
 
                 if userLaneLabel not in self.lanes:
-                    #create new Lane
-                    lane = Lane(self.Run)
-                    lane.userLaneLabel = userLaneLabel
-
-                    self.lanes.append(lane)
+                    lane = self.makeNewLane(userLaneLabel) #start new Lane
 
                 rlen1 = len(index1)  #initialize "real" index lengths to index lengths before adjustment
                 rlen2 = len(index2)
@@ -362,19 +381,17 @@ class SampleSheet_formatB(BaseSampleSheet):
 
                     if len(elems) > 2:
                         self.warnings.append('Too many values in description field in samplesheet %s, Line %s: %s' % (self.file, i+1, line))
-                    elif len(elems) > 0:
+                    elif len(elems) > 0 and elems[0].isdigit():
                         rlen1 = elems[0]
 
-                        if len(elems) == 2:
+                        if len(elems) == 2 and elems[1].isdigit():
                             rlen2 = elems[1]
-                        else:
-                            rlen2 = 0
                         
                         #shorten or lengthen indices according to rlen1 and rlen2
                         if rlen1 != len(index1):
                             index1 = self.adjustIndexLength(index1, rlen1)  
                         if rlen2 != len(index2):
-                            index2 = self.adjustIndexLength(index2, rlen2)
+                            index2 = self.adjustIndexLength(index2, rlen2)  
 
                 #set lane index1 length to maximum of index1 real lengths
                 if not lane.index1Length or rlen1 > lane.index1Length:
@@ -387,18 +404,15 @@ class SampleSheet_formatB(BaseSampleSheet):
                 indexType = str(rlen1)  #make index type label
                 if rlen2 > 0:
                     indexType += '_' + str(rlen2)
+                self.indexType = indexType
 
                 if lane == 'NoLane':
                     analName = 'indexlength_' + indexType  
                 else:
-                    analName = 'Lane' + lane.userLaneLabel + '.indexlength_' + indexType  
+                    analName = get_analysisName(lane.userLaneLabel, indexType)
 
                 if analName not in [x.name for x in self.analyses]: 
-                    #start new analysis
-                    analysis = IlluminaNextGenAnalysis.getInstance(analName, self.Run)
-                    analysis.index1Length = rlen1
-                    analysis.index2Length = rlen2
-                    self.analyses.append(analysis)
+                    analysis = self.makeNewAnalysis(analName, rlen1, rlen2) #start new analysis
 
                 #ensure both sample_id and sample_name are set
                 if len(vDict['sample_id']) == 0 and len(vDict['sample_name']) > 0:  
@@ -453,6 +467,10 @@ class SampleSheet_formatB(BaseSampleSheet):
                 self.ss[i] = ','.join( vals )
 
             # Done parsing samplesheet.
+
+        if not self.analyses: #if there were no lines in the SampleData section of the samplesheet
+            self.makeNewAnalysis('All_Reads')
+            self.makeNewLane('1')
 
         self.subIDs = unique(flatten(x.subIDs for x in self.analyses))
 

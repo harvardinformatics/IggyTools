@@ -11,6 +11,7 @@ from iggytools.iggyseq.seqstats.illuminate import InteropDataset
 import shutil, time, json, sys, re, os
 import os.path as path
 
+
 def getRun(runName): #get run from DB (exception raised if does not exist)
     runs = list(SeqRun.objects.filter(run_name=runName))
     if len(runs) > 1:

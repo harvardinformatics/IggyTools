@@ -40,6 +40,8 @@ class IlluminaNextGen:
 
     def __init__(self, runName, pref = None, **kwargs):
 
+        os.umask(002)
+
         if not pref:
             pref = getSeqPref()
         self.pref = pref

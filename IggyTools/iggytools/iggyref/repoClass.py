@@ -13,6 +13,8 @@ class Repo(object):
 
     def __init__(self, source, prefDir = None, selectedCollections = None):
 
+        os.umask(002)
+
         prefObj = Iggytools_Preferences(prefDir = prefDir)        
         self.iggyPref = prefObj.getPreferences()
         pref = self.iggyPref['iggyref']
