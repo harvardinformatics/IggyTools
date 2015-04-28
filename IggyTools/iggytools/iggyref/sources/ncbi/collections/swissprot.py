@@ -1,22 +1,34 @@
 
-fileList = ['swissprot.tar.gz']
+##
+# Swissprot fasta file, db file
+##
+
+fileList = ['swissprot.gz', 'swissprot.tar.gz']
 
 fileProperties = dict()
-for myfile in fileList:
-    fileProperties[myfile] = dict()
-    fileProperties[myfile]['ftpSubDir'] = 'blast/db'
-    fileProperties[myfile]['checksumFile'] = myfile + '.md5'
 
-tasks = list()
-for myfile in fileList:
-    tasks.append( dict(taskName = 'unzip-untar', inFiles = myfile) )
+fileProperties['swissprot.gz'] = dict()
+fileProperties['swissprot.gz']['ftpSubDir'] = 'blast/db/FASTA'
+fileProperties['swissprot.gz']['checksumFile'] = 'swissprot.gz.md5'
+
+
+fileProperties['swissprot.tar.gz'] = dict()
+fileProperties['swissprot.tar.gz']['ftpSubDir'] = 'blast/db'
+fileProperties['swissprot.tar.gz']['checksumFile'] = 'swissprot.tar.gz.md5'
+
+
+tasks = [ dict(taskName = 'unzip', inFiles = 'swissprot.gz', outFiles = 'swissprot.fa'),
+          dict(taskName = 'unzip-untar', inFiles = 'swissprot.tar.gz') ]
+
 
 collectionProperties = dict(
     primaryID = 'swissprot',
     secondaryID = '',
     collectionType = 'database',
+    aliasFileType = None,
     fileList = fileList,
     fileProperties = fileProperties,
+    dbFileProp = None,
     tasks = tasks
 )
 

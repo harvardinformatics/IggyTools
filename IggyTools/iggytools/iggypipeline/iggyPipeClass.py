@@ -9,10 +9,11 @@ from iggytools.iggypipeline.module.derived.bowtie2 import Bowtie2
 from iggytools.iggypipeline.help.pipeHelp import pipeHelp
 from iggytools.iggypipeline.help.modHelp import modHelp
 
+
 class IggyPipe(object):
 
 
-    def __init__(self, name = None, pipeDir = None, prefDir = None, notify = True, verbose = True):
+    def __init__(self, name = None, pipeDir = None, pipeParentDir = None, prefDir = None, notify = True, verbose = True):
 
         self.availModNames = ['Fastqc', 'Trimmomatic', 'Bowtie2']
         self.pipeID = None
@@ -24,37 +25,29 @@ class IggyPipe(object):
 
         self.pref = self.iggyPref['iggypipe']['iggypipe']
 
-        #set pipe name, pipeDir. Create pipeDir if it doesn't exist.
+        #set pipe name, pipeDir.
         if name:
             self.name = name
         else:
             self.name = 'iggyproj'
 
-        if pipeDir:
+        if pipeDir:  # set output directory
             self.pipeDir = path.expanduser(pipeDir)
+        elif pipeParentDir:
+            self.pipeDir = path.join( path.expanduser(pipeParentDir), self.name )
         else:
             self.pipeDir = path.join(self.pref.RESULTS_DIR, self.name)
 
         mkdir_p(self.pipeDir)
 
-        #logging setup
-        mkdir_p(self.pref.LOG_DIR)
-        self.logFile = path.join(self.pref.LOG_DIR, 'iggypipe.log')
-        logging.basicConfig(filename = self.logFile,
-                            format = '%(asctime)s - %(name)s - %(funcName)s - %(levelname)s - %(message)s',
-                            datefmt = '%m/%d/%Y %I:%M:%S %p',
-                            level = self.pref.LOGGING_LEVEL)
-        self.log = logging.getLogger('iggypipe')
-        sh = logging.StreamHandler(sys.stdout)
-        sh.setLevel(self.pref.LOGGING_LEVEL)
-        sh.setFormatter(logging.Formatter('%(asctime)s - %(name)s - %(funcName)s - %(levelname)s - %(message)s'))
-        self.log.addHandler(sh)
-
         self.db = iggypipeDB(self.pref)
+        
+        self.logFile = path.join(self.pref.LOG_DIR, 'iggypipe.log') # logging setup
+        self.log = getLogger(self.pref, self.logFile, 'iggypipe')
 
-        self.verbose = verbose  #true is pipeline created in the interpreter.
+        self.verbose = verbose  #true is pipeline is created in the interpreter.
         self.notify = notify   # optional override of notify setting in preferences file.
-        self.users = getpass.getuser()  #for iggypipe notifications
+        self.users = getpass.getuser()  #user to send iggypipe notifications
 
         self.modules = list()
 
@@ -81,12 +74,13 @@ class IggyPipe(object):
             mod.view(indent)
             mod.sview(indent)
 
-    def add(self, modName):
+
+    def add(self, modName, outName = None):
 
         if modName not in self.availModNames:
             raise Exception('Module %s not found. Available modules: %s' % (modName, ', '.join(self.availModNames)))
 
-        m = globals()[modName](pipe = self)  
+        m = globals()[modName](pipe = self, outName = outName)  
 
         self.modules.append(m)
 
@@ -127,3 +121,23 @@ class IggyPipe(object):
             return '<IggyPipe(%s, pipeID: %s)>' % (self.name, self.pipeID)
         else:
             return '<IggyPipe(%s)>' % (self.name)
+
+
+
+def getLogger(pref, logFile, logName):
+
+    mkdir_p( path.dirname(logFile) )
+
+    logging.basicConfig(filename = logFile,
+                        format = '%(asctime)s - %(name)s - %(funcName)s - %(levelname)s - %(message)s',
+                        datefmt = '%m/%d/%Y %I:%M:%S %p',
+                        level = pref.LOGGING_LEVEL)
+    log = logging.getLogger(logName)
+
+    sh = logging.StreamHandler(sys.stdout)
+    sh.setLevel(pref.LOGGING_LEVEL)
+    sh.setFormatter(logging.Formatter('%(asctime)s - %(name)s - %(funcName)s - %(levelname)s - %(message)s'))
+
+    log.addHandler(sh)
+
+    return log

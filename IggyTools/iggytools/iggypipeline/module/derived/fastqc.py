@@ -3,18 +3,16 @@ import os.path as path
 from collections import OrderedDict
 from iggytools.iggypipeline.module.iggyMod import IggyMod
 from iggytools.iggypipeline.module.argDefClass import ArgDef
-from iggytools.iggypipeline.module.configClasses import BaseConfig
+from iggytools.iggypipeline.module.configClasses import BaseConfig, make_AD_dict
 from iggytools.utils.util import mkdir_p, dict2namedtuple
 
 
 class Fastqc(IggyMod):
 
 
-    def __init__(self, pipe):
+    def __init__(self, pipe, outName = None):
         
-        IggyMod.__init__(self, 'Fastqc', pipe)  #set self.pref, and do other module initialization
-
-        self.modConfig = BaseConfig.getInstance('module', self, self.getArgDefs())
+        IggyMod.__init__(self, 'Fastqc', pipe, outName = outName)  #set self.pref, and do other module initialization
 
         self.outputHelp = ["outputs.fileList               List of zip file paths (one per input file)"]
 
@@ -61,14 +59,13 @@ class Fastqc(IggyMod):
 
     def modSetup(self):
 
+        IggyMod.modSetup(self)
+
         a = self.modConfig.argDefs
 
         for inFile in a['inFiles'].value:  
             if not path.isfile(inFile):
                 raise Exception('Cannot find input file %s' % inFile)
-
-        if not path.isdir(a['outdir'].value):  #create output dir
-            mkdir_p(a['outdir'].value)
 
 
     def buildCommand(self):
@@ -105,39 +102,7 @@ class Fastqc(IggyMod):
 
         self.command = command
 
-
-    def getArgDefs(self):
         
-        argDefs = OrderedDict( [
-            ('inFiles', ArgDef('inFiles',        help = 'Comma-separted list of input files.', 
-                                                       type = list)),
-
-            ('inputdir',   ArgDef('-d', '--inputdir',  help = 'Directory containing input files. Default: current directory.',
-                                                       type = str)),
-
-            ('outdir',     ArgDef('-o', '--outdir',    help ='Directory where output files should be written. Default: <projDir>/fastqc: %(default)s.',
-                                                       type = str, 
-                                                       default = self.modDir)),
-     
-            ('threads',    ArgDef('-t', '--threads',   help ='Number of threads. Note: FastQC uses at most 3 threads per input file. Default: %(default)s.',
-                                                       type = int, 
-                                                       default = self.pref.THREADS)),
-
-            ('quiet',      ArgDef('-q', '--quiet',     help = 'Suppress FastQC progress messages to stdout. Default: %(default)s.',
-                                                       type = bool,
-                                                       default = self.pref.QUIET)),
-
-            ('noextract',  ArgDef('-x', '--noextract', help ='Do not uncompress the output file after creating it.',
-                                                       type = bool,
-                                                       default = self.pref.NOEXTRACT)),
-
-            ('nogroup',    ArgDef('-n', '--nogroup',   help ='Disable grouping of bases for reads >50bp. Reports show data for every base in read.',
-                                                       type = bool,
-                                                       default = self.pref.NOGROUP)) ])
-
-        return argDefs
-
-
     def setSlurmDefaults_from_modConfig(self):  #update slurm settings based on module inputs
 
         args = self.modConfig.argDefs  
@@ -169,4 +134,37 @@ class Fastqc(IggyMod):
                 s.value = s.default
 
         self.slurmConfig.argDefs = sargs
+
+
+    def get_argDefs(self):
+
+        return make_AD_dict(
+
+            [ ArgDef('inFiles',           help = 'Comma-separted list of input files.', 
+                                          type = list),
+
+              ArgDef('-d', '--inputdir',  help = 'Directory containing input files. Default: current directory.',
+                                          type = str),
+
+              ArgDef('-o', '--outdir',    help ='Directory where output files should be written. Default: <projDir>/fastqc: %(default)s.',
+                                          type = str, 
+                                          default = self.modDir),
+     
+              ArgDef('-t', '--threads',   help ='Number of threads. Note: FastQC uses at most 3 threads per input file. Default: %(default)s.',
+                                          type = int, 
+                                          default = self.pref.THREADS),
+
+              ArgDef('-q', '--quiet',     help = 'Suppress FastQC progress messages to stdout. Default: %(default)s.',
+                                          type = bool,
+                                          default = self.pref.QUIET),
+
+              ArgDef('-x', '--noextract', help ='Do not uncompress the output file after creating it.',
+                                          type = bool,
+                                          default = self.pref.NOEXTRACT),
+
+              ArgDef('-n', '--nogroup',   help ='Disable grouping of bases for reads >50bp. Reports show data for every base in read.',
+                                          type = bool,
+                                          default = self.pref.NOGROUP) 
+              ] )
+
 

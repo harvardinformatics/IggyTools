@@ -11,10 +11,10 @@ class BaseConfig:
     __metaclass__ = ABCMeta
 
     @classmethod
-    def getInstance(cls, cType, mod, argDefs = None):
+    def getInstance(cls, cType, mod):
 
         if cType == 'module':
-            return ModConfig(mod, argDefs)
+            return ModConfig(mod, mod.get_argDefs())
         elif cType == 'slurm':
             return SlurmConfig(mod, slurmArgDefs)
 
@@ -24,16 +24,16 @@ class BaseConfig:
         self.mod = mod
         self.pipe = mod.pipe
 
+        self.argDefs = argDefs
+
         self.args = OrderedDict()
         self.argsJson = None
 
         #create parser from arg definitions
         self.parser = argparse.ArgumentParser()
-        for argDef in argDefs.itervalues():
-            argDef.add(self.parser)
+        for argDef in self.argDefs.itervalues():
+            argDef.add(self.parser)  #add arg to parser
 
-        self.argDefs = argDefs
-        
 
     def setValues(self, **namedArgs): 
 
@@ -61,6 +61,7 @@ class BaseConfig:
 
         print self.args2str(indent)
 
+
     @abstractmethod
     def showDefs(self):
         pass
@@ -79,7 +80,9 @@ class BaseConfig:
         return argStr
 
 
+
 class ModConfig(BaseConfig):
+
 
     def __init__(self, mod, argDefs):
 
@@ -106,12 +109,13 @@ class ModConfig(BaseConfig):
 class SlurmConfig(BaseConfig):
 
 
-    def __init__(self, mod, argDefs):
+    def __init__(self, mod, slurmArgDefs):
 
-        BaseConfig.__init__(self, mod, argDefs)
+        BaseConfig.__init__(self, mod, slurmArgDefs)
 
         self.slurmScript = None
         self.slurmScriptFile = None
+
 
     def showDefs(self):  #display slurm param definitions
 
@@ -166,11 +170,20 @@ class SlurmConfig(BaseConfig):
 
 
 
-def get_slurmArgDefs():
-# See sbatch man page for doc on these slurm parameters:
+#convert an argDef list to orderedDict
+def make_AD_dict(argDefList): 
 
-    return copy.deepcopy(
-               OrderedDict([ ('nodes',   ArgDef( '-N', '--nodes',
+    ordDict = OrderedDict()
+
+    for argDef in argDefList:
+        ordDict.update( {argDef.name: argDef} )
+
+    return ordDict
+
+
+
+# See sbatch man page for doc on slurm parameters
+slurmArgDefs =    OrderedDict([ ('nodes',   ArgDef( '-N', '--nodes',
                                                     help = 'Request that a minimum of _nodes_ nodes be allocated to this job.',
                                                     type = int, 
                                                     default = 1 )),
@@ -209,5 +222,4 @@ def get_slurmArgDefs():
                              ('mail-type',  ArgDef( '--mail-type',
                                                     help = 'Events triggering slurm notficaiton. Accepted values include: ' \
                                                                + 'BEGIN, END, FAIL, TIME_LIMIT_80, TIME_LIMIT_90.',
-                                                    type = list)) ]) )
-
+                                                    type = list)) ])

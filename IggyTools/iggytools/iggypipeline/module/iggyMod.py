@@ -1,10 +1,10 @@
 from abc import ABCMeta, abstractmethod
 from collections import OrderedDict
-import os, logging, re, traceback, argparse, json
+import os, logging, re, traceback, argparse, json, socket
 import os.path as path
 from iggytools.utils.util import Command_toStdout, Command_toFile, sbatch, printJobStatus, mkdir_p
 from iggytools.pref.iggytools_PrefClass import Iggytools_Preferences
-from iggytools.iggypipeline.module.configClasses import BaseConfig, SlurmConfig, get_slurmArgDefs
+from iggytools.iggypipeline.module.configClasses import BaseConfig, SlurmConfig
 from iggytools.iggypipeline.help.modHelp import modHelp
 
 log = logging.getLogger('iggypipe')
@@ -14,61 +14,100 @@ class IggyMod:
     __metaclass__ = ABCMeta
 
 
-    def __init__(self, modName, pipe):
+    def __init__(self, modName, pipe, outName = None):
 
         self.pipe = pipe
 
-        self.name = modName
-        self.modDir = path.join(self.pipe.pipeDir, modName)
+        if outName:  #name used to create output directory
+            self.outName = outName
+        else:
+            self.outName = modName
+
+        self.name = modName  #module name (eg., Bowtie2, FastQC)
+
+        self.modDir = path.join(self.pipe.pipeDir, self.outName)
         self.modID = None
+        self.dbRecord = None
 
         self.db = pipe.db
         self.verbose = pipe.verbose
         self.pref = pipe.iggyPref['iggypipe'][modName] #get module preferences
 
-        self.slurmConfig = SlurmConfig(self, get_slurmArgDefs())
-
         self.command = None
-        self.processID = None
+        self.pid = None
         self.jobID = None
 
         self.outputs = None
         self.outputHelp = None
 
+        self.slurmConfig = BaseConfig.getInstance('slurm', self)
+        self.modConfig = BaseConfig.getInstance('module', self)
+
 
     def run(self):
 
-        if not self.modID:
-            self.db.write_new_module(self)
+        self.runType = 'local'
+        self.hostname = socket.gethostname()
 
         self.modSetup()
 
+        cmd = Command_toFile(self.command, path.join(self.modDir, 'stdout_stderr.txt'), append=False, echo=True)
+        self.pid = cmd.pid
+
+        if not self.dbRecord:
+            self.db.write_new_module(self, )   #set self.modID. Set self.pipe.pipeID if unset.
+
         log.info('Running %s in pipeline %s:\n%s' % (self.name, self.pipe.name, self.command))
 
-        cmd = Command_toFile(self.command, path.join(self.modDir, 'stdout_stderr.txt'), append=False, echo=True)
-        self.processID = cmd.pid
-
-        self.db.write_module_record(self, status = 'STARTED')
+        self.writeParams()  #write params, pid to output dir
 
         cmd.run()
 
-        self.db.write_module_record(self, status = 'COMPLETED')
+        self.dbRecord.status = 'ENDED'
+        self.db.session.commit()
 
-        log.info('Module %s (id: %s) in pipeline %s (id: %s) completed.' % (self.name, self.modID, self.pipe.name, self.pipe.pipeID))
+        log.info('Module %s (id: %s) in pipeline %s (id: %s) ended.' % (self.name, self.modID, self.pipe.name, self.pipe.pipeID))
         
 
-    def argSetup(self): # process/format module inputs, create output args, build module command
+    def argSetup(self):  # process/format module inputs, create output args, build module command
         pass
 
 
-    def modSetup(self): # create output directories, or additional module initialization
+    def modSetup(self):  # create output directories, or additional module initialization
 
         if not path.isdir(self.modDir):  
             mkdir_p(self.modDir)
 
 
+    def writeParams(self, slurm = False):  #write params, pid to output dir
+        paramsLogFile = path.join( self.modDir, '%s_%s_inputs.txt' % (self.pipe.name, self.name) )
+        
+        with open(paramsLogFile, 'w') as fh:
+
+            fh.write('\nModule Inputs:\n\n')
+            fh.write( '\n'.join( [ '%s: %s' % (arg.name, arg.value) for arg in self.modConfig.argDefs.itervalues() if arg.value is not None] ) )
+            
+            if self.command:
+                fh.write('\n\nCommand:\n\n')
+                fh.write('%s' % self.command)
+
+            if self.pid:
+                fh.write('\nProcess ID: %s\n' % self.pid)
+                fh.write('\nHost: %s\n\n' % socket.gethostname())
+
+            elif slurm:
+                fh.write('\n\nSlurm Parameters:\n\n')
+                fh.write( '\n'.join( [ '%s: %s' % (arg.name, arg.value) for arg in self.slurmConfig.argDefs.itervalues() if arg.value is not None] ) )                
+                fh.write('\nJob ID: %s\n\n' % self.jobID)
+                
+
     @abstractmethod
-    def setSlurmDefaults_from_modConfig(self):   #update slurm settings based on module inputs
+    def get_argDefs(self):  # define module params, defaults.   
+        pass
+
+
+    @abstractmethod
+    def setSlurmDefaults_from_modConfig(self):   # update slurm settings based on module inputs
         pass
 
 
@@ -99,7 +138,7 @@ class IggyMod:
         indentStr = ' '* indent
 
         print ''
-        print '%sModule name:         %s' % (indentStr, self.name)
+        print '%sModule:              %s' % (indentStr, self.name)
         print '%sModule output dir:   %s\n' % (indentStr, self.modDir)
 
         self.modConfig.showValues(indent)  
@@ -138,17 +177,19 @@ class IggyMod:
     
     def srun(self):
 
+        self.runType = 'slurm'
+
         self.slurmSetup()
 
         self.jobID = sbatch(self.slurmConfig.slurmScriptFile)
 
-        with open(path.join(self.modDir, 'slurm_%s_%s_jobID.txt' % (self.name, self.pipe.name)), 'w') as fh:
-            fh.write(str(self.jobID))
-        
-        self.db.write_new_module(self, status = 'SUBMITTED')
+        self.db.write_new_module(self)
+
+        self.writeParams(slurm = True)  #write params, jobID to output dir
 
         if self.verbose:
             print 'Submitted job %s' % self.jobID
+
 
     def status(self):
         
@@ -177,7 +218,7 @@ class IggyMod:
 
 
     def __repr__(self):
-        return '<%s(modID: %s)>' % (self.name, self.modID)
+        return '<%s(modID: %s, modDir: %s)>' % (self.name, self.modID, self.modDir)
 
 
 

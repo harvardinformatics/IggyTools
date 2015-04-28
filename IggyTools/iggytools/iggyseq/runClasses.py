@@ -3,16 +3,9 @@ from os import path
 from abc import ABCMeta, abstractmethod
 from iggytools.iggyseq.sampleSheetClasses import BaseSampleSheet
 from iggytools.iggyseq.seqUtil import setPermissions
-from iggytools.pref.iggytools_PrefClass import Iggytools_Preferences
-from iggytools.utils.util import getUserHome, touch, mkdir_p, intersect, deleteItem, copy, Command, unique, str2list_byComma
-
-
-def getSeqPref(prefDir = None):
-    if not prefDir:
-        prefDir = path.join(getUserHome(), '.iggytools')
-
-    iggyPref = Iggytools_Preferences(prefDir)
-    return iggyPref.getPreferences()['iggyseq']
+from iggytools.utils.util import touch, mkdir_p, intersect, deleteItem, copy, Command, unique, str2list_byComma
+from iggytools.iggyseq.getSeqPref import getSeqPref
+from iggytools.iggyseq.seqUtil import parseRunName
 
 
 class IlluminaNextGen:
@@ -34,9 +27,11 @@ class IlluminaNextGen:
         elif machine_type == "NextSeq":
             return NextSeq(runName, pref = pref, **options)
 
+
     @abstractmethod
     def makeLetter(self):
         pass
+
 
     def __init__(self, runName, pref = None, **kwargs):
 
@@ -44,12 +39,16 @@ class IlluminaNextGen:
 
         if not pref:
             pref = getSeqPref()
-        self.pref = pref
 
+        self.pref = pref
         self.runName = runName
-        self.flowcell = runName[-9:]
-        self.flowcellPosition = runName[-10]
-        self.inSlurm = 'SLURM_JOBID' in os.environ.keys()
+
+        parsed = parseRunName(runName)
+
+        self.flowcell              = parsed.flowcell
+        self.flowcellPosition      = parsed.pos
+
+        self.inSlurm               = 'SLURM_JOBID' in os.environ.keys()
 
         self.watcherEmails         = pref.WATCHER_EMAILS
         self.userEmails            = pref.USER_EMAILS
@@ -68,11 +67,11 @@ class IlluminaNextGen:
         self.dbStore               = pref.SEQPREP_DB_STORE
         self.verbose               = pref.VERBOSE
 
-        self.suffix = None
-        self.customBasesMask = None
-        self.selectedLanes = None
-        self.SampleSheet      = None
-        self.analyses         = None
+        self.suffix                = None
+        self.customBasesMask       = None
+        self.selectedLanes         = None
+        self.SampleSheet           = None
+        self.analyses              = None
 
         for key, value in kwargs.iteritems():  #get optional initialization parameters 
             if key == 'suffix':                self.suffix = value
@@ -103,33 +102,7 @@ class IlluminaNextGen:
         self.samplesheetFile  = path.join(self.primaryDir, 'SampleSheet.csv')
         self.runinfoFile      = path.join(self.primaryDir, 'RunInfo.xml')
 
-        #touch status file to prevent re-processing of this run by cron job
-        statusFile = path.join(self.primaryDir, 'seqprep_seen.txt')
-        touch(statusFile)
-        setPermissions(statusFile)
-
-        self.initLogFile()
-        self.logOptions()   #write options to log. (More options set and logged by child class)
-
-    def initLogFile(self):
-        mkdir_p(self.logDir)
-        k = 1
-
-        if path.isfile(self.logFile):  #preserve any previous log files
-            logBkup = self.logFile + str(k)
-
-            while path.isfile(logBkup):
-                k += 1
-                logBkup = self.logFile + str(k)
-
-            self.safeCopy(self.logFile, logBkup)
-
-            setPermissions(logBkup)
-
-            self.safeDeleteItem(self.logFile)
-
-    def logOptions(self):  
-        optionsStr = '\nBase Parameters:\n' \
+        self.optionsStr = '\nBase Parameters:\n' \
             + 'runName:                 ' + self.runName                   + '\n' \
             + 'runOutName:              ' + self.runOutName                + '\n' \
             + 'suffix:                  ' + str(self.suffix)               + '\n' \
@@ -159,9 +132,44 @@ class IlluminaNextGen:
             + 'userEmails:              ' + str(self.userEmails)           + '\n' \
             + 'watcherEmails:           ' + str(self.watcherEmails)        + '\n' 
 
-        self.log(optionsStr)
+        if self.verbose:
+            print self.optionsStr
+        
+
+    def init_for_processing(self):
+        statusFile = path.join(self.primaryDir, 'seqprep_seen.txt') #touch status file to prevent re-processing of this run by cron job
+        touch(statusFile)
+        setPermissions(statusFile)
+
+        self.initLogFile()
+        self.log(self.optionsStr)  #write options to log. (More options set and logged by child class)
+
+
+    def initLogFile(self):
+        mkdir_p(self.logDir)
+        k = 1
+
+        if path.isfile(self.logFile):  #preserve any previous log files
+            logBkup = self.logFile + str(k)
+
+            while path.isfile(logBkup):
+                k += 1
+                logBkup = self.logFile + str(k)
+
+            self.safeCopy(self.logFile, logBkup)
+
+            setPermissions(logBkup)
+
+            self.safeDeleteItem(self.logFile)
+
+
+    def showOptions(self):  
+        print self.optionsStr
+
 
     def processRun(self):
+
+        self.init_for_processing()
 
         try:
             self.clearDir(self.processingDir)
@@ -307,6 +315,12 @@ class IlluminaNextGen:
         with open(self.logFile,'r') as fh:  #read in log file
             log = fh.readlines()
 
+
+        #determine whether to print individual sample info
+        terse = len(self.SampleSheet.ss) > 300
+        terseText = ['Too many lines to print -- see online stats']
+
+        #scan log for errors to report
         errors = list()
         for i, line in enumerate(log):
 
@@ -342,7 +356,11 @@ class IlluminaNextGen:
         for a in self.analyses:
             summary.append('\nAnalysis  ' + a.name + ':')
             summary.append('--------------------------------------------------\n')
-            summary += a.summarizeDemuxResults()
+
+            if terse:
+                summary += terseText
+            else:
+                summary += a.summarizeDemuxResults()
 
         ## Append user letter
         summary.append('\n\nLetter:')
@@ -354,7 +372,17 @@ class IlluminaNextGen:
         ## Append SampleSheet
         summary.append('\nSampleSheet:')
         summary.append('--------------------------------------------------\n')
-        summary += self.SampleSheet.ss
+
+        if terse:
+            summary += terseText
+        else:
+            summary += self.SampleSheet.ss
+
+            
+        
+
+
+
         summary.append('\n')
 
         self.summary = '\n'.join(summary)

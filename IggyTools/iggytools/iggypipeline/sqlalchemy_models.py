@@ -47,9 +47,12 @@ class ModuleRecord(Base):
 
     status    = Column(String(100))
 
-    processID = Column('process_id', Integer())
+    pid       = Column('process_id', Integer())
     jobID     = Column('job_id', Integer())
 
+    runType   = Column('run_type', String(50))
+    hostname  = Column('host', String(50))
+    
     timestamp = Column(TIMESTAMP, server_default=func.current_timestamp(), onupdate=func.current_timestamp())
     modArgs   = Column('mod_args', String(1000))
     slurmArgs = Column('slurm_args', String(1000))
@@ -65,8 +68,14 @@ class ModuleRecord(Base):
 
         self.status = status
 
-        if mod.processID:
-            self.processID = mod.processID
+        if mod.runType:
+            self.runType = mod.runType
+
+        if mod.hostname:
+            self.hostname = mod.hostname
+
+        if mod.pid:
+            self.pid = mod.pid
             
         if mod.jobID:
             self.jobID = mod.jobID

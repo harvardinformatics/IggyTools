@@ -3,25 +3,24 @@ import os.path as path
 from collections import OrderedDict
 from iggytools.iggypipeline.module.iggyMod import IggyMod
 from iggytools.iggypipeline.module.argDefClass import ArgDef
-from iggytools.iggypipeline.module.configClasses import BaseConfig
+from iggytools.iggypipeline.module.configClasses import BaseConfig, make_AD_dict
 from iggytools.utils.util import mkdir_p, dict2namedtuple, filestem
 
 
 class Trimmomatic(IggyMod):
 
 
-    def __init__(self, pipe):
-
+    def __init__(self, pipe, outName = None):
         
-        IggyMod.__init__(self, 'Trimmomatic', pipe)  #set self.modPref, and do other module initialization
+        IggyMod.__init__(self, 'Trimmomatic', pipe, outName = outName)  #set self.modPref, and do other module initialization
 
-        self.modConfig = BaseConfig.getInstance('module', self, self.getArgDefs())
-
-        self.outputHelp = ['outputs.R1_unpaired            Fastq file of R1 unpaired reads',
+        self.outputHelp = ["If input paramter 'read1' is specified:",
+                           'outputs.R1_unpaired            Fastq file of R1 unpaired reads\n',
+                           "If input paramters 'read1' and 'read2' are specified:",
+                           'outputs.R1_unpaired            Fastq file of R1 unpaired reads',
                            'outputs.R1_paired              Fastq file of R1 paired reads',
                            'outputs.R2_unpaired            Fastq file of R1 unpaired reads',
                            'outputs.R2_paired              Fastq file of R2 paired reads']
-
 
     def argSetup(self):
         a = self.modConfig.argDefs
@@ -37,7 +36,7 @@ class Trimmomatic(IggyMod):
         # Setup outdir arg, self.modDir, 
 
         if 'outdir' in a and a['outdir'].value:
-            self.modDir = a['outdir'].value  #set new module output directory
+            self.modDir = a['outdir'].value  #set self.modDir to new module output directory
         else:
             a['outdir'].value = self.modDir
         
@@ -66,6 +65,8 @@ class Trimmomatic(IggyMod):
 
     def modSetup(self):
 
+        IggyMod.modSetup(self)
+
         a = self.modConfig.argDefs
 
         if not path.isfile(a['read1'].value):
@@ -73,43 +74,6 @@ class Trimmomatic(IggyMod):
 
         if a['read2'].value and not path.isfile(a['read2'].value):
             raise Exception('Cannot find input file %s' % a['read2'].value)
-
-        if not path.isdir(a['outdir'].value):  #create output dir 
-            mkdir_p(a['outdir'].value)
-
-
-    def getArgDefs(self):
-        
-        argDefs = OrderedDict( [
-
-            ('read1',       ArgDef('read1',               help = 'Read1 fastq file.', 
-                                                          type = str)),
- 
-            ('read2',       ArgDef('-2','--read2',        help = 'Read2 fastq file.', 
-                                                          type = str)),
-
-            ('steps',       ArgDef('-s', '--steps',       help = 'String of comma-separated Trimmomatic steps. For single-end reads, default is %s. For paired end: %s' \
-                                                                      % (self.pref.SINGLE_END_STEPS, self.pref.PAIRED_END_STEPS),
-                                                          type = str)),
-
-            ('encoding',    ArgDef('-e', '--encoding',    help = 'Fastq quality score encoding. Default: %default',
-                                                          type = str,
-                                                          choices = ['phred64', 'phred33'],
-                                                          default = self.pref.ENCODING)),
-
-            ('output-stem', ArgDef('-m', '--output-stem', help='String used to name output files. By default, ' \
-                                                               + 'output files are named by giving input files(s) a ".tr.fastq" extension.',
-                                                          type = str)),
-
-            ('outdir',      ArgDef('-o', '--outdir',      help='Output directory. Default is current directory.',
-                                                          type = str)),
-
-            ('threads',     ArgDef('-t', '--threads',     help='Number of threads. Default: %(default)s',
-                                                          type = int,
-                                                          default = self.pref.THREADS)) ] )
-
-        return argDefs
-
 
 
     def setSlurmDefaults_from_modConfig(self):  #update slurm settings based on module inputs
@@ -171,4 +135,35 @@ class Trimmomatic(IggyMod):
         command += '\n'  #end line continuation
 
         self.command = command
+
+
+    def get_argDefs(self):
+        
+        return make_AD_dict( 
+            [ ArgDef('read1',               help = 'Read1 fastq file.', 
+                                            type = str),
+ 
+              ArgDef('-2','--read2',        help = 'Read2 fastq file.', 
+                                            type = str),
+
+              ArgDef('-s', '--steps',       help = 'String of comma-separated Trimmomatic steps. For single-end reads, default is %s. For paired end: %s' \
+                                                    % (self.pref.SINGLE_END_STEPS, self.pref.PAIRED_END_STEPS),
+                                            type = str),
+
+              ArgDef('-e', '--encoding',    help = 'Fastq quality score encoding. Default: %default',
+                                            type = str,
+                                            choices = ['phred64', 'phred33'],
+                                            default = self.pref.ENCODING),
+
+              ArgDef('-m', '--output-stem', help='String used to name output files. By default, ' \
+                                                  + 'output files are named by giving input files(s) a ".tr.fastq" extension.',
+                                            type = str),
+
+              ArgDef('-o', '--outdir',      help='Output directory. Default is current directory.',
+                                            type = str),
+
+              ArgDef('-t', '--threads',     help='Number of threads. Default: %(default)s',
+                                            type = int,
+                                            default = self.pref.THREADS) ] )
+
 

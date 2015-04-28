@@ -11,6 +11,10 @@ class Command(object):  # Run command and yield stdout lines.
 
 
     def __init__(self, cmd):
+
+        if not cmd or type(cmd) != str:
+            raise Exception('Invalid command: %s' % cmd)
+
         self.p = subprocess.Popen( ['/bin/bash', '-c', cmd],
                                    shell=False,
                                    stdin=open('/dev/null', 'r'),
@@ -469,3 +473,31 @@ def suppress_stdout():
 
         finally:
             sys.stdout = old_stdout
+
+
+def parse_NCBI_aliasFile(aliasFile):
+
+    with open(aliasFile, 'r') as fh:
+        text = fh.readlines()
+
+    for line in text:
+        vals = re.split('[\s"]+', line.rstrip())
+        if vals[0] == 'DBLIST':
+            return [x for x in vals[1:] if x]
+
+
+def extractFromTar(tarFile, fileTarPath, destDir):
+
+    mkdir_p(destDir) 
+
+    tar = tarfile.open(tarFile) #works with .tar and .tar.gz files 
+    tar.extract(fileTarPath, destDir)
+    tar.close()
+
+    return path.join(destDir, fileTarPath)
+
+def procStatus(pid):
+    for line in open("/proc/%d/status" % pid).readlines():
+        if line.startswith("State:"):
+            return line.split(":",1)[1].strip().split(' ')[0]   #e.g., 'S', 'D', 'Z'
+    return None

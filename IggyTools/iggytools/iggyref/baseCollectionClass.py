@@ -22,9 +22,14 @@ class baseCollection(object):
             log.error("Unable to instantiate class in %s: %s" % (modulepath, traceback.format_exc()))
 
 
-    def __init__(self, primaryID, repo, ftpConn=None):
-        collMod = __import__('iggytools.iggyref.sources.%s.collections.%s' % (repo.source, primaryID),fromlist=[primaryID])
-        self.properties = getattr(collMod,'collectionProperties')
+    def __init__(self, primaryID, repo, ftpConn=None, collectionProperties = None):
+
+        if not collectionProperties:
+            collMod = __import__('iggytools.iggyref.sources.%s.collections.%s' % (repo.source, primaryID),fromlist=[primaryID])
+            self.properties = getattr(collMod,'collectionProperties')
+        else:
+            self.properties = collectionProperties
+
         self.primaryID = primaryID
         self.secondaryID = ''
         if 'secondaryID' in self.properties:
@@ -38,14 +43,12 @@ class baseCollection(object):
         self.downloadFiles = list()
         self.modifiedFiles = list()
 
-        if 'tasks' in self.properties: #ensure task file lists are type list
+        if 'tasks' in self.properties: #ensure task file lists are of type list
             for taskDict in self.properties['tasks']:        
                 if type(taskDict['inFiles']) != list: 
                     taskDict['inFiles'] = [taskDict['inFiles']]
                 if 'outFiles' in taskDict and type(taskDict['outFiles']) != list: 
                     taskDict['outFiles'] = [taskDict['outFiles']]
-
-        self.setLocalDirs()
 
 
     def setLocalDirs(self):

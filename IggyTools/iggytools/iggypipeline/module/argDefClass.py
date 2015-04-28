@@ -18,7 +18,9 @@ class ArgDef(object):
         else:
             self.default = None
 
-        self.name = [re.sub('--','',x) for x in self.args if re.match('--|\w',x)][0]
+        name = [re.sub('--','',x) for x in self.args if re.match('--|\w',x)][0]  #define self.name via command-line arg name
+        self.name = re.sub('-','_',name)  
+
         self.value = self.default
 
 
@@ -31,7 +33,7 @@ class ArgDef(object):
         indent = firstColStart * ' '
         firstColWidth = secondColStart - firstColStart
 
-        if 'help' in self.kwargs:
+        if 'help' in self.kwargs:  #print arg name and help message if it exists
 
             text = self.kwargs['help']
             #suppress default substring for command-line interface
@@ -43,7 +45,7 @@ class ArgDef(object):
             for line in lines:
                 print '%s%s' % (indent.rjust(secondColStart), line)
         else:
-            print '%s%s' % (indent, self.name)
+            print '%s%s' % (indent, self.name)  #print arg name
         
         for prop in ['default', 'nargs']:
             if prop in self.kwargs:

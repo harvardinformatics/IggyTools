@@ -23,8 +23,20 @@ class BaseSampleSheet:
 
     @classmethod
     def getInstance(cls, runObj):
+
+        ssFile = runObj.samplesheetFile
+
+        if not path.isfile(ssFile):  #attempt to find samplesheet in run's parent directory.
+
+            altFile = path.join(runObj.primaryParent, '%s.csv' % runObj.flowcell) 
+
+            if path.isfile(altFile):
+                copy(altFile, ssFile)
+                setPermissions(ssFile)
+            else:
+                raise Exception('No samplesheet found for run %s at %s or %s' % (runObj.runName, ssFile, altFile))
         
-        with open(runObj.samplesheetFile, 'r') as fh:
+        with open(ssFile, 'r') as fh:
             firstline = fh.readline()
 
         if re.match('FCID', firstline): #matches from beg.
@@ -35,18 +47,18 @@ class BaseSampleSheet:
 
     def __init__(self, runObj):
 
-        self.file = runObj.samplesheetFile
-        self.selectedLanes = runObj.selectedLanes
+        self.file                     = runObj.samplesheetFile
+        self.selectedLanes            = runObj.selectedLanes
 
-        self.Run = runObj
+        self.Run                      = runObj
 
-        self.nonIndexRead1_numCycles = None  # Non-index read lengths are not provided in samplesheet format A.
-        self.nonIndexRead2_numCycles = None
+        self.nonIndexRead1_numCycles  = None  # Non-index read lengths are not provided in samplesheet format A.
+        self.nonIndexRead2_numCycles  = None
 
-        self.analyses = list()
-        self.lanes = list()
+        self.analyses                 = list()
+        self.lanes                    = list()
 
-        self.warnings = list()
+        self.warnings                 = list()
 
         with open(self.file,'r') as fh:
             ss = fh.readlines()
@@ -267,11 +279,15 @@ class SampleSheet_formatA(BaseSampleSheet):
         if not self.analyses:
             raise Exception('No analyses matching selected lanes found in samplesheet %s.' % self.file)
         
+
+
 class SampleSheet_formatB(BaseSampleSheet):
     
+
     def __init__(self, runObj):
         BaseSampleSheet.__init__(self, runObj)
         self.format = 'B'
+
 
     def parse(self):
 
@@ -469,8 +485,12 @@ class SampleSheet_formatB(BaseSampleSheet):
             # Done parsing samplesheet.
 
         if not self.analyses: #if there were no lines in the SampleData section of the samplesheet
-            self.makeNewAnalysis('All_Reads')
-            self.makeNewLane('1')
+
+            analysis = self.makeNewAnalysis('All_Reads')
+            analysis.subIDs = headerSubIDs
+
+            lane = self.makeNewLane('1')
+            lane.subIDs = headerSubIDs
 
         self.subIDs = unique(flatten(x.subIDs for x in self.analyses))
 

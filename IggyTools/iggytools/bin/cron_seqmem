@@ -1,14 +1,21 @@
 #!/usr/bin/env python 
-from seqmem.manageMem import reportDiskUsage, deleteOldRuns, moveOldPrimaryToArchive, capDirUsage
+import sys, os
+from iggytools.iggyseq.seqmem.manageMem import reportDiskUsage, deleteOldRuns, moveOldPrimaryToArchive, capDirUsage
+from iggytools.iggyseq.getSeqPref import getSeqPref
 from argparse import ArgumentParser
-import sys
+
+os.umask(002)
+
 
 def main(argv):
+
+    pref = getSeqPref()
+
     parser = ArgumentParser(prog='cron_seqmem', usage='%(prog)s [options]')
     parser.add_argument("-v","--verbose", help="Verbose mode. Default: %default", default=False, action="store_true", dest="verbose")
     args = parser.parse_args()
 
-    reportDiskUsage( ['/n/seqcfs', '/n/illumina01'] )
+    reportDiskUsage( ['/n/seqcfs', '/n/illumina01'], emailList = pref.USER_EMAILS )
 
     capDirUsage('/n/ngsdata', 85, 30, copyInSEQCFS = True, verbose = args.verbose)  #delete oldest run folders until disk usage is below 85%, 
                                                                                     #while retaining runs for at least 30 days

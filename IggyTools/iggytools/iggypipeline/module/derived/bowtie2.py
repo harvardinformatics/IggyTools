@@ -3,21 +3,20 @@ import os.path as path
 from collections import OrderedDict
 from iggytools.iggypipeline.module.iggyMod import IggyMod
 from iggytools.iggypipeline.module.argDefClass import ArgDef
-from iggytools.iggypipeline.module.configClasses import BaseConfig
+from iggytools.iggypipeline.module.configClasses import BaseConfig, make_AD_dict
 from iggytools.utils.util import mkdir_p, dict2namedtuple
 
 
 class Bowtie2(IggyMod):
 
 
-    def __init__(self, pipe):
+    def __init__(self, pipe, outName = None):
         
-        IggyMod.__init__(self, 'Bowtie2', pipe)  #set self.pref, plus other module initialization
-
-        self.modConfig = BaseConfig.getInstance('module', self, self.getArgDefs())
+        IggyMod.__init__(self, 'Bowtie2', pipe, outName = outName)  #set self.pref, plus other module initialization
 
         self.outputHelp = ['outputs.samFile                SAM alignment file',
                            'outputs.metricsFile            Alignment metrics file']
+
 
     def argSetup(self):
 
@@ -61,43 +60,6 @@ class Bowtie2(IggyMod):
         self.command += '\n'  #end line continuation
 
 
-    def getArgDefs(self):
-        
-        #arg name (first element in tuple) must not contain dashes
-        argDefs = OrderedDict( [
-
-            ('index_stem', ArgDef('-x', '--index-stem',  help = 'The basename of the index for the reference genome',
-                                                         type = str)),
-
-            ('read1',      ArgDef('-1', '--read1',       help = 'Comma-separated string of files containing mate 1s',
-                                                         type = str)),
-
-            ('read2',      ArgDef('-2', '--read2',       help = 'Comma-separated string of files containing mate 2s',
-                                                         type = str)),
-
-            ('unpaired',   ArgDef('-U', '--unpaired',    help = 'Comma-separated string of files containing unpaired reads to be aligned',
-                                                         type = str)),
-
-            ('sam',        ArgDef('-S', '--sam',         help="SAM output file",
-                                                         type = str,
-                                                         default = path.join(self.modDir, 'alignment_bt2.sam'))),
-
-            ('encoding',   ArgDef('-e', '--encoding',    help = 'Fastq quality score encoding. Default: %default',
-                                                         type = str,
-                                                         choices = ['phred64', 'phred33'],
-                                                         default = self.pref.ENCODING)),
-
-            ('threads',    ArgDef('-t', '--threads',     help = 'Number of threads. Default: %(default)s',
-                                                         type = int,
-                                                         default = self.pref.THREADS)),
-
-            ('met_file',   ArgDef('-m', '--met-file',    help="Alignment metrics output file.",
-                                                         type = str,
-                                                         default = path.join(self.modDir, 'metrics_bt2.txt'))) ])
-
-        return argDefs
-
-
     def setSlurmDefaults_from_modConfig(self):  #update slurm settings based on module inputs
 
         a = self.modConfig.argDefs  
@@ -114,4 +76,39 @@ class Bowtie2(IggyMod):
                 arg.value = arg.default
 
         self.slurmConfig.argDefs = s
+
+
+    def get_argDefs(self):
+
+        return make_AD_dict(
+
+            [ ArgDef('-x', '--index-stem',  help = 'The basename of the index for the reference genome',
+                                            type = str),
+
+              ArgDef('-1', '--read1',       help = 'Comma-separated string of files containing mate 1s',
+                                            type = str),
+
+              ArgDef('-2', '--read2',       help = 'Comma-separated string of files containing mate 2s',
+                                            type = str),
+
+              ArgDef('-U', '--unpaired',    help = 'Comma-separated string of files containing unpaired reads to be aligned',
+                                            type = str),
+
+              ArgDef('-S', '--sam',         help="SAM output file",
+                                            type = str,
+                                            default = path.join(self.modDir, 'alignment_bt2.sam')),
+
+              ArgDef('-e', '--encoding',    help = 'Fastq quality score encoding. Default: %default',
+                                            type = str,
+                                            choices = ['phred64', 'phred33'],
+                                            default = self.pref.ENCODING),
+
+              ArgDef('-t', '--threads',     help = 'Number of threads. Default: %(default)s',
+                                            type = int,
+                                            default = self.pref.THREADS),
+
+              ArgDef('-m', '--met-file',    help="Alignment metrics output file.",
+                                            type = str,
+                                            default = path.join(self.modDir, 'metrics_bt2.txt')) ] )
+
 

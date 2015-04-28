@@ -14,6 +14,8 @@ application = get_wsgi_application()
 
 def seqstatsOnNew(argv):
 
+    os.umask(002)
+
     pref = getSeqPref()
 
     parser = OptionParser(usage="usage: %prog [options]")
@@ -51,7 +53,10 @@ def seqstatsOnNew(argv):
                 if True:
                     #add run to database if not already present
                      myArgs = [runName, "--force", "-d", options.primaryParent]
-                     if options.verbose: myArgs.append("--verbose")
+
+                     if options.verbose: 
+                         myArgs.append("--verbose")
+
                      logMsg = time.strftime("%c") + "  Running addSeqRun.add() on " + runName + " with args: " + ' '.join(myArgs)
                      append(logMsg, pref.SEQSTATS_LOGFILE, echo = options.verbose)
                      addSeqRun.add(myArgs)  

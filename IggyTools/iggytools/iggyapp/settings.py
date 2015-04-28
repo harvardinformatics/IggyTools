@@ -1,5 +1,5 @@
 """
-Django settings for seqstats project.
+Django settings for iggyapp project.
 
 For more information on this file, see
 https://docs.djangoproject.com/en/1.6/topics/settings/
@@ -70,7 +70,7 @@ DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
         'NAME': 'iggyapp',
-        'USER': 'cwill',
+        'USER': 'iggy',
         'PASSWORD': '98smms76',
         'HOST': 'db-internal',
         'PORT': '3306',

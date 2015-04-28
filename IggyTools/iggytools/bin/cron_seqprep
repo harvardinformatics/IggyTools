@@ -3,8 +3,11 @@ from optparse import OptionParser
 import sys, os, re, time, traceback
 import os.path as path
 from iggytools.utils.util import intersect, touch, email, append
-from iggytools.iggyseq.runClasses import IlluminaNextGen, getSeqPref
-from iggytools.iggyseq.seqUtil import setPermissions
+from iggytools.iggyseq.runClasses import IlluminaNextGen
+from iggytools.iggyseq.getSeqPref import getSeqPref
+from iggytools.iggyseq.seqUtil import parseRunName
+
+os.umask(002)
 
 def seqprepOnNew(argv):
 
@@ -24,39 +27,54 @@ def seqprepOnNew(argv):
     if len(args) != 0:
         parser.error("Expected 0 input arguments, " + str(len(args)) + " provided. Use -h to see usage.")
 
-    required = ["InterOp", "RunInfo.xml", "SampleSheet.csv", "RTAComplete.txt"]  #files that must be in run folder
+    required = ["InterOp", "RunInfo.xml", "RTAComplete.txt"]  #files that must be in run folder
     interopRequired = ["QMetricsOut.bin", "TileMetricsOut.bin"]  #files that must be in <run>/InterOp folder
     runParametersOptions = ["runParameters.xml", "RunParameters.xml"] #one of these must be in run folder
+
     for item in os.listdir(primaryParent):
+
         itemPath = path.join(primaryParent, item)
-        runNameMatch = re.match('[0-9]{6}_[0-9A-Za-z]+_[0-9A-Za-z]+_[0-9A-Za-z]{10}$', item) #re.match matches from beginning of string
-        if path.isdir(itemPath) and runNameMatch:
+        parsedName = parseRunName(item)
+
+        if path.isdir(itemPath) and parsedName:
+
             runName = item
             runPath = itemPath
-            runItems = os.listdir(runPath) #get list of directory contents
-            #check that we haven't examined this run folder before, and then check that required files are present:
-            if 'seqprep_seen.txt' not in runItems \
-                    and 'seqprep_skip.txt' not in runItems \
-                    and 'seq_skip.txt' not in runItems \
-                    and len(intersect(runItems, required)) == len(required) \
-                    and len(intersect(runItems, runParametersOptions)) == 1 \
-                    and len(intersect(os.listdir(path.join(runPath, "InterOp")), interopRequired)) == len(interopRequired):
-                if verbose: print "\nNew run: " + runName
-                statusFile = path.join(runPath, "seqprep_seen.txt")
-                touch(statusFile)  #mark run as seen by seqprep
-                setPermissions(statusFile)
 
-                #send notification email
-                email(pref.USER_EMAILS, 'Found new run:  %s' % runName, 'Starting seqprep\n')
+            runItems = os.listdir(runPath)  #get list of run directory contents
 
-                #start seqprep for this run
-                myArgs = dict(primary = primaryParent)
-                if verbose: myArgs['verbose'] = True
-                logMsg = time.strftime("%c") + "  Running seqprep on " + runName + " with args: " + str(myArgs)
-                append(logMsg, cronLog, echo = verbose)
+            #skip if run has been seen before
+            if 'seqprep_seen.txt' in runItems \
+                    or 'seqprep_skip.txt' in runItems \
+                    or 'seq_skip.txt' in runItems:
+                continue
 
-                r = IlluminaNextGen.getInstance(runName, pref = pref, **myArgs)
-                r.processRun()
+            #skip if required files are missing
+            if len(intersect(runItems, required)) != len(required) \
+                    or len(intersect(runItems, runParametersOptions)) != 1 \
+                    or len(intersect(os.listdir(path.join(runPath, "InterOp")), interopRequired)) != len(interopRequired):
+                continue
+
+            #skip if samplesheet cannot be found
+            if 'SampleSheet.csv' not in runItems and not path.isfile( path.join(primaryParent, '%s.csv' % parsedName.flowcell) ):
+                continue
+
+            #process run
+            if verbose: print "\nNew run: " + runName
+            statusFile = path.join(runPath, "seqprep_seen.txt")
+            touch(statusFile)  #mark run as seen by seqprep
+
+            #send notification email
+            email(pref.USER_EMAILS, 'Found new run:  %s' % runName, 'Starting seqprep\n')
+
+            #start seqprep for this run
+            myArgs = dict(primary = primaryParent)
+            if verbose: myArgs['verbose'] = True
+            logMsg = time.strftime("%c") + "  Running seqprep on " + runName + " with args: " + str(myArgs)
+            append(logMsg, cronLog, echo = verbose)
+
+            r = IlluminaNextGen.getInstance(runName, pref = pref, **myArgs)
+            r.processRun()
 
 if __name__ == "__main__":
     seqprepOnNew(sys.argv[1:])

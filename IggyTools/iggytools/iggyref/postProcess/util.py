@@ -38,6 +38,7 @@ def untar(srcFile, destDir = None):
     tar.close()
     return destDir
 
+
 def concatFiles(inDir, outFile = None, outDir = None, ext = '.fa'):
     if not ext:
         raise Exception('An non-empty extension string must be specified.')

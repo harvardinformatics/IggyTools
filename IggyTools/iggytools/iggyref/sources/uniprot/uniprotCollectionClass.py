@@ -7,6 +7,7 @@ from iggytools.iggyref.baseCollectionClass import baseCollection
 class uniprotCollection(baseCollection):
     def __init__(self, primaryID, repo, ftpConn = None):
         baseCollection.__init__(self, primaryID, repo, ftpConn)
+        self.setLocalDirs()
         self.collectionSetup()
 
     def setLocalFilePath(self, File):

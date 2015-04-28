@@ -48,7 +48,7 @@ class iggypipeDB(object):
             self.session.add(m)
             return m
 
-    def write_new_pipe(self, pipe):
+    def write_new_pipe(self, pipe, status = 'NEW'):
 
         maxObj = self.get_maxObj()
         maxObj.pipeID += 1
@@ -56,10 +56,13 @@ class iggypipeDB(object):
 
         pipe.pipeID = maxObj.pipeID
 
-        self.write_pipe_record(pipe, status = 'NEW')  #set pipeline status to new
+        pipe.dbRecord = PipelineRecord(pipe, status = status) 
+        self.session.add(pipe.dbRecord)
+        self.session.commit()
 
 
     def write_new_module(self, mod, status = 'NEW'):
+
         if not mod.pipe.pipeID:
             self.write_new_pipe(mod.pipe)            
 
@@ -69,22 +72,32 @@ class iggypipeDB(object):
 
         mod.modID = maxObj.modID
 
-        self.write_module_record(mod, status = status)  #set mod status to new
-
-
-    def write_pipe_record(self, pipe, status = None):
-
-        pRecord = PipelineRecord(pipe, status)
-
-        self.session.add(pRecord)
+        mod.dbRecord = ModuleRecord(mod, status = status)
+        self.session.add(mod.dbRecord)
         self.session.commit()
 
 
-    def write_module_record(self, mod, status = None):
+    def update_pipe_record(self, pipe, status):
+        
+        if not pipe.pipeID:
+            raise Exception('pipe.pipeID must be set')
+    
+        PipelineRecord.update()\
+            .where(PipelineRecord.c.pipeID == pipe.pipeID)\
+            .values(status = status)
+        
+        self.session.commit()
 
-        mRecord = ModuleRecord(mod, status)
 
-        self.session.add(mRecord)
+    def update_module_record(self, mod, status):
+        
+        if not mod.modID:
+            raise Exception('mod.modID must be set')
+    
+        ModuleRecord.update()\
+            .where(ModuleRecord.c.modID == mod.modID)\
+            .values(status = status)
+        
         self.session.commit()
 
 

@@ -1,7 +1,8 @@
-import sys, os, stat, glob
+import sys, os, stat, glob, re
 from lxml import etree
 import os.path as path
-from iggytools.utils.util import md5Checksum, recursiveChmod
+from iggytools.utils.util import md5Checksum, recursiveChmod, dict2namedtuple
+
 
 def setPermissions(item):
 
@@ -36,6 +37,7 @@ def parseRunInfo(rifile):
 
     return rdict, datetext
 
+
 def fastqGz_checksums(myDir):
     # Calculate md5sum checksums on any .fastq.gz files in myDir. Saves checksums to md5sum.txt in myDir
     # Writing md5sum.txt to the same directory as the input files avoids ambiguity that could arise if samples 
@@ -51,3 +53,23 @@ def fastqGz_checksums(myDir):
     outFile.close()
 
 
+def parseRunName(runName, machineDict = None):   #machineDict: keys are machine ID's and vals are run type
+    match = re.match('([0-9]{6})_([0-9A-Za-z]+)_([0-9A-Za-z]+)_([0-9A-Za-z]{10})$', runName) #re.match matches from beg. of string 
+
+    if not match:
+        return None
+
+    d = dict()
+    d['runName']           = match.group(0)
+    d['date']              = match.group(1)
+    d['machineID']         = match.group(2)
+    d['counter']           = match.group(3)
+    d['pos_and_flowcell']  = match.group(4)
+    d['pos']               = match.group(4)[0]
+    d['flowcell']          = match.group(4)[-9:]
+    d['runType']           = ''
+
+    if machineDict and d['machineID'] in machineDict:
+        d['runType'] = machineDict[ d['machineID'] ]
+
+    return dict2namedtuple(d)
