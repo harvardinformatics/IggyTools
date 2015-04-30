@@ -1,27 +1,32 @@
 import os, sys, logging, re, traceback, getpass
 import os.path as path
-from iggytools.iggypipeline.DBclass import iggypipeDB 
+from iggytools.iggypipeline.DBclass import IggypipeDB 
 from iggytools.utils.util import mkdir_p, copy, email
 from iggytools.pref.iggytools_PrefClass import Iggytools_Preferences
+from iggytools.iggypipeline.help.pipeHelp import pipeHelp
+from iggytools.iggypipeline.help.modHelp import modHelp
 from iggytools.iggypipeline.module.derived.fastqc import Fastqc
 from iggytools.iggypipeline.module.derived.trimmomatic import Trimmomatic
 from iggytools.iggypipeline.module.derived.bowtie2 import Bowtie2
-from iggytools.iggypipeline.help.pipeHelp import pipeHelp
-from iggytools.iggypipeline.help.modHelp import modHelp
-
+from iggytools.iggypipeline.module.derived.cufflinks import Cufflinks
+from iggytools.iggypipeline.module.derived.sortsam import SortSam
 
 class IggyPipe(object):
 
 
     def __init__(self, name = None, pipeDir = None, pipeParentDir = None, prefDir = None, notify = True, verbose = True):
 
-        self.availModNames = ['Fastqc', 'Trimmomatic', 'Bowtie2']
-        self.pipeID = None
 
         #load preferences
         prefObj = Iggytools_Preferences(prefDir = prefDir)
         self.prefDir = path.expanduser(prefObj.prefDir)
         self.iggyPref = prefObj.getPreferences()
+
+        #set list of valid module names
+        self.availModNames = list()
+        for key in self.iggyPref['iggypipe']:
+            if key != 'iggypipe':
+                self.availModNames.append(key)
 
         self.pref = self.iggyPref['iggypipe']['iggypipe']
 
@@ -40,7 +45,8 @@ class IggyPipe(object):
 
         mkdir_p(self.pipeDir)
 
-        self.db = iggypipeDB(self.pref)
+        self.db = IggypipeDB(self.pref)
+        self.pipeID = None
         
         self.logFile = path.join(self.pref.LOG_DIR, 'iggypipe.log') # logging setup
         self.log = getLogger(self.pref, self.logFile, 'iggypipe')
@@ -94,12 +100,12 @@ class IggyPipe(object):
         for mod in self.modules:
             mod.run()
 
-        self.db.write_pipe_record(self, status = 'COMPLETED')
+        self.db.update_pipe_record(self, status = 'ENDED')
 
         #if notify, send email that pipeline finished
-        email(self.users, 'IggyPipe Notification', '\nPipeline %s completed.\n\n' % self.name \
+        email(self.users, 'IggyPipe Notification', '\nPipeline %s ended.\n\n' % self.name \
                                                    + 'Pipeline ID: %s\n\n' % self.pipeID \
-                                                   + 'Modules: %s\n\n' % '\n'.join(['%s:\n%s\n' % (x.name, x.modConfig.args2str()) for x in self.modules]))
+                                                   + 'Modules:\n\n%s\n\n' % '\n'.join(['%s:\n%s\n' % (x.name, x.modConfig.args2str()) for x in self.modules]))
 
     def srun(self):
 

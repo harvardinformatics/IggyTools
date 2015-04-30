@@ -7,6 +7,8 @@ from iggytools.pref.derived.iggypipe_fileClass import Iggypipe_PrefFile
 from iggytools.pref.derived.fastqc_fileClass import Fastqc_PrefFile
 from iggytools.pref.derived.trimmomatic_fileClass import Trimmomatic_PrefFile
 from iggytools.pref.derived.bowtie2_fileClass import Bowtie2_PrefFile
+from iggytools.pref.derived.cufflinks_fileClass import Cufflinks_PrefFile
+from iggytools.pref.derived.sortsam_fileClass import SortSam_PrefFile
 
 
 class Iggypipe_Preferences(BaseToolPref):
@@ -17,19 +19,16 @@ class Iggypipe_Preferences(BaseToolPref):
         BaseToolPref.__init__(self, iggytools_prefDir)
 
 
-    def getPreferences(self):  # Load tool preferences
+    def getPreferences(self):  # Load iggypipe preferences
         
-        p = dict()
+        pref = dict()
 
-        self.prefFiles = [ Iggypipe_PrefFile(self.iggytools_prefDir),
-                           Fastqc_PrefFile(self.iggytools_prefDir),
-                           Trimmomatic_PrefFile(self.iggytools_prefDir),
-                           Bowtie2_PrefFile(self.iggytools_prefDir)]
+        for prefFileClass in [Iggypipe_PrefFile, Fastqc_PrefFile, Trimmomatic_PrefFile, Bowtie2_PrefFile, SortSam_PrefFile, Cufflinks_PrefFile]:
 
+            pFile = prefFileClass( self.iggytools_prefDir ) 
 
-        for pfile in self.prefFiles:
-            p[pfile.id] = pfile.getVars()
-            
-        return p
+            pref[pFile.id] = pFile.getVars()
+
+        return pref
 
 

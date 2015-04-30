@@ -34,8 +34,9 @@ class IggyMod:
         self.pref = pipe.iggyPref['iggypipe'][modName] #get module preferences
 
         self.command = None
-        self.pid = None
         self.jobID = None
+        self.pid = None
+        self.hostname = None
 
         self.outputs = None
         self.outputHelp = None
@@ -51,7 +52,7 @@ class IggyMod:
 
         self.modSetup()
 
-        cmd = Command_toFile(self.command, path.join(self.modDir, 'stdout_stderr.txt'), append=False, echo=True)
+        cmd = Command_toFile(self.command, path.join(self.modDir, 'stdout.txt'), append=False, echo=True)
         self.pid = cmd.pid
 
         if not self.dbRecord:

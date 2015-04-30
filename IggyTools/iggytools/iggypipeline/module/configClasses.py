@@ -147,11 +147,14 @@ class SlurmConfig(BaseConfig):
         if s['time'].value:       script += '#SBATCH --time=%s\n'            % s['time'].value
         if s['partition'].value:  script += '#SBATCH --partition=%s\n'       % s['partition'].value
         if s['job_name'].value:   script += '#SBATCH --job-name=%s\n'        % s['job_name'].value
-        if s['output'].value:     script += '#SBATCH --output=%s\n'          % s['output'].value
-        if s['error'].value:      script += '#SBATCH --error=%s\n'           % s['error'].value
         if s['mail-type'].value:  script += '#SBATCH --mail-type=%s\n'       % ','.join(s['mail-type'].value)
+        if s['error'].value:      script += '#SBATCH --error=%s\n'           % s['error'].value
+        if s['output'].value:     
+            script += '#SBATCH --output=%s\n'          % s['output'].value
+        else:
+            script += '#SBATCH --output=%s\n'          % path.join(self.mod.modDir, 'stdout.txt')
 
-        script += '\nset -eu\n\n'
+        #script += '\nset -eu\n\n'  
         script += self.mod.command + '\n'
 
         self.slurmScript = script

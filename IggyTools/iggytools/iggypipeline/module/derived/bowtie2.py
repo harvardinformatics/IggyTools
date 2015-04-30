@@ -15,8 +15,8 @@ class Bowtie2(IggyMod):
         IggyMod.__init__(self, 'Bowtie2', pipe, outName = outName)  #set self.pref, plus other module initialization
 
         self.outputHelp = ['outputs.samFile                SAM alignment file',
-                           'outputs.metricsFile            Alignment metrics file']
-
+                           'outputs.metricsFile            Alignment metrics file',
+                           'outputs.stdoutFile             Stdout/stderr file']            
 
     def argSetup(self):
 
@@ -27,6 +27,7 @@ class Bowtie2(IggyMod):
         outItems = dict()
         outItems['samFile'] = a['sam'].value
         outItems['metricsFile'] = a['met_file'].value
+        outItems['stdoutFile'] = path.join(self.modDir, 'stdout.txt')
 
         self.outputs = dict2namedtuple(outItems)
 
@@ -65,11 +66,11 @@ class Bowtie2(IggyMod):
         a = self.modConfig.argDefs  
         s = self.slurmConfig.argDefs
 
-        s['ntasks'].default = a['threads'].value
-        s['mem'].default = self.pref.SLURM_MEM
-        s['time'].default = self.pref.SLURM_TIME
-        s['job_name'].default = '%s_%s' % (self.name, self.pipe.name)
-        s['partition'].default = self.pref.SLURM_PARTITION
+        s['ntasks'].default     = a['threads'].value
+        s['mem'].default        = self.pref.SLURM_MEM
+        s['time'].default       = self.pref.SLURM_TIME
+        s['job_name'].default   = '%s_%s' % (self.name, self.pipe.name)
+        s['partition'].default  = self.pref.SLURM_PARTITION
 
         for arg in s.itervalues():
             if arg.default is not None:

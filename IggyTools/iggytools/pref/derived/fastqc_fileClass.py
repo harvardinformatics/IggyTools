@@ -33,6 +33,6 @@ class Fastqc_PrefFile(BasePrefFile):
                                varType = bool),
 
                       PrefVar( name = 'SLURM_PARTITION',
-                               default = 'general',
-                               comment = 'Partition for slurm',
+                               default = 'serial_requeue',
+                               comment = 'Slurm partition',
                                varType = str ) ]

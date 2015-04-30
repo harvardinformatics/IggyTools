@@ -6,19 +6,22 @@ from iggytools.iggypipeline.sqlalchemy_models import getBase, PipelineRecord, Mo
 from sqlalchemy.orm.exc import NoResultFound
 
 
-class iggypipeDB(object):
+class IggypipeDB(object):
 
 
-    def __init__(self, pref):
+    def __init__(self, pref, verbose = None):
+
+        if verbose is None:
+            verbose = pref.LOGGING_LEVEL == logging.DEBUG
 
         Base = getBase()
 
         if pref.DB_TYPE == 'mysql':
             engine = create_engine('mysql://%s:%s@%s:'%(pref.MYSQL_USER, pref.MYSQL_PASS, pref.MYSQL_HOST) \
-                                       + path.join('3306',pref.MYSQL_DB), echo = pref.LOGGING_LEVEL == logging.DEBUG)
+                                       + path.join('3306',pref.MYSQL_DB), echo = verbose)
 
         elif pref.DB_TYPE == 'sqlite':
-            engine = create_engine('sqlite:///' + path.join(pref.LOG_DIR,'iggyref.db'), echo = pref.LOGGING_LEVEL == logging.DEBUG)
+            engine = create_engine('sqlite:///' + path.join(pref.LOG_DIR,'iggyref.db'), echo = verbose)
 
         else:
             raise Exception('Unrecognized DB_TYPE: %s' % pref.DB_TYPE)
@@ -81,11 +84,10 @@ class iggypipeDB(object):
         
         if not pipe.pipeID:
             raise Exception('pipe.pipeID must be set')
-    
-        PipelineRecord.update()\
-            .where(PipelineRecord.c.pipeID == pipe.pipeID)\
-            .values(status = status)
-        
+
+        pRecord = self.session.query(PipelineRecord).filter( PipelineRecord.pipeID == pipe.pipeID ).one()
+        pRecord.status = status
+
         self.session.commit()
 
 
@@ -94,10 +96,9 @@ class iggypipeDB(object):
         if not mod.modID:
             raise Exception('mod.modID must be set')
     
-        ModuleRecord.update()\
-            .where(ModuleRecord.c.modID == mod.modID)\
-            .values(status = status)
-        
+        mRecord = self.session.query(ModuleRecord).filter( ModuleRecord.pipeID == mod.modID ).one()
+        mRecord.status = status
+
         self.session.commit()
 
 

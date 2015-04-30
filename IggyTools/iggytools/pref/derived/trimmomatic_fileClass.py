@@ -35,6 +35,6 @@ class Trimmomatic_PrefFile(BasePrefFile):
                                varType = str),
 
                       PrefVar( name = 'SLURM_PARTITION',
-                               default = 'general',
-                               comment = 'Partition for slurm',
+                               default = 'serial_requeue',
+                               comment = 'Slurm partition',
                                varType = str ) ]
