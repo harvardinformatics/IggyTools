@@ -10,7 +10,6 @@ from iggytools.iggypipeline.slurmDBclass import SlurmDB
 from daemon import runner
 from datetime import datetime
 
-
 class IggyPipeDaemon(object):
 
     def __init__(self, prefDir = None, verbose = False):
@@ -58,7 +57,7 @@ class IggyPipeDaemon(object):
 
                     if modRecord.pid:
                         if path.isfile('/proc/%d/status' % modRecord.pid):
-                            if procStatus(modRecord.pid) == 'Z':
+                            if procStatus(modRecord.pid) in ['Z', 'T', 'X']:  # Z: ZOMBIE, T: STOPPED, X: DEAD
                                 modRecord.status = 'ENDED/ZOMBIE'
                             else:
                                 modRecord.status = 'RUNNING'                                
