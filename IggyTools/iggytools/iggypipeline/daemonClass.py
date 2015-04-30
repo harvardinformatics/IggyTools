@@ -72,7 +72,7 @@ class IggyPipeDaemon(object):
 
                     modRecord.status = self.slurm_db.getJobStatus(modRecord.jobID)
 
-                self.db.session.commit()
+            self.db.session.commit()
 
             #pipe records to update
             pipeRecords = self.db.session.query(PipelineRecord).filter( PipelineRecord.status == 'NEW' ).all()
