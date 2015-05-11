@@ -1,4 +1,5 @@
 
+# Update iggyref repos from within python
 
 # Update ucsc repository
 from iggytools.iggyref.repoClass import Repo
