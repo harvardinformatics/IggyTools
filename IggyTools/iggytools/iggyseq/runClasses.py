@@ -547,7 +547,7 @@ class NextSeq(IlluminaNextGen):
                 '\'Undetermined_S0.\' We encourage users to download a local copy of their',
                 'data, as run data will eventually be removed from the ngsdata server.\n',
                 'For more information, please see our FAQ page:\n',
-                'http://informatics.fas.harvard.edu/faq\n\nBest,\nChris\n']
+                'http://informatics.fas.harvard.edu/faq\n']
 
 
 
@@ -591,5 +591,5 @@ class HiSeq(IlluminaNextGen):
                 'We encourage users to download a local copy of their data, as run data will',
                 'eventually be removed from the ngsdata server.\n',
                 'For more information, please see our FAQ page:\n',
-                'http://informatics.fas.harvard.edu/faq\n\nBest,\nChris\n']
+                'http://informatics.fas.harvard.edu/faq\n']
 
