@@ -14,6 +14,8 @@ except ImportError:
 import locale  #for printing of commas in numbers using format()
 ignored = locale.setlocale(locale.LC_ALL, '') # empty string for platform's default setting
 
+highCountThreshold = 1000000  #count above which an undetermined index is reported in demultiplex summary email
+
 class IlluminaNextGenAnalysis:
 
     __metaclass__ = ABCMeta
@@ -48,6 +50,8 @@ class IlluminaNextGenAnalysis:
         self.finalDir = None
 
         self.ssFile = None
+
+        self.highCountUndetInd_Summary = list() # Summary of high-count undetermined indices.
 
         if self.Run.processingDir:
             self.processingDir = path.join(self.Run.processingDir, self.name)
@@ -162,7 +166,7 @@ class IlluminaNextGenAnalysis:
 
             if path.isfile(undetFastq):
                 self.Run.log('Tallying undetermined indices...')
-                countUndetInd.count(undetFastq, path.join(self.finishingDir, 'QC'))
+                self.highCountUndetInd_Summary = countUndetInd.count(undetFastq, path.join(self.finishingDir, 'QC'), highCountThreshold)
             else:
                 self.Run.log('No undetermined indices found to count.')
 
@@ -205,7 +209,7 @@ class IlluminaNextGenAnalysis:
         lines = list()
         cols = zip(*rows)
         colWidths = [ max(len(elem) for elem in col) for col in cols ]
-        rowFormat = '    ' + '  |  '.join(['%%%ds' % width for width in colWidths ])
+        rowFormat = '     ' + '   |   '.join(['%%%ds' % width for width in colWidths ])
         for row in rows:
             lines.append(rowFormat % tuple(row))
         lines.append('\n')
@@ -344,7 +348,8 @@ class HiSeqAnalysis(IlluminaNextGenAnalysis):
         #copy analysis samplesheet to analysis finishingDir
         self.Run.safeCopy( self.ssFile, path.join(self.finishingDir, path.basename(self.ssFile)) )
     
-    def summarizeDemuxResults(self): #hiseq analysis
+
+    def summarizeDemuxResults(self): #hiseq analysis summary
 
         summary = list()
 
@@ -369,13 +374,14 @@ class HiSeqAnalysis(IlluminaNextGenAnalysis):
         nsamps = 0
         for tables in tree.xpath('//table')[0:2]:
             for row in tables.xpath('./tr'):
-                cols = row.xpath('./th | ./td');
+                cols = row.xpath('./th | ./td')
 
                 samp = cols[1].text
+                index = cols[3].text
                 reads = cols[9].text
                 perc = cols[13].text
 
-                srows.append([samp, reads, perc])
+                srows.append([samp, index, reads, perc])
 
                 if re.sub(',','',reads).isdigit():
                     totalReads += int(re.sub(',','',reads))
@@ -383,7 +389,7 @@ class HiSeqAnalysis(IlluminaNextGenAnalysis):
 
         scols = zip(*srows)
         colWidths = [ max( [len(elem) if elem else 0 for elem in col] ) for col in scols ]
-        rowFormat = '    ' + '  |  '.join(['%%%ds' % width for width in colWidths ])
+        rowFormat = '     ' + '   |   '.join(['%%%ds' % width for width in colWidths ])
 
         ## Append analysis read count and num samps
         if self.Run.SampleSheet.nonIndexRead2_numCycles > 0:
@@ -396,6 +402,11 @@ class HiSeqAnalysis(IlluminaNextGenAnalysis):
 
         for row in srows:
             summary.append(rowFormat % tuple(row))
+
+        ## Append list of over-represented undetermined indices
+        if self.highCountUndetInd_Summary:
+            summary += ['\nHigh-count undetermined indices (count > %s):\n' % highCountThreshold] + self.highCountUndetInd_Summary 
+            summary += ['']  #add line break
 
         return summary
 
@@ -497,19 +508,21 @@ class NextSeqAnalysis(IlluminaNextGenAnalysis):
         self.Run.safeCopy( self.ssFile, path.join(self.finishingDir, path.basename(self.ssFile)) )
 
 
-    def summarizeDemuxResults(self):  #nextseq analysis
+    def summarizeDemuxResults(self):  #nextseq analysis summary
         self.Run.log('Summarizing demux results...')
 
         summary = list()
 
         ## Append stats from html report to summary
-        statsFile = path.join(self.finalDir, 'Reports', 'html', self.Run.flowcell, 'all', 'all', 'all', 'laneBarcode.html')
+
+        subDir = path.join('Reports', 'html', self.Run.flowcell, 'all', 'all', 'all')
+        statsFile = path.join(self.finalDir, subDir, 'laneBarcode.html')
 
         if not path.isfile(statsFile):
 
             summary.append('    No laneBarecode.html found in finalDir! Checking finishingDir...\n')
 
-            statsFile = path.join(self.finishingDir,'Basecall_Stats','Demultiplex_Stats.htm')
+            statsFile = path.join(self.finishingDir, subDir, 'laneBarcode.html')
             if not path.isfile(statsFile):
 
                 summary.append('    No laneBarecode.html found in finishingDir either.\n')
@@ -531,7 +544,7 @@ class NextSeqAnalysis(IlluminaNextGenAnalysis):
         
         for i in range(2,len(rows)):  #get per-lane and per-sample stats
             row = rows[i]
-            cols = row.xpath('./th | ./td');
+            cols = row.xpath('./th | ./td')
 
             # Table cols:
             #   Lane number
@@ -550,6 +563,7 @@ class NextSeqAnalysis(IlluminaNextGenAnalysis):
 
             lane = cols[0].text
             samp = cols[2].text
+            index = cols[3].text
             numReads = re.sub(',','',cols[8].text)
             perc_Q30bases = cols[11].text
             
@@ -564,14 +578,14 @@ class NextSeqAnalysis(IlluminaNextGenAnalysis):
             else:
                 perc_Q30bases = float(perc_Q30bases)
 
-            if lane not in laneStats:
+            if lane not in laneStats:  # start new lane tallys
                 laneStats[lane] = {'numReads': 0, 'num_Q30bases': 0, 'perc_Q30bases': 0}
 
             laneStats[lane]['numReads'] += numReads
             laneStats[lane]['num_Q30bases'] += perc_Q30bases * numReads
 
-            if samp not in sampStats:
-                sampStats[samp] = {'numReads': 0, 'num_Q30bases': 0, 'perc_Q30bases': 0}
+            if samp not in sampStats: # start new sample tallys
+                sampStats[samp] = {'index': index, 'numReads': 0, 'num_Q30bases': 0, 'perc_Q30bases': 0}
 
             sampStats[samp]['numReads'] += numReads
             sampStats[samp]['num_Q30bases'] += perc_Q30bases * numReads
@@ -589,8 +603,11 @@ class NextSeqAnalysis(IlluminaNextGenAnalysis):
             if s['numReads'] > 0:
                 s['perc_Q30bases'] = s['num_Q30bases']/s['numReads']
 
-        laneRows = [['Lane', 'Reads', '% Bases >= Q30']] + [[lane, format(laneStats[lane]['numReads'], 'n'), '%.2f' % laneStats[lane]['perc_Q30bases']] for lane in laneStats]
-        sampRows = [['Sample', 'Reads', '% Bases >= Q30']] + [[samp, format(sampStats[samp]['numReads'], 'n'), '%.2f' % sampStats[samp]['perc_Q30bases']] for samp in sampStats]
+        laneRows = [ ['Lane', 'Reads', '% Bases >= Q30'] ] \
+            + [ [ lane, format(laneStats[lane]['numReads'], 'n'), '%.2f' % laneStats[lane]['perc_Q30bases'] ] for lane in laneStats ]
+
+        sampRows = [ ['Sample', 'Index', 'Reads', '% Bases >= Q30'] ]  \
+            + [ [ samp, sampStats[samp]['index'], format(sampStats[samp]['numReads'], 'n'), '%.2f' % sampStats[samp]['perc_Q30bases'] ] for samp in sampStats ]
         
         ## Append analysis read count and num samps
         if self.Run.SampleSheet.nonIndexRead1_numCycles > 0:
@@ -604,6 +621,11 @@ class NextSeqAnalysis(IlluminaNextGenAnalysis):
         ## Append detailed stats tables
         summary += self.formatTable(laneRows)
         summary += self.formatTable(sampRows)
+
+        ## Append list of high-count undetermined indices
+        if self.highCountUndetInd_Summary:
+            summary += ['\nHigh-count undetermined indices (count > %s):\n' % highCountThreshold] + self.highCountUndetInd_Summary
+            summary += ['']  #add line break
 
         return summary
 

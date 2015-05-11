@@ -215,7 +215,7 @@ class IggyMod:
         if t < 10:
             return '10'
         elif t > 60:
-            return '%s:%s' % ( int(t / 60), mod(t % 60) )  # format 'hours:minutes'                                                                                          
+            return '%s:%s:00' % ( int(t / 60), mod(t % 60) )  # format 'hours:minutes'                                                                                          
 
 
     def __repr__(self):

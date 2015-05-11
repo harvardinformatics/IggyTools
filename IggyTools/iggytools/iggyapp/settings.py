@@ -8,7 +8,6 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/1.6/ref/settings/
 """
 
-# Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 import os
 
 BASE_DIR = os.path.dirname(os.path.dirname(__file__))
@@ -18,9 +17,9 @@ LOGFILE = '/n/informatics_external/seq/seqstats_log/log.txt'
 
 TEMPLATE_DIRS = ( BASE_DIR + "/iggyapp/templates", )
 
-MACHINE_NAME = { 'SN343'  : 'HiSeq 2000', #map machine id to human-friendly name
-                 'D00365' : 'HiSeq 2500',
-                 'NS500422' : 'NextSeq' }
+MACHINE_VERSION = { 'SN343'    : 'HiSeq 2000', #map machine id to human-readable machine version
+                    'D00365'   : 'HiSeq 2500',
+                    'NS500422' : 'NextSeq' }
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/1.6/howto/deployment/checklist/
