@@ -381,11 +381,6 @@ class IlluminaNextGen:
         else:
             summary += self.SampleSheet.ss
 
-            
-        
-
-
-
         summary.append('\n')
 
         self.summary = '\n'.join(summary)
