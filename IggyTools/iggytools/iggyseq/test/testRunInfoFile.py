@@ -7,7 +7,9 @@ All rights reserved.
 """
 
 import unittest
+import sys
 import os
+import re
 
 from iggytools.pref.iggytools_PrefClass       import Iggytools_Preferences
 from iggytools.iggyseq.RunInfoFile            import RunInfoFile 
@@ -22,16 +24,46 @@ class RunInfoFileTest(unittest.TestCase):
         if not os.path.exists(prefdir):
             raise Exception("IGGYPREFDIR %s does not exist" % prefdir)
 
-      self.file = "./iggytools/iggyseq/test/data/H2LC5AFXX.RunInfo.xml"
 
-    def testRunInfoFile(self):
-      rif  = RunInfoFile(self.file)
+    def testRunInfoFile0(self):
+      file0 = "./iggytools/iggyseq/test/data/H2LC5AFXX.RunInfo.xml"
+      rif0  = RunInfoFile(file0)
 
-      (rdict, datetext) = rif.parse()
+      (rdict, datetext) = rif0.parse()
 
       self.assertTrue(datetext == "150527")
-     
-      print rdict 
+    
+    def testRunInfoFile1(self): 
+      file1 = "./iggytools/iggyseq/test/data/H2LC5AFXX.bad1.RunInfo.xml"
+      rif1  = RunInfoFile(file1)
+
+      caught = False
+
+      try:
+        (rdict, datetext) = rif1.parse()
+      except Exception as e:
+
+        if re.search('Number element', str(e), re.I):
+           caught = True
+
+      self.assertTrue(caught)
+
+
+    def testRunInfoFile2(self):
+      file2 = "./iggytools/iggyseq/test/data/H2LC5AFXX.bad2.RunInfo.xml"
+      rif2  = RunInfoFile(file2)
+
+      caught = False
+
+      try:
+        (rdict, datetext) = rif2.parse()
+      except Exception as e:
+        if re.search('NumCycles element', str(e), re.I):
+           caught = True
+
+      self.assertTrue(caught)
+
+
 
     def tearDown(self):
         pass
