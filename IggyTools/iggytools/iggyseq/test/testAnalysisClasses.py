@@ -17,6 +17,7 @@ from iggytools.iggyseq.sampleSheetClasses     import BaseSampleSheet
 class AnalysisClassesTest(unittest.TestCase):
 
     def setUp(self):
+      os.environ['IGGYPREFDIR']='./tests/data/iggytools_prefs/'
       prefdir = os.environ.get('IGGYPREFDIR',None)
 
       if prefdir is not None:
