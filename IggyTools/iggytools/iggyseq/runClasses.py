@@ -173,11 +173,23 @@ class IlluminaNextGen:
     def processRun(self):
 
         self.init_for_processing()
-
+        print "Init done"
         try:
+
+            print "Clearing directory %s"%self.processingDir
+
             self.clearDir(self.processingDir)
+
+            print "Parsing Sample Sheet"
+
             self.parseSamplesheet(write_validated=True, write_analysis_samplesheets=True)
+
+            print "Bcl2fastq"
+
             self.bcl2fastq()
+
+            print "Post processing"
+
             self.postProcess()
 
         except:

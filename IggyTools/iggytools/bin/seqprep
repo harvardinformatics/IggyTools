@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-import sys, re
+import sys, re, os
 from iggytools.iggyseq.seqprep.parseArgs import parseArgs
 from iggytools.iggyseq.runClasses import IlluminaNextGen, getSeqPref
 from iggytools.utils.util import getUserHome
@@ -7,7 +7,11 @@ from iggytools.utils.util import getUserHome
 
 def seqprep(argv): #process raw sequencing data
 
-    pref = getSeqPref()
+    prefdir = os.environ.get('IGGYPREFDIR',None)
+    if prefdir is not None:
+        if not os.path.exists(prefdir):
+            raise Exception("IGGYPREFIDR %s does not exist" % prefdir)
+    pref = getSeqPref(prefdir)
 
     args = parseArgs(argv, pref = pref)
 

@@ -13,22 +13,22 @@ PRIMARY_PARENT: /n/informatics/git/testdata
 MACHINE_TYPE: {'NS500422': 'NextSeq', 'SN343': 'HiSeq', 'D00365': 'HiSeq', 'NS500305': 'NextSeq'}
 
 # File containing comma-separated email addresses to be sent all iggyseq notifications and demultiplex summaries.
-USERS_FILE: /n/informatics/saved/iggyseq_users_list.txt
+USERS_FILE: /n/informatics/mclamp/test/saved/iggyseq_users_list.txt
 
 # File containing comma-separated email addresses to be sent demultiplex summaries only.
-WATCHERS_FILE: /n/informatics/saved/seqprep_watchers_list.txt
+WATCHERS_FILE: /n/informatics/mclamp/test/saved/seqprep_watchers_list.txt
 
 # Directory where run log directories are written.
-LOGDIR_PARENT: /n/informatics_external/seq/seqprep_log
+LOGDIR_PARENT: /n/informatics/mclamp/test/seqprep_log
 
 # Directory where run processing directories are written.
-PROCESSING_PARENT: /n/seqcfs/sequencing/analysis_in_progress
+PROCESSING_PARENT: /n/informatics/mclamp/test/analysis_in_progress
 
 # Directory where run finishing directories are written.
-FINISHING_PARENT: /n/seqcfs/sequencing/analysis_finished
+FINISHING_PARENT: /n/informatics/mclamp/test/analysis_finished
 
 # Directory where demultiplexed runs are written for download by users.
-FINAL_PARENT: /n/ngsdata
+FINAL_PARENT: /n/informatics/mclamp/test/ngsdata
 
 # Number of mismatches allowed in barcodes when demultiplexing.
 SEQPREP_NUM_MISMATCHES: 0
