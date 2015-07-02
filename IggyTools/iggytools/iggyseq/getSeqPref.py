@@ -1,4 +1,5 @@
 from os import path
+
 from iggytools.utils.util import getUserHome
 from iggytools.pref.iggytools_PrefClass import Iggytools_Preferences
 
