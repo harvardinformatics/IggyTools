@@ -1,0 +1,20 @@
+
+###
+## Bowtie2 preferences
+###
+
+# Number of threads.
+THREADS: 16
+
+# Fastq quality score encoding.
+ENCODING: phred33
+
+# Slurm memory reservation in MB.
+SLURM_MEM: 16000
+
+# Slurm time parameter. See sbatch man page for accepted formats.
+SLURM_TIME: '10:00:00'
+
+# Slurm partition.
+SLURM_PARTITION: serial_requeue
+

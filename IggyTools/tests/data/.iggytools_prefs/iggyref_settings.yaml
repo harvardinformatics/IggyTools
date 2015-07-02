@@ -1,0 +1,39 @@
+
+####
+##  IggyRef preferences
+####
+
+# Directory for genomes and databases 
+IGGYREF_REPOSITORY_DIR: '/n/regal/informatics_public/ref/'
+
+# Level of logging detail (info or debug)
+LOGGING_LEVEL: debug
+
+# Database type (sqlite or mysql)
+DB_TYPE: mysql
+
+# Note, if DB_TYPE is sqlite, then the mysql settings below can be ignored:
+MYSQL_USER: iggy
+MYSQL_HOST: db-internal
+MYSQL_DB: iggyref
+MYSQL_PASS: 98smms76
+
+# Debug mode (In debug mode, files are not copied to REPOSITORY_DIR)
+DEBUG: False
+
+# EBI collection choices are interpro, pfam
+EBI_COLLECTIONS: [interpro, pfam]
+
+# Ensembl collection choices are human, fruitfly, worm, yeast
+ENSEMBL_COLLECTIONS: [human, fruitfly, worm, yeast]
+
+# NCBI collection choices are nr, nt, refseq_genomic, refseq_protein, refseq_rna, swissprot
+NCBI_COLLECTIONS: [nr, nt, refseq_genomic, refseq_protein, refseq_rna, swissprot]
+
+# UCSC collection choices are chicken_galGal3, chicken (most recent), fruitfly, human, 
+# mouse, rat, worm, yeast, zebrafinch
+UCSC_COLLECTIONS: [chicken_galGal3, chicken, fruitfly, human, mouse, rat, worm, yeast, zebrafinch]
+
+# The sole Uniprot collection choice is uniref100
+UNIPROT_COLLECTIONS: [uniref100]
+

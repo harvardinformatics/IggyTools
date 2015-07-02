@@ -1,0 +1,28 @@
+
+###
+## iggypipe preferences
+###
+
+# Directory for analysis results and logs.
+IGGYPIPE_DIR: /n/regal/rc_admin/mclamp/iggypipeout/
+
+# Logging level.
+# Choices: [info, debug]
+LOGGING_LEVEL: debug
+
+# Database type.
+# Choices: [sqlite, mysql]
+DB_TYPE: mysql
+
+# If DB_TYPE is sqlite, mysql settings can be ignored.
+MYSQL_HOST: db-internal
+
+MYSQL_DB: iggypipe_mclamp
+
+MYSQL_USER: iggy
+
+MYSQL_PASS: 98smms76
+
+# Debug mode.
+DEBUG: False
+

@@ -1,0 +1,20 @@
+
+###
+## Trimmomatic preferences
+###
+
+# Number of threads.
+THREADS: 5
+
+# Trimmomatic steps for paired end reads.
+PAIRED_END_STEPS: 'ILLUMINACLIP:/n/sw/centos6/Trimmomatic-0.32/adapters/TruSeq3-PE.fa:2:30:10,LEADING:10,TRAILING:10,SLIDINGWINDOW:4:15,MINLEN:36'
+
+# Trimmomatic steps for single end reads.
+SINGLE_END_STEPS: 'ILLUMINACLIP:/n/sw/centos6/Trimmomatic-0.32/adapters/TruSeq3-SE.fa:2:30:10,LEADING:10,TRAILING:10,SLIDINGWINDOW:4:15,MINLEN:36'
+
+# Fastq quality score encoding.
+ENCODING: phred33
+
+# Slurm partition.
+SLURM_PARTITION: serial_requeue
+
