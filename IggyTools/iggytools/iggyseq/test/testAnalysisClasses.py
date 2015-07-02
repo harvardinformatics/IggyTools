@@ -14,7 +14,7 @@ from iggytools.pref.iggytools_PrefClass       import Iggytools_Preferences
 from iggytools.iggyseq.runClasses             import IlluminaNextGen, getSeqPref
 from iggytools.iggyseq.sampleSheetClasses     import BaseSampleSheet
 
-class SampleSheetTest(unittest.TestCase):
+class AnalysisClassesTest(unittest.TestCase):
 
     def setUp(self):
       prefdir = os.environ.get('IGGYPREFDIR',None)
@@ -32,10 +32,8 @@ class SampleSheetTest(unittest.TestCase):
       self.run  = IlluminaNextGen.getInstance(runName, pref = seqpref, verbose = True)
 
 
-    def testGetSampleSheet(self):
-      ss = BaseSampleSheet.getInstance(self.run)
-
-      self.assertTrue(ss)
+    def testProcessRun(self):
+        pass
 
     def tearDown(self):
         pass
