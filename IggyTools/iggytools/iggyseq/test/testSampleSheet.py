@@ -17,6 +17,7 @@ from iggytools.iggyseq.sampleSheetClasses     import BaseSampleSheet
 class SampleSheetTest(unittest.TestCase):
 
     def setUp(self):
+      os.environ['IGGYPREFDIR']='./tests/data/iggytools_prefs/'
       prefdir = os.environ.get('IGGYPREFDIR',None)
 
       if prefdir is not None:
@@ -34,8 +35,13 @@ class SampleSheetTest(unittest.TestCase):
 
     def testGetSampleSheet(self):
       ss = BaseSampleSheet.getInstance(self.run)
-
+    
       self.assertTrue(ss)
+
+      ss.parse()
+
+      for i in  ss.__dict__:
+          print "%s - %s"%(i,ss.__dict__[i])
 
     def tearDown(self):
         pass
