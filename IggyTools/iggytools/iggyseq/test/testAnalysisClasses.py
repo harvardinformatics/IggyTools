@@ -8,6 +8,11 @@ All rights reserved.
 
 import unittest
 import os
+import sys
+
+scriptdir = os.path.dirname(os.path.realpath(__file__))
+
+sys.path.append(scriptdir + "/../../../")
 
 from iggytools.utils.util                     import getUserHome
 from iggytools.pref.iggytools_PrefClass       import Iggytools_Preferences
@@ -20,7 +25,6 @@ class AnalysisClassesTest(unittest.TestCase):
 
       self.scriptdir = os.path.dirname(os.path.realpath(__file__))
 
-      os.environ['PYTHONPATH']   = self.scriptdir + "../../../"
       os.environ['IGGYPREFDIR']  = self.scriptdir + "/../../../tests/data/iggytools_prefs/"
 
       prefdir = os.environ.get('IGGYPREFDIR',None)
