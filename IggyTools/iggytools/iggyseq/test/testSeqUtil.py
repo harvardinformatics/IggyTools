@@ -12,7 +12,7 @@ import os
 from iggytools.utils.util                     import getUserHome
 from iggytools.pref.iggytools_PrefClass       import Iggytools_Preferences
 from iggytools.iggyseq.runClasses             import IlluminaNextGen, getSeqPref
-from iggytools.iggyseq.seqUtil                import parseRunName
+from iggytools.iggyseq.seqUtil                import parseRunName, parseRunInfo
 
 class SeqUtilTest(unittest.TestCase):
 
@@ -50,6 +50,28 @@ class SeqUtilTest(unittest.TestCase):
       self.assertTrue(namehash.flowcell         == 'H2LC5AFXX')
       self.assertTrue(namehash.runName          == '150527_NS500422_0126_AH2LC5AFXX')
       self.assertTrue(namehash.date             == '150527')
+
+    def testParseRunInfo(self):
+
+       """ This is a correct RunInfo file """
+
+       rifile1 = "./iggytools/iggyseq/test/data/H2LC5AFXX.RunInfo.xml"
+
+       (rdict, datetext) = parseRunInfo(rifile1)
+
+       print datetext
+
+       self.assertTrue(rdict)
+       self.assertTrue(datetext == "150527")
+
+
+       #{'Read1': {'num_cycles': '76', 'is_index': 'N'}, 'Read2': {'num_cycles': '76', 'is_index': 'N'}}
+
+       self.assertTrue(len(rdict) ==2)
+       self.assertTrue(rdict['Read1'])
+       self.assertTrue(rdict['Read2'])
+
+       self.assertTrue(rdict['Read2']['is_index'] == 'N')
 
     def tearDown(self):
         pass
