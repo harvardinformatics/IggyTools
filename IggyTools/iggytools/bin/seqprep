@@ -18,6 +18,7 @@ def seqprep(argv): #process raw sequencing data
     runName = args.pop('runName')
 
     r = IlluminaNextGen.getInstance(runName, pref = pref, **args)
+
     r.processRun()
 
 

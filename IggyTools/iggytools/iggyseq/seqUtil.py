@@ -30,11 +30,15 @@ def parseRunInfo(rifile):
 
     rdict = dict()
     for read in reads:
+        print "READ"
+        print read.attrib['Number']
+        print read.attrib['NumCycles']
         read_num = read.attrib['Number']
         rdict["Read" + read_num] = dict()
         rdict["Read" + read_num]['is_index'] = read.attrib['IsIndexedRead']
         rdict["Read" + read_num]['num_cycles'] = read.attrib['NumCycles']
 
+    print rdict
     return rdict, datetext
 
 

@@ -30,7 +30,7 @@ class SampleSheetTest(unittest.TestCase):
       runName  = "150527_NS500422_0126_AH2LC5AFXX"
       seqpref  = getSeqPref(prefdir)
 
-      self.run  = IlluminaNextGen.getInstance(runName, pref = seqpref, verbose = True)
+      self.run  = IlluminaNextGen.getInstance(runName, pref = seqpref, verbose = False)
 
 
     def testGetSampleSheet(self):
@@ -40,9 +40,13 @@ class SampleSheetTest(unittest.TestCase):
 
       ss.parse()
 
-      for i in  ss.__dict__:
-          print "%s - %s"%(i,ss.__dict__[i])
+      
 
+      for i in  ss.__dict__:
+     #     print "%s - %s"%(i,ss.__dict__[i])
+           print i
+
+      print ss.analyses[0].__dict__
     def tearDown(self):
         pass
 
