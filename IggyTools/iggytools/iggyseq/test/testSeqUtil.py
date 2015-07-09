@@ -51,15 +51,13 @@ class SeqUtilTest(unittest.TestCase):
       self.assertTrue(namehash.runName          == '150527_NS500422_0126_AH2LC5AFXX')
       self.assertTrue(namehash.date             == '150527')
 
-    def testParseRunInfo(self):
+    def testParseRunInfo1(self):
 
        """ This is a correct RunInfo file """
 
        rifile1 = "./iggytools/iggyseq/test/data/H2LC5AFXX.RunInfo.xml"
 
        (rdict, datetext) = parseRunInfo(rifile1)
-
-       print datetext
 
        self.assertTrue(rdict)
        self.assertTrue(datetext == "150527")
@@ -72,6 +70,23 @@ class SeqUtilTest(unittest.TestCase):
        self.assertTrue(rdict['Read2'])
 
        self.assertTrue(rdict['Read2']['is_index'] == 'N')
+
+    def testParseRunInfo2(self):
+
+       """ This is an  incorrect RunInfo file """
+
+       rifile1 = "./iggytools/iggyseq/test/data/H2LC5AFXX.bad1.RunInfo.xml"
+
+
+       try:
+
+         (rdict, datetext) = parseRunInfo(rifile1)
+
+       except Exception as e:
+
+         self.assertTrue(str(e) == "KeyError: 'Number'")
+
+         print e
 
     def tearDown(self):
         pass

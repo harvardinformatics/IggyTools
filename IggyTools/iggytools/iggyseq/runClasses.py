@@ -47,8 +47,7 @@ class IlluminaNextGen:
         self.runName = runName
 
         parsed = parseRunName(runName)
-        print runName
-        print parsed
+
         self.flowcell              = parsed.flowcell
         self.flowcellPosition      = parsed.pos
 
