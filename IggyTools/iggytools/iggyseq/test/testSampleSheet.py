@@ -7,7 +7,12 @@ All rights reserved.
 """
 
 import unittest
+import sys
 import os
+
+scriptdir = os.path.dirname(os.path.realpath(__file__))
+
+sys.path.append(scriptdir + "/../../../")
 
 from iggytools.utils.util                     import getUserHome
 from iggytools.pref.iggytools_PrefClass       import Iggytools_Preferences
@@ -19,7 +24,7 @@ class SampleSheetTest(unittest.TestCase):
     def setUp(self):
       self.scriptdir = os.path.dirname(os.path.realpath(__file__))
 
-      os.environ['PYTHONPATH']   = self.scriptdir + "../../../"
+      #os.environ['PYTHONPATH']   = self.scriptdir + "../../../"
       os.environ['IGGYPREFDIR']  = self.scriptdir + "/../../../tests/data/iggytools_prefs/"
 
       prefdir = os.environ.get('IGGYPREFDIR',None)
@@ -51,6 +56,17 @@ class SampleSheetTest(unittest.TestCase):
            print i
 
       print ss.analyses[0].__dict__
+
+
+    def testValidateIndexChars(self):
+
+       ss = BaseSampleSheet.getInstance(self.run)
+
+       # if not re.match('[AGCT-]*$', index):
+       #     raise Exception('Unexpected index in samplesheet %s, line %s: %s' % (self.file, lineIndex+1, index))
+
+       self.assertTrue(ss.validate_indexChars("ACGTGC",1) is None)
+
     def tearDown(self):
         pass
 
