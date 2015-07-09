@@ -83,10 +83,24 @@ class SeqUtilTest(unittest.TestCase):
          (rdict, datetext) = parseRunInfo(rifile1)
 
        except Exception as e:
+         # This obviously isn't a very informative error message.  But the test passes
+         self.assertTrue(e.message == "Number")
 
-         self.assertTrue(str(e) == "KeyError: 'Number'")
+    def testParseRunInfo3(self):
 
-         print e
+       """ This is an incorrect RunInfo file """
+
+       rifile1 = "./iggytools/iggyseq/test/data/H2LC5AFXX.bad2.RunInfo.xml"
+
+
+       try:
+
+         (rdict, datetext) = parseRunInfo(rifile1)
+
+       except Exception as e:
+         # This obviously isn't a very informative error message.  But the test passes
+         self.assertTrue(e.message == "NumCycles")
+
 
     def tearDown(self):
         pass
