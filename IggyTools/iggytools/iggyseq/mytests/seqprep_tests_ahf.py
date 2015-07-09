@@ -5,31 +5,35 @@ Created on Jul 1, 2015
 '''
 import unittest
 import os
-import import shutil 
+import shutil 
 import sys
 from subprocess import Popen,PIPE
 
-data_dir=sys.argv[1] # 150605_D00365_0511_BC6FHCANXX
+data_dir="/n/informatics/git/testdata/150605_D00365_0511_BC6FHCANXX"
 
 class Test(unittest.TestCase):
 		
 	def setUp(self):
 		self.workingdir=os.path.join(os.getcwd(),"tempdir")
+		os.system("mkdir %s" % self.workingdir)
 		self.prefdir=os.path.join(self.workingdir,"pref")
 		paths={
 		"LOGDIR_PARENT":os.path.join(self.workingdir,"seqprep_log"),
-		"PROCESSING_PARENT":os.path.join(self.workdingdir,"analysis_in_progress"),
+		"PROCESSING_PARENT":os.path.join(self.workingdir,"analysis_in_progress"),
 		"FINISHING_PARENT":os.path.join(self.workingdir,"analysis_finished"),
-		"FINAL_PARENT":os.path(join(self.workingdir,"ngsdata"),
-		"SEQSTATS_LOG_DIR":os.path(join(self.workingdir,"seqstats_bkup")}}
+		"FINAL_PARENT":os.path.join(self.workingdir,"ngsdata"),
+		"SEQSTATS_HIST_DIR":os.path.join(self.workingdir,"seqstats_bkup"),
+		"SEQSTATS_LOG_DIR":os.path.join(self.workingdir,"seqstats_log")}
 	
-	for path in paths:
-		os.system("mkdir %s" % paths[path])
-	
-	paths["TILE_REGEX"]="s_1_1205"
-	preffile=os.path.join(self.prefdir,"iggyseq_settings.yaml")
-
-	prefdata="""
+		for name,path in paths.iteritems():
+			os.system("mkdir %s" % path)
+			print path	
+		paths["TILE_REGEX"]="s_1_1205"
+		paths["MACHINE_TYPE"]="{'NS500422': 'NextSeq', 'SN343': 'HiSeq', 'D00365': 'HiSeq', 'NS500305': 'NextSeq'}"
+		
+		self.preffile=os.path.join(self.prefdir,"iggyseq_settings.yaml")
+		os.system("mkdir %s" % self.prefdir)	
+		self.prefdata="""
 ###
 ## iggyseq preferences
 ###
@@ -41,7 +45,7 @@ VERBOSE: False
 PRIMARY_PARENT: /n/informatics/git/testdata
 
 # Dictionary mapping machine name to machine type. (Keys are machine names, values are type.
-MACHINE_TYPE: {'NS500422': 'NextSeq', 'SN343': 'HiSeq', 'D00365': 'HiSeq', 'NS500305': 'NextSeq'}
+MACHINE_TYPE: {MACHINE_TYPE}
 
 # File containing comma-separated email addresses to be sent all iggyseq notifications and demultiplex summaries.
 USERS_FILE: /n/informatics/saved/iggyseq_users_list.txt
@@ -56,7 +60,7 @@ LOGDIR_PARENT: {LOGDIR_PARENT}
 PROCESSING_PARENT: {PROCESSING_PARENT}
 
 # Directory where run finishing directories are written.
-FINISHING_PARENT: }{FINISHING_PARENT}
+FINISHING_PARENT: {FINISHING_PARENT}
 
 # Directory where demultiplexed runs are written for download by users.
 FINAL_PARENT: {FINAL_PARENT}
@@ -107,25 +111,35 @@ SEQSTATS_HIST_DIR: {SEQSTATS_HIST_DIR}
 SEQSTATS_LOGFILE: {SEQSTATS_LOG_DIR}log.txt
 """.format(**paths)
 	
-	preffile=open(self.preffile,"w")
-	preffile.write(prefdata)
-	preffile.close()
+		preffile=open(self.preffile,"w")
+		preffile.write(self.prefdata)
+		preffile.close()
 
 
-    def tearDown(self):
-        
-        shutil.rmtree(self.workingdir))
+	def tearDown(self):
+        	#shutil.rmtree(self.workingdir)
+		pass
 
+	def testName(self):
+		#os.system(". ~/workspace/IggyTools/setup.sh")
+		execpath="~/workspace/IggyTools/IggyTools/iggytools/bin"
+        	#pdir=os.path.join(os.getcwd(),"pref")
+		logging=os.path.join(self.workingdir,"analysis_in_progress")
+		suffix="test"
+		cmd="IGGYPREFDIR=%s %s -v -s %s %s" % (self.prefdir,os.path.join(execpath,"seqprep"),suffix,data_dir.split("/")[-1])
+		print cmd
+		p=Popen(cmd,shell=True,stdout=PIPE,stderr=PIPE)
+		out,err=p.communicate()
+		#print err
+		#print out
+		
+		sheet_exist_cmd="ls %s/%s/SampleSheet.csv"   % os.path.join(self.workingdir,"analysis_finished",data_dir.split("/")[-1])
+		sheet=Popen(sheet_exist_cmd,shell=True,stdout=PIPE,stderr=PIPE).stdout.read()
+		self.assertEqual(sheet.strip(),"SampleSheet.csv")
 
-    def testName(self):
-	os.system(". ~/workspace/IggyTools/setup.sh")
-	execpath="~/workspace/IggyTools/IggyTools/iggytools/bin"
-        pdir=os.path.join(os.getcwd(),"pref")
-	logging=os.path.join(self.workdingdir,"analysis_in_progress)"
-	cmd="IGGYPREFDIR=%s %s -v -s %s %s 2>&1 > %s.%s.%s.out &" % (pdir,os.path.join(execpath,"seqprep"),suffix,data_dir.split("/")[-1],logging,data_dir.split("/")[-1],suffix)
-	sprep_run=subprocess.Popen(cmd,shell=TRUE,stdout=PIPE,stderr=PIPE).communicate()
-
-
+		
+		
+			
 
 
 if __name__ == "__main__":
