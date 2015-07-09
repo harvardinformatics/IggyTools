@@ -11,10 +11,10 @@ import os
 
 from iggytools.utils.util                     import getUserHome
 from iggytools.pref.iggytools_PrefClass       import Iggytools_Preferences
-from iggytools.iggyseq.laneClass              import Lane
 from iggytools.iggyseq.runClasses             import IlluminaNextGen, getSeqPref
+from iggytools.iggyseq.seqUtil                import parseRunName
 
-class LaneClassTest(unittest.TestCase):
+class SeqUtilTest(unittest.TestCase):
 
     def setUp(self):
       os.environ['IGGYPREFDIR']='./tests/data/iggytools_prefs/'
@@ -33,28 +33,23 @@ class LaneClassTest(unittest.TestCase):
       self.run  = IlluminaNextGen.getInstance(runName, pref = seqpref, verbose = False)
 
 
-    def testCreateLane(self):
+    def testParseRunName(self):
 
-      lane = Lane(self.run)
+      run  = self.run
+      name = run.runName
+ 
+      self.assertTrue(name == "150527_NS500422_0126_AH2LC5AFXX")
 
-      self.assertTrue(lane)
+      namehash = parseRunName(name)
 
-      lane.index1Length = 6
-      lane.index2Length = 8
+      # NamedTuple(pos_and_flowcell='AH2LC5AFXX', machineID='NS500422', counter='0126', pos='A', runType='', flowcell='H2LC5AFXX', runName='150527_NS500422_0126_AH2LC5AFXX', date='150527')
 
-      self.assertTrue(lane.index1Length == 6) 
-      self.assertTrue(lane.index2Length == 8) 
-
-      self.assertTrue(len(lane.subIDs) == 0)
-
-      self.assertTrue(len(lane.ssSampleLines) == 0)
-      self.assertTrue(len(lane.ssLineIndices) == 0)
-
-      self.assertTrue(lane.userLaneName is None)
-      self.assertTrue(lane.machineLaneName is None)
-
-
-      self.assertTrue(lane.Run.runName == "150527_NS500422_0126_AH2LC5AFXX")
+      self.assertTrue(namehash.pos_and_flowcell == 'AH2LC5AFXX')
+      self.assertTrue(namehash.machineID        == 'NS500422')
+      self.assertTrue(namehash.counter          == '0126')
+      self.assertTrue(namehash.flowcell         == 'H2LC5AFXX')
+      self.assertTrue(namehash.runName          == '150527_NS500422_0126_AH2LC5AFXX')
+      self.assertTrue(namehash.date             == '150527')
 
     def tearDown(self):
         pass
