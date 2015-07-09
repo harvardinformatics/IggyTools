@@ -117,10 +117,10 @@ SEQSTATS_LOGFILE: {SEQSTATS_LOG_DIR}log.txt
 
 
 	def tearDown(self):
-        	#shutil.rmtree(self.workingdir)
+        	shutil.rmtree(self.workingdir)
 		pass
 
-	def testName(self):
+	def SampleSheetExists(self):
 		#os.system(". ~/workspace/IggyTools/setup.sh")
 		execpath="~/workspace/IggyTools/IggyTools/iggytools/bin"
         	#pdir=os.path.join(os.getcwd(),"pref")
