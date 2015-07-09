@@ -12,12 +12,16 @@ import os
 from iggytools.utils.util                     import getUserHome
 from iggytools.pref.iggytools_PrefClass       import Iggytools_Preferences
 from iggytools.iggyseq.runClasses             import IlluminaNextGen, getSeqPref
-from iggytools.iggyseq.seqUtil                import parseRunName, parseRunInfo
+from iggytools.iggyseq.seqUtil                import parseRunName, parseRunInfo, setPermissions
 
 class SeqUtilTest(unittest.TestCase):
 
     def setUp(self):
-      os.environ['IGGYPREFDIR']='./tests/data/iggytools_prefs/'
+      self.scriptdir = os.path.dirname(os.path.realpath(__file__))
+
+      os.environ['PYTHONPATH']   = self.scriptdir + "../../../"
+      os.environ['IGGYPREFDIR']  = self.scriptdir + "/../../../tests/data/iggytools_prefs/"
+
       prefdir = os.environ.get('IGGYPREFDIR',None)
 
       if prefdir is not None:
@@ -55,7 +59,7 @@ class SeqUtilTest(unittest.TestCase):
 
        """ This is a correct RunInfo file """
 
-       rifile1 = "./iggytools/iggyseq/test/data/H2LC5AFXX.RunInfo.xml"
+       rifile1 = self.scriptdir + "/data/H2LC5AFXX.RunInfo.xml"
 
        (rdict, datetext) = parseRunInfo(rifile1)
 
@@ -75,7 +79,7 @@ class SeqUtilTest(unittest.TestCase):
 
        """ This is an  incorrect RunInfo file """
 
-       rifile1 = "./iggytools/iggyseq/test/data/H2LC5AFXX.bad1.RunInfo.xml"
+       rifile1 = self.scriptdir + "/data/H2LC5AFXX.bad1.RunInfo.xml"
 
 
        try:
@@ -90,7 +94,7 @@ class SeqUtilTest(unittest.TestCase):
 
        """ This is an incorrect RunInfo file """
 
-       rifile1 = "./iggytools/iggyseq/test/data/H2LC5AFXX.bad2.RunInfo.xml"
+       rifile1 = self.scriptdir + "/data/H2LC5AFXX.bad2.RunInfo.xml"
 
 
        try:
@@ -100,6 +104,26 @@ class SeqUtilTest(unittest.TestCase):
        except Exception as e:
          # This obviously isn't a very informative error message.  But the test passes
          self.assertTrue(e.message == "NumCycles")
+
+
+
+    def testSetPermissions(self):
+
+      """ This tests setting permissions on an existing file and on a non-existent file """
+
+      file1 = self.scriptdir + "/data/H2LC5AFXX.bad2.RunInfo.xml"
+
+      setPermissions(file1) 
+
+      file2 = "pog"
+
+      try:
+
+        setPermissions(file2) 
+
+      except Exception as e:
+        
+        self.assertTrue(e.message == "File [pog] doesn't exist. Can't set permissions")
 
 
     def tearDown(self):
