@@ -23,7 +23,7 @@ class NSNoentrySampleSheet(unittest.TestCase):
 	# Command to set up iggy environment 
 	self.setupcmd = "source %s/setup.sh %s" % (self.iggyprefdir, self.codedir)
 	# Command needed for the main body of the test
-	self.jobcmd1 = "seqprep --suffix '_test_noentry' --verbose  150529_NS500305_0015_AHFCWWBGXX"
+	self.jobcmd1 = "seqprep --primary /n/informatics/git/testdata --suffix '_test_noentry' --verbose  150529_NS500305_0015_AHFCWWBGXX"
         #pass
 
   
@@ -41,6 +41,8 @@ class NSNoentrySampleSheet(unittest.TestCase):
 
 
     def testNoentry(self):
+	# Make sure correct version of Sample Sheet is in place
+	os.system("cp /n/informatics/git/testdata/150529_NS500305_0015_AHFCWWBGXX/SampleSheet.noentry.csv /n/informatics/git/testdata/150529_NS500305_0015_AHFCWWBGXX/SampleSheet.csv")
         # Run command, get its output 
 	cmd = "%s && IGGYPREFDIR=%s %s" % (self.setupcmd, self.iggyprefdir, self.jobcmd1)
 	print cmd
