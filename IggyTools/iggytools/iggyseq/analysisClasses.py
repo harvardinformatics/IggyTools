@@ -262,7 +262,7 @@ class HiSeqAnalysis(IlluminaNextGenAnalysis):
         inDir = path.join(self.Run.primaryDir, 'Data', 'Intensities', 'BaseCalls')
 
         if self.Run.customBasesMask:
-            basesMask = self.customBasesMask
+            basesMask = self.Run.customBasesMask
         else:
             basesMask = self.makeBasesMask(self.index1Length, self.index2Length)
 
