@@ -172,24 +172,20 @@ class IlluminaNextGen:
 
     def processRun(self):
 
+
         self.init_for_processing()
         print "Init done"
         try:
-
-            print "Clearing directory %s"%self.processingDir
-
+            print "Clearing directory"
             self.clearDir(self.processingDir)
 
-            print "Parsing Sample Sheet"
-
+            print "Parsing samplesheet"
             self.parseSamplesheet(write_validated=True, write_analysis_samplesheets=True)
 
-            print "Bcl2fastq"
-
+            print "BCL2fasgtq"
             self.bcl2fastq()
-
-            print "Post processing"
-
+ 
+            print "post process"
             self.postProcess()
 
         except:
@@ -197,6 +193,7 @@ class IlluminaNextGen:
                 mkdir_p(path.dirname(self.logFile))
 
             self.notify('Seqprep Exception for %s' % (self.runOutName), 'Error in ' + self.runOutName + ':\n' + traceback.format_exc())
+            print('Seqprep Exception for %s' % (self.runOutName +  'Error in ' + self.runOutName + ':\n' + traceback.format_exc()))
             return
 
     def postProcess(self):
@@ -230,6 +227,8 @@ class IlluminaNextGen:
             self.SampleSheet.parse()
             self.analyses = self.SampleSheet.analyses
 
+        print self.SampleSheet.analyses
+
         self.selectedLanes
 
         if self.SampleSheet.warnings:
@@ -248,6 +247,7 @@ class IlluminaNextGen:
             self.parseSamplesheet()
 
         for a in self.analyses:
+            print "Running analysis ",a
             a.bcl2fastq()
 
 

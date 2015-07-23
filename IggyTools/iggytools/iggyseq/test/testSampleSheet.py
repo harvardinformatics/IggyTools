@@ -7,7 +7,12 @@ All rights reserved.
 """
 
 import unittest
+import sys
 import os
+
+scriptdir = os.path.dirname(os.path.realpath(__file__))
+
+sys.path.append(scriptdir + "/../../../")
 
 from iggytools.utils.util                     import getUserHome
 from iggytools.pref.iggytools_PrefClass       import Iggytools_Preferences
@@ -17,7 +22,11 @@ from iggytools.iggyseq.sampleSheetClasses     import BaseSampleSheet
 class SampleSheetTest(unittest.TestCase):
 
     def setUp(self):
-      os.environ['IGGYPREFDIR']='./tests/data/iggytools_prefs/'
+      self.scriptdir = os.path.dirname(os.path.realpath(__file__))
+
+      #os.environ['PYTHONPATH']   = self.scriptdir + "../../../"
+      os.environ['IGGYPREFDIR']  = self.scriptdir + "/../../../tests/data/iggytools_prefs/"
+
       prefdir = os.environ.get('IGGYPREFDIR',None)
 
       if prefdir is not None:
@@ -30,7 +39,7 @@ class SampleSheetTest(unittest.TestCase):
       runName  = "150527_NS500422_0126_AH2LC5AFXX"
       seqpref  = getSeqPref(prefdir)
 
-      self.run  = IlluminaNextGen.getInstance(runName, pref = seqpref, verbose = True)
+      self.run  = IlluminaNextGen.getInstance(runName, pref = seqpref, verbose = False)
 
 
     def testGetSampleSheet(self):
@@ -40,8 +49,23 @@ class SampleSheetTest(unittest.TestCase):
 
       ss.parse()
 
+      
+
       for i in  ss.__dict__:
-          print "%s - %s"%(i,ss.__dict__[i])
+     #     print "%s - %s"%(i,ss.__dict__[i])
+           print i
+
+      print ss.analyses[0].__dict__
+
+
+    def testValidateIndexChars(self):
+
+       ss = BaseSampleSheet.getInstance(self.run)
+
+       # if not re.match('[AGCT-]*$', index):
+       #     raise Exception('Unexpected index in samplesheet %s, line %s: %s' % (self.file, lineIndex+1, index))
+
+       self.assertTrue(ss.validate_indexChars("ACGTGC",1) is None)
 
     def tearDown(self):
         pass

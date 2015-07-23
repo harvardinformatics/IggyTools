@@ -1,5 +1,5 @@
 """
-Created on Jul 2, 2015
+Created on Jul 9, 2015
 Harvard FAS Informatics
 All rights reserved.
 
@@ -7,8 +7,8 @@ All rights reserved.
 """
 
 import unittest
-import os
 import sys
+import os
 
 scriptdir = os.path.dirname(os.path.realpath(__file__))
 
@@ -16,13 +16,12 @@ sys.path.append(scriptdir + "/../../../")
 
 from iggytools.utils.util                     import getUserHome
 from iggytools.pref.iggytools_PrefClass       import Iggytools_Preferences
+from iggytools.iggyseq.laneClass              import Lane
 from iggytools.iggyseq.runClasses             import IlluminaNextGen, getSeqPref
-from iggytools.iggyseq.sampleSheetClasses     import BaseSampleSheet
 
-class AnalysisClassesTest(unittest.TestCase):
+class LaneClassTest(unittest.TestCase):
 
     def setUp(self):
-
       self.scriptdir = os.path.dirname(os.path.realpath(__file__))
 
       os.environ['IGGYPREFDIR']  = self.scriptdir + "/../../../tests/data/iggytools_prefs/"
@@ -39,11 +38,31 @@ class AnalysisClassesTest(unittest.TestCase):
       runName  = "150527_NS500422_0126_AH2LC5AFXX"
       seqpref  = getSeqPref(prefdir)
 
-      self.run  = IlluminaNextGen.getInstance(runName, pref = seqpref, verbose = True)
+      self.run  = IlluminaNextGen.getInstance(runName, pref = seqpref, verbose = False)
 
 
-    def testProcessRun(self):
-        pass
+    def testCreateLane(self):
+
+      lane = Lane(self.run)
+
+      self.assertTrue(lane)
+
+      lane.index1Length = 6
+      lane.index2Length = 8
+
+      self.assertTrue(lane.index1Length == 6) 
+      self.assertTrue(lane.index2Length == 8) 
+
+      self.assertTrue(len(lane.subIDs) == 0)
+
+      self.assertTrue(len(lane.ssSampleLines) == 0)
+      self.assertTrue(len(lane.ssLineIndices) == 0)
+
+      self.assertTrue(lane.userLaneName is None)
+      self.assertTrue(lane.machineLaneName is None)
+
+
+      self.assertTrue(lane.Run.runName == "150527_NS500422_0126_AH2LC5AFXX")
 
     def tearDown(self):
         pass
