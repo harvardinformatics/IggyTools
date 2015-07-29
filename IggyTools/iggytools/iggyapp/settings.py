@@ -19,7 +19,8 @@ TEMPLATE_DIRS = ( BASE_DIR + "/iggyapp/templates", )
 
 MACHINE_VERSION = { 'SN343'    : 'HiSeq 2000', #map machine id to human-readable machine version
                     'D00365'   : 'HiSeq 2500',
-                    'NS500422' : 'NextSeq' }
+                    'NS500422' : 'NextSeq',
+                    'D00742' : 'HiSeq 2500' }
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/1.6/howto/deployment/checklist/
