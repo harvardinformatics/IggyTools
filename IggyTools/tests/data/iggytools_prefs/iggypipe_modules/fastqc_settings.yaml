@@ -1,0 +1,20 @@
+
+###
+## Fastqc preferences
+###
+
+# Number of threads.
+THREADS: 4
+
+# Quiet mode. Set to True to supress messages to stdout.
+QUIET: False
+
+# Noextract. Set to True to leave .gz input files compressed.
+NOEXTRACT: True
+
+# Nogroup. Set to True to disable grouping of bases for reads >50bp.
+NOGROUP: True
+
+# Slurm partition.
+SLURM_PARTITION: serial_requeue
+

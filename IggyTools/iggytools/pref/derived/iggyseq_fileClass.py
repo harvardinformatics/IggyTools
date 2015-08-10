@@ -25,7 +25,7 @@ class Iggyseq_PrefFile(BasePrefFile):
                                varType = str ),
 
                       PrefVar( name = 'MACHINE_TYPE',
-                               default = dict(SN343 = 'HiSeq', D00365 = 'HiSeq', NS500422 = 'NextSeq'),
+                               default = dict(D00742 = 'HiSeq', SN343 = 'HiSeq', D00365 = 'HiSeq', NS500422 = 'NextSeq'),
                                comment = 'Dictionary mapping machine name to machine type. (Keys are machine names, values are type',
                                varType = dict ),
 

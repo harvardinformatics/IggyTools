@@ -17,6 +17,8 @@ def setPermissions(item):
         dirPermissions = stat.S_IRUSR|stat.S_IWUSR|stat.S_IXUSR|stat.S_IRGRP|stat.S_IWGRP|stat.S_IXGRP|stat.S_IRUSR|stat.S_IROTH|stat.S_IXOTH
         recursiveChmod(item, filePermissions, dirPermissions)
 
+    else:
+        raise Exception("File [%s] doesn't exist. Can't set permissions"%item)
 
 def parseRunInfo(rifile):
 

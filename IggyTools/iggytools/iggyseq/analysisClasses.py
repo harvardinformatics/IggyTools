@@ -93,11 +93,15 @@ class IlluminaNextGenAnalysis:
     def makeBasesMask(self, index1Length, index2Length):  
         index1Length = int(index1Length)
         index2Length = int(index2Length)
-        
+       
+        print "Index lengths %d %d"%(index1Length,index2Length) 
+
         runinfo_index_numcycles = list()
 
+        print "Parsing run info file %s"%self.Run.runinfoFile
         r, ignored = parseRunInfo(self.Run.runinfoFile) #example: {'Read1': {'num_cycles': 76, 'is_index': 'N'}, 'Read2': {'num_cycles': 7, 'is_index': 'Y'}}  
 
+        print r.keys()
         basesMask = 'Y' + str( int(r['Read1']['num_cycles']) - 1 ) + 'N'  #Read1 is never an index
 
         if 'Read2' in r.keys():
@@ -111,6 +115,7 @@ class IlluminaNextGenAnalysis:
                 else:
                     basesMask += ',' + 'N' * read2_numcycles
 
+                print "Appending %d"%read2_numcycles
                 runinfo_index_numcycles.append(read2_numcycles)
 
             else: #then Read2 is not an index
@@ -137,11 +142,17 @@ class IlluminaNextGenAnalysis:
 
         # Check if index lengths in samplesheet and runinfo file agree
 
-        if (index1Length > 0 or len(runinfo_index_numcycles) > 0) \
-                and index1Length not in [ runinfo_index_numcycles[0], runinfo_index_numcycles[0] - 1 ]:
+        print "Index 1 length %d"%index1Length
 
-            self.warnings.append('In analysis %s: Unusual combination of samplesheet index length and runinfo num cycles for 1st index. Index length: %s. RunInfo num cycles: %s' 
-                            % (self.name, index1Length, runinfo_index_numcycles[0]))
+        for i in runinfo_index_numcycles:
+            print ("%d %s"%(i,runinfo_index_numcycles[0]))
+
+        print "Done"
+        #if (index1Length > 0 or len(runinfo_index_numcycles) > 0) \
+        #        and index1Length not in [ runinfo_index_numcycles[0], runinfo_index_numcycles[0] - 1 ]:
+
+        #    self.warnings.append('In analysis %s: Unusual combination of samplesheet index length and runinfo num cycles for 1st index. Index length: %s. RunInfo num cycles: %s' 
+        #                    % (self.name, index1Length, runinfo_index_numcycles[0]))
 
         if (index2Length > 0 or len(runinfo_index_numcycles) > 1) \
                 and index2Length not in [ runinfo_index_numcycles[1], runinfo_index_numcycles[1] - 1 ]:
@@ -251,7 +262,7 @@ class HiSeqAnalysis(IlluminaNextGenAnalysis):
         inDir = path.join(self.Run.primaryDir, 'Data', 'Intensities', 'BaseCalls')
 
         if self.Run.customBasesMask:
-            basesMask = self.customBasesMask
+            basesMask = self.Run.customBasesMask
         else:
             basesMask = self.makeBasesMask(self.index1Length, self.index2Length)
 
@@ -437,12 +448,16 @@ class NextSeqAnalysis(IlluminaNextGenAnalysis):
 
     def bcl2fastq(self):
 
+        print "In nextseq bcl2fastq "
         command = 'source new-modules.sh; module load legacy/0.0.1-fasrc01; module load bcl2fastq2; echo "Using bcl2fastq: "; which bcl2fastq; '
 
         if self.Run.customBasesMask:
             basesMask = self.Run.customBasesMask
         else:
+            print "Making basesmasek for %d %d"%(self.index1Length,self.index2Length)
             basesMask = self.makeBasesMask(self.index1Length, self.index2Length)
+
+        print "Made bases mask"
 
         command += 'bcl2fastq --runfolder-dir '      + self.Run.primaryDir \
                           + ' --barcode-mismatches ' + str(self.Run.numMismatches) \

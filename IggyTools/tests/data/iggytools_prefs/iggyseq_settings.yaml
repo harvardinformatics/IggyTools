@@ -1,0 +1,77 @@
+
+###
+## iggyseq preferences
+###
+
+# Iggyseq verbose mode.
+VERBOSE: False
+
+# Directory where run directories with BCL files are located.
+PRIMARY_PARENT: /n/informatics/git/testdata
+
+# Dictionary mapping machine name to machine type. (Keys are machine names, values are type.
+MACHINE_TYPE: {'NS500422': 'NextSeq', 'SN343': 'HiSeq', 'D00365': 'HiSeq', 'NS500305': 'NextSeq'}
+
+# File containing comma-separated email addresses to be sent all iggyseq notifications and demultiplex summaries.
+USERS_FILE: /n/informatics/mclamp/test/saved/iggyseq_users_list.txt
+
+# File containing comma-separated email addresses to be sent demultiplex summaries only.
+WATCHERS_FILE: /n/informatics/mclamp/test/saved/seqprep_watchers_list.txt
+
+# Directory where run log directories are written.
+LOGDIR_PARENT: /n/informatics/mclamp/test/seqprep_log
+
+# Directory where run processing directories are written.
+PROCESSING_PARENT: /n/informatics/mclamp/test/analysis_in_progress
+
+# Directory where run finishing directories are written.
+FINISHING_PARENT: /n/informatics/mclamp/test/analysis_finished
+
+# Directory where demultiplexed runs are written for download by users.
+FINAL_PARENT: /n/informatics/mclamp/test/ngsdata
+
+# Number of mismatches allowed in barcodes when demultiplexing.
+SEQPREP_NUM_MISMATCHES: 0
+
+# Number of threads for demultiplexing.
+SEQPREP_NUM_THREADS: 8
+
+# Ignore missing BCL files.
+SEQPREP_IGNORE_MISSING_BCL: True
+
+# Ignore missing CONTROL files.
+SEQPREP_IGNORE_MISSING_CONTROL: True
+
+# Include failed reads in demultiplex results.
+SEQPREP_WITH_FAILED_READS: False
+
+# Regex for tile selection.
+SEQPREP_TILE_REGEX: None
+
+# Update minilims upon completion of demultiplexing.
+SEQPREP_DB_STORE: True
+
+# For NextSeq, mask short adapter reads.
+NEXTSEQ_MASK_SHORT_ADAPTER_READS: None
+
+# For NextSeq, suppress adater trimming.
+NEXTSEQ_SUPPRESS_ADAPTER_TRIMMING: False
+
+# For NextSeq, minimum trimmed read length.
+NEXTSEQ_MIN_TRIMMED_READ_LENGTH: 0
+
+# Slurm time reservation in format HH:MM:SS.
+SLURM_TIME: '48:00:00'
+
+# Slurm memory reservation in MB.
+SLURM_MEM: 10000
+
+# SLURM PARTITION.
+SLURM_PARTITION: general
+
+# Where Illumina run statistics files are kept.
+SEQSTATS_HIST_DIR: /n/informatics_external/seq/seqstats_bkup
+
+# Seqtats log file.
+SEQSTATS_LOGFILE: /n/informatics_external/seq/seqstats_log/log.txt
+

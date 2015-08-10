@@ -131,5 +131,5 @@ class BasePrefFile(object):
                 self.prefYaml = yaml.load(fh)
 
         except:
-            raise Exception('Error occured while reading preferences file %s:\n%s' % (self.prefFile, traceback.format_exc()))
+            raise Exception('Error occured while reading preferences file %s:\n%s' % (self.filePath , traceback.format_exc()))
 

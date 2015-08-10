@@ -16,16 +16,14 @@ class Iggytools_Preferences(object):
 
     def getPreferences(self):
 
-        refFile = Iggyref_PrefFile(self.prefDir)
-        seqFile = Iggyseq_PrefFile(self.prefDir)
-
+        refFile  = Iggyref_PrefFile(self.prefDir)
+        seqFile  = Iggyseq_PrefFile(self.prefDir)
         pipePref = Iggypipe_Preferences(self.prefDir)
 
         p = dict()
 
-        p['iggyref'] = refFile.getVars()
-        p['iggyseq'] = seqFile.getVars()
-
+        p['iggyref']  = refFile.getVars()
+        p['iggyseq']  = seqFile.getVars()
         p['iggypipe'] = pipePref.getPreferences()
 
         return p

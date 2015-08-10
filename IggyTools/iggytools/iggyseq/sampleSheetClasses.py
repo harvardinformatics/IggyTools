@@ -164,7 +164,7 @@ class SampleSheet_formatA(BaseSampleSheet):
                 continue
             index = vDict['index']
             subID = vDict['description']
-            indexType = vDict['recipe']            #examples: '6' for a 6-base index; '8_8' for two indices were each 8 is bases.
+            indexType = vDict['recipe']            #examples: '6' for a 6-base index; '8_8' for two indices where each is 8 bases.
 
             vDict['sampleproject'] = 'Fastq_Files'                        #reset project field, as this will create uniform output directory stucture for all runs
             vDict['sampleid'] = re.sub(r'[- .)(@]','_',vDict['sampleid']) #replace illegal characters in sample name with underscores
