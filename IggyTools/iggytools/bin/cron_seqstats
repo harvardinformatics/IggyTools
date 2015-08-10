@@ -34,6 +34,7 @@ def seqstatsOnNew(argv):
     for myDir in os.listdir(options.primaryParent):
         match = re.match('[0-9]{6}_[0-9A-Za-z]+_[0-9A-Za-z]+_[0-9A-Za-z]{10}$', myDir) #re.match matches from beginning of string
         if match:
+            #print myDir
             runName = myDir
             runPath = path.join(options.primaryParent,runName)
             items = os.listdir(runPath) #get list of directory contents

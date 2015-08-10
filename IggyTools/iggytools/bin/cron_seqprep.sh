@@ -7,6 +7,6 @@ fi
 
 umask 002
 
-. /n/informatics/iggy/setup.sh
-/n/informatics/iggy/IggyTools/iggytools/bin/cron_seqprep ${@-}
+. /n/informatics/mclamp/iggy/setup.sh
+/n/informatics/mclamp/iggy/IggyTools/iggytools/bin/cron_seqprep ${@-}
 

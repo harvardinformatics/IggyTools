@@ -1,5 +1,6 @@
 #!/usr/bin/env python 
-from lxml import etree
+
+from lxml     import etree
 from datetime import date
 from iggytools.iggyseq.seqstats import stats, util
 from optparse import OptionParser
@@ -13,7 +14,9 @@ import os.path as path
 
 
 def getRun(runName): #get run from DB (exception raised if does not exist)
+
     runs = list(SeqRun.objects.filter(run_name=runName))
+
     if len(runs) > 1:
         raise Exception("Multiple ("+str(len(runs))+") instances of run " + runName + "found in DB")
     return runs[0]
@@ -48,8 +51,9 @@ def add(argv):  #add a new run to DB
     runPath = path.join(options.primaryParent,runName)
 
     #Copy essential files to history dir, if not already present
-    histDir = pref.SEQSTATS_HIST_DIR
+    histDir    = pref.SEQSTATS_HIST_DIR
     runHistDir = path.join(histDir,runName)
+
     if path.isdir(runHistDir):
         if options.verbose: print "Run " + runName + " already present in seqstats_hist dir: " + histDir
         if not options.noHistRewrite:
@@ -66,6 +70,7 @@ def add(argv):  #add a new run to DB
     try:
         DBrun = getRun(runName)
     except IndexError:  #thrown if query in getRun() returns an empty list
+        print "Couldn't get run %s"%runName
         DBrun = None
 
     if DBrun and options.noDBrewrite: 
