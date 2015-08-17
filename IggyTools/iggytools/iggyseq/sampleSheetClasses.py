@@ -436,8 +436,16 @@ class SampleSheet_formatB(BaseSampleSheet):
                 else:
                     analName = get_analysisName(lane.userLaneLabel, indexType)
 
-                if analName not in [x.name for x in self.analyses]: 
-                    analysis = self.makeNewAnalysis(analName, rlen1, rlen2) #start new analysis
+                # Create a new analysis when you find a new analName
+                # Lines may not be in order, so be able to go back to 
+                # previous analysis if necessary
+                
+                analysis = None
+                for x in self.analyses:
+                    if analName == x.name:
+                        analysis = x
+                if analysis is None:
+                    analysis = self.makeNewAnalysis(analName, rlen1, rlen2)  #start new analysis  
 
                 #ensure both sample_id and sample_name are set
                 if len(vDict['sample_id']) == 0 and len(vDict['sample_name']) > 0:  
