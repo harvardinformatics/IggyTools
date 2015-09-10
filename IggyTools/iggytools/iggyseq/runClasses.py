@@ -6,7 +6,7 @@ from iggytools.iggyseq.seqUtil import setPermissions
 from iggytools.utils.util import touch, mkdir_p, intersect, deleteItem, copy, Command, unique, str2list_byComma
 from iggytools.iggyseq.getSeqPref import getSeqPref
 from iggytools.iggyseq.seqUtil import parseRunName
-
+from subprocess import Popen,PIPE
 
 class IlluminaNextGen:
 
@@ -425,10 +425,39 @@ class IlluminaNextGen:
             self.notify('SeqPrep Warning for %s' % (self.runOutName), self.runOutName + '\n\n' + '\n'.join(warnings))
 
 
+    #def copyToFinal(self): #copy processing results to self.finalDir
+        #self.log('Copying data to ' + self.finalDir + '...')
+        #self.safeCopy(self.finishingDir, self.finalDir)
+        #self.log('Copy to ' + self.finalDir + ' finished.')
+
     def copyToFinal(self): #copy processing results to self.finalDir
-        self.log('Copying data to ' + self.finalDir + '...')
-        self.safeCopy(self.finishingDir, self.finalDir)
-        self.log('Copy to ' + self.finalDir + ' finished.')
+        check_destination_size="df -P |grep %s" % self.finalParent
+        p1=Popen(check_destination_size,shell=True,stdout=PIPE,stderr=PIPE)
+        stdout1,stderr1=p1.communicate()
+        if p1.returncode==0:        
+            fs_size,fs_used=[int(i) for i in stdout1.strip().split()[1:3]]
+            
+            # above passed, so proceed to checking size of finishing dir
+            check_result_size="du -s %" % self.finishingDir
+            p2=Popen(check_result_size,shell=True,stdout=PIPE,stderr=PIPE)
+            stdout2,stderr2=p2.communicate()
+            if p2.returncode==0:
+                finishing_size=int(stdout2.strip().split()[0])
+                
+                # check how close destination filesystem is to being full
+                if (fs_used+finishing_size)/float(fs_size)>0.85:
+                    self.notify("WARNING, approaching filesystem capacity on %s,copying to final directory aborted\n" % self.finalParent)
+                    print("WARNING, approaching filesystem capacity on %s, copying to final directory aborted\n" % self.finalParent)
+                else:
+                    self.log('Copying data to ' + self.finalDir + '...')
+                    self.safeCopy(self.finishingDir, self.finalDir)
+                    self.log('Copy to ' + self.finalDir + ' finished.')
+            else:
+                self.notify("EXCEPTION, self.finishingDir does not exist, so can't check directory size")
+                print("EXCEPTION, self.finishingDir does not exist, so can't check directory size")
+        else:
+            self.notify("EXCEPTION, self.finalParent does not exist, so can't check filesystem capacity")            
+            print("EXCEPTION, self.finalParent does not exist,so can't check filesystem capacity")
 
 
     def clearDir(self, item):
