@@ -431,7 +431,7 @@ class IlluminaNextGen:
         #self.log('Copy to ' + self.finalDir + ' finished.')
 
     def copyToFinal(self): #copy processing results to self.finalDir
-        check_destination_size="df -P |grep %s" % self.finalParent
+        check_destination_size="df -P |grep ngsdata" #% self.finalParent
         p1=Popen(check_destination_size,shell=True,stdout=PIPE,stderr=PIPE)
         stdout1,stderr1=p1.communicate()
         if p1.returncode==0:        
