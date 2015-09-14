@@ -454,9 +454,9 @@ class IlluminaNextGen:
                     self.log('Copy to ' + self.finalDir + ' finished.')
             else:
                 #self.notify("EXCEPTION, self.finishingDir does not exist, so can't check directory size")
-                print("EXCEPTION, self.finishingDir does not exist, so can't check directory size")
+                print("EXCEPTION, return code for p2 not zero, error is %s\n" % stderr2)
         else:
-            print("EXCEPTION: return code !=0 for p1, error is %s\n" % stderr1) 
+            print("EXCEPTION: return code not equal to zero for p1, error is %s\n" % stderr1) 
             #self.notify("EXCEPTION with running %s\n" % check_destination_size)             
             print("EXCEPTION with running %s\n" % check_destination_size)
 
