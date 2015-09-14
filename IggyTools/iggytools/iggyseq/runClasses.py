@@ -446,18 +446,18 @@ class IlluminaNextGen:
                 
                 # check how close destination filesystem is to being full
                 if (fs_used+finishing_size)/float(fs_size)>0.85:
-                    self.notify("WARNING, approaching filesystem capacity on %s,copying to final directory aborted\n" % self.finalParent)
+                    #self.notify("WARNING, approaching filesystem capacity on %s,copying to final directory aborted\n" % self.finalParent)
                     print("WARNING, approaching filesystem capacity on %s, copying to final directory aborted\n" % self.finalParent)
                 else:
                     self.log('Copying data to ' + self.finalDir + '...')
                     self.safeCopy(self.finishingDir, self.finalDir)
                     self.log('Copy to ' + self.finalDir + ' finished.')
             else:
-                self.notify("EXCEPTION, self.finishingDir does not exist, so can't check directory size")
+                #self.notify("EXCEPTION, self.finishingDir does not exist, so can't check directory size")
                 print("EXCEPTION, self.finishingDir does not exist, so can't check directory size")
         else:
             print("EXCEPTION: return code !=0 for p1, error is %s\n" % stderr1) 
-            self.notify("EXCEPTION with running %s\n" % check_destination_size)             
+            #self.notify("EXCEPTION with running %s\n" % check_destination_size)             
             print("EXCEPTION with running %s\n" % check_destination_size)
 
 
