@@ -456,8 +456,9 @@ class IlluminaNextGen:
                 self.notify("EXCEPTION, self.finishingDir does not exist, so can't check directory size")
                 print("EXCEPTION, self.finishingDir does not exist, so can't check directory size")
         else:
-            self.notify("EXCEPTION, self.finalParent does not exist, so can't check filesystem capacity")            
-            print("EXCEPTION, self.finalParent does not exist,so can't check filesystem capacity")
+            print("EXCEPTION: return code !=0 for p1, error is %s\n" % stderr1) 
+            self.notify("EXCEPTION with running %s\n" % check_destination_size)             
+            print("EXCEPTION with running %s\n" % check_destination_size)
 
 
     def clearDir(self, item):
