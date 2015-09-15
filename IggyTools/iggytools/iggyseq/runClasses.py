@@ -438,7 +438,7 @@ class IlluminaNextGen:
             fs_size,fs_used=[int(i) for i in stdout1.strip().split()[1:3]]
             
             # above passed, so proceed to checking size of finishing dir
-            check_result_size="du -s %" % self.finishingDir
+            check_result_size="du -s %s" % self.finishingDir
             p2=Popen(check_result_size,shell=True,stdout=PIPE,stderr=PIPE)
             stdout2,stderr2=p2.communicate()
             if p2.returncode==0:
