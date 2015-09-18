@@ -7,6 +7,10 @@ from iggytools.utils.util import touch, mkdir_p, intersect, deleteItem, copy, Co
 from iggytools.iggyseq.getSeqPref import getSeqPref
 from iggytools.iggyseq.seqUtil import parseRunName
 from subprocess import Popen,PIPE
+import time
+from datetime import date,datetime
+import glob
+from shutil import rmtree
 
 class IlluminaNextGen:
 
@@ -430,12 +434,20 @@ class IlluminaNextGen:
         #self.safeCopy(self.finishingDir, self.finalDir)
         #self.log('Copy to ' + self.finalDir + ' finished.')
 
-    def copyToFinal(self): #copy processing results to self.finalDir
-        check_destination_size="df -P |grep ngsdata" #% self.finalParent
+    def copyToFinal(self,test=True): #copy processing results to self.finalDir
+        if test==True:
+            check_destination_size="du -s /n/home03/dderpiston/ngsdata_test"
+        else:    
+            check_destination_size="df -P |grep ngsdata"  #% self.finalParent.split("/")[-1]
+        
         p1=Popen(check_destination_size,shell=True,stdout=PIPE,stderr=PIPE)
         stdout1,stderr1=p1.communicate()
         if p1.returncode==0:        
-            fs_size,fs_used=[int(i) for i in stdout1.strip().split()[1:3]]
+            if test==True:
+                fs_size=40000000
+                fs_used=int(stdout1.strip().split()[0])
+            else:    
+                fs_size,fs_used=[int(i) for i in stdout1.strip().split()[1:3]]
             
             # above passed, so proceed to checking size of finishing dir
             check_result_size="du -s %s" % self.finishingDir
@@ -446,8 +458,47 @@ class IlluminaNextGen:
                 
                 # check how close destination filesystem is to being full
                 if (fs_used+finishing_size)/float(fs_size)>0.85:
-                    #self.notify("WARNING, approaching filesystem capacity on %s,copying to final directory aborted\n" % self.finalParent)
-                    print("WARNING, approaching filesystem capacity on %s, copying to final directory aborted\n" % self.finalParent)
+                    month_convert={'Jan':1,'Feb':2,'Mar':3,'Apr':4,'May':5,'Jun':6,'Jul':7,'Aug':8,'Sep':9,'Oct':10,'Nov':11,'Dec':12}
+                    print("WARNING, approaching filesystem capacity on %s, trying to rm directories > 1 month old\n" % self.finalParent)
+                    
+                    try:
+                        current_date=date(datetime.now().year,datetime.now().month,datetime.now().day) # converts datetime object to date object for math below
+                        removes=[]
+                    
+                        dir_fetch=glob.glob('/*/ngsdata/[0-9]*_[A-Z]*XX') # glob sequencing directories with regex
+                        dirtimes=[]
+                        
+                        for illuminadir in dir_fetch:
+                            dirtimes.append((os.path.getmtime(illuminadir),time.ctime(os.path.getmtime(illuminadir)),illuminadir)) # parse to (decimal time,timestring,directory) tuples in list
+                        
+                        dirtimes.sort() # sort (ascending) on the decimal time so its oldest first
+                        
+                        
+                        for dirtuple in dirtimes:
+                            if len(removes<=2): # extra precaution so that list of those to be removed doesn't exceed two directories
+                                dir_year=int(dirtuple[1].split()[-1])
+                                dir_month=month_convert[dirtuple[1].split()[1]]
+                                dir_day=int(dirtuple[1].split()[2])
+                                
+                                file_date=date(dir_year,dir_month,dir_day)
+                                if (current_date-file_date).days > 30:
+                                    removes.append(dirtuple[-1])
+                            else:
+                                break   
+                       
+                        if len(removes)<=2: # precation again
+                            for j in range(len(removes)):
+                                rmtree(removes[j])  
+                        
+                            
+                        ### try copying again after removing older directories ###
+                        self.log('Copying data to ' + self.finalDir + '...')
+                        self.safeCopy(self.finishingDir, self.finalDir)
+                        self.log('Copy to ' + self.finalDir + ' finished.')
+                    
+                    except:
+                        print("EXCEPTION: failed querying timestamp,removing older runs and copying new run")        
+                        
                 else:
                     self.log('Copying data to ' + self.finalDir + '...')
                     self.safeCopy(self.finishingDir, self.finalDir)
