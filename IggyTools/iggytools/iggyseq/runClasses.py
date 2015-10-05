@@ -436,10 +436,11 @@ class IlluminaNextGen:
 
     def copyToFinal(self,test=True): #copy processing results to self.finalDir
         if test==True:
-            check_destination_size="du -s /n/home03/dderpiston/ngsdata_test"
+            check_destination_size="du -s /n/home03/dderpiston/ngsdata_test" 
         else:    
             check_destination_size="df -P |grep ngsdata"  #% self.finalParent.split("/")[-1]
         
+        print "check destination size is: %s" %  check_destination_size
         p1=Popen(check_destination_size,shell=True,stdout=PIPE,stderr=PIPE)
         stdout1,stderr1=p1.communicate()
         if p1.returncode==0:        
@@ -455,6 +456,14 @@ class IlluminaNextGen:
             stdout2,stderr2=p2.communicate()
             if p2.returncode==0:
                 finishing_size=int(stdout2.strip().split()[0])
+                print("WHAT IS WRONG WITH THE MATH?")
+                print("fs used is %s\n" % fs_used)
+                print("finising_size is %s\n" % finishing_size)
+                print("filesystem size is %s\n" % fs_size)
+                
+                print("HERE IS THE MATH!!")
+                testcalc=str((fs_used+finishing_size)/float(fs_size))
+                print("testcalc is %s\n " % testcalc)
                 
                 # check how close destination filesystem is to being full
                 if (fs_used+finishing_size)/float(fs_size)>0.85:
@@ -463,9 +472,13 @@ class IlluminaNextGen:
                     
                     try:
                         current_date=date(datetime.now().year,datetime.now().month,datetime.now().day) # converts datetime object to date object for math below
+                        print "current date is", current_date
                         removes=[]
                     
-                        dir_fetch=glob.glob('/*/ngsdata/[0-9]*_[A-Z]*XX') # glob sequencing directories with regex
+                        #dir_fetch=glob.glob('/*/ngsdata/[0-9]*_[A-Z]*XX') # glob sequencing directories with regex
+                        dir_fetch=glob.glob('%s/[0-9]*_[A-Z]*XX'  % self.finalParent) # glob sequencing directories with regex
+                        print "length of dir_fetch is", len(dir_fetch)
+                        print "first entry of dir_fetch is", dir_fetch[0]
                         dirtimes=[]
                         
                         for illuminadir in dir_fetch:
@@ -473,42 +486,64 @@ class IlluminaNextGen:
                         
                         dirtimes.sort() # sort (ascending) on the decimal time so its oldest first
                         
+                        print "dirtimes"
+                        print dirtimes
+                    
                         
+                    
+                    ##############################
+                      
                         for dirtuple in dirtimes:
-                            if len(removes<=2): # extra precaution so that list of those to be removed doesn't exceed two directories
-                                dir_year=int(dirtuple[1].split()[-1])
-                                dir_month=month_convert[dirtuple[1].split()[1]]
-                                dir_day=int(dirtuple[1].split()[2])
+                            #print "dirtuple is",dirtuple
+                            #if len(removes)<2: # extra precaution so that list of those to be removed doesn't exceed two directories
+                            dir_year=int(dirtuple[1].split()[-1])
+                            dir_month=month_convert[dirtuple[1].split()[1]]
+                            dir_day=int(dirtuple[1].split()[2])
                                 
-                                file_date=date(dir_year,dir_month,dir_day)
-                                if (current_date-file_date).days > 30:
-                                    removes.append(dirtuple[-1])
-                            else:
-                                break   
-                       
-                        if len(removes)<=2: # precation again
-                            for j in range(len(removes)):
-                                rmtree(removes[j])  
+                                
+                            file_date=date(dir_year,dir_month,dir_day)
+                            print "file date is", file_date
+                            if (current_date-file_date).days > 30:
+                                removes.append(dirtuple[-1])
+                            #else:
+                                #break
                         
+                        print "removes_list_complete:", removes    
+                        
+                    #############################                  
+                       
+                        #if len(removes)<=2: # precation again
+                        for j in range(len(removes)):
+                                #try:
+                                    rmtree(removes[j]) 
+                                    #self.notify('seqPrep WARNING for %s' % (self.runOutName),'removing'+removes[j]+'to make space in'+ self.finalParent)
+                                #except:
+                                    #print "couldn't remove %s" % self.runOutName
+                        #else:
+                            #print "removes length not <= 2", removes
                             
                         ### try copying again after removing older directories ###
-                        self.log('Copying data to ' + self.finalDir + '...')
+                        self.log('Copying data, post space clearing, to ' + self.finalDir + '...')
                         self.safeCopy(self.finishingDir, self.finalDir)
                         self.log('Copy to ' + self.finalDir + ' finished.')
                     
                     except:
-                        print("EXCEPTION: failed querying timestamp,removing older runs and copying new run")        
+                        except_string="EXCEPTION: failed querying timestamp,removing older runs and copying new run"
+                        print("EXCEPTION: failed querying timestamp,removing older runs and copying new run")
+                        self.notify('SeqPrep EXCEPTION for %s' % (self.runOutName), except_string + '\n\n' + '\n'.join([str(i) for i in [removes,len(dir_fetch),dir_fetch[0],dirtimes]]))       
                         
                 else:
                     self.log('Copying data to ' + self.finalDir + '...')
                     self.safeCopy(self.finishingDir, self.finalDir)
                     self.log('Copy to ' + self.finalDir + ' finished.')
             else:
-                #self.notify("EXCEPTION, self.finishingDir does not exist, so can't check directory size")
+                except_string="EXCEPTION, return code for p2 not zero, error is %s\n" % stderr2
+                self.notify('SeqPrep EXCEPTION for %s' % (self.runOutName), except_string) 
                 print("EXCEPTION, return code for p2 not zero, error is %s\n" % stderr2)
         else:
             print("EXCEPTION: return code not equal to zero for p1, error is %s\n" % stderr1) 
-            #self.notify("EXCEPTION with running %s\n" % check_destination_size)             
+            except_string="EXCEPTION: return code not equal to zero for p1, error is %s\n" % stderr1
+            self.notify('SeqPrep EXCEPTION for %s' % (self.runOutName),except_string)             
             print("EXCEPTION with running %s\n" % check_destination_size)
 
 
