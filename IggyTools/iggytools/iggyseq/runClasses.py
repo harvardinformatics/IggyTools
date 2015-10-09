@@ -457,7 +457,7 @@ class IlluminaNextGen:
                 # check how close destination filesystem is to being full
                 if (fs_used+finishing_size)/float(fs_size)>0.85:
                     month_convert={'Jan':1,'Feb':2,'Mar':3,'Apr':4,'May':5,'Jun':6,'Jul':7,'Aug':8,'Sep':9,'Oct':10,'Nov':11,'Dec':12}
-                    #print("WARNING, approaching filesystem capacity on %s, trying to rm directories > 1 month old\n" % self.finalParent)
+                    
                     
                     current_date=date(datetime.now().year,datetime.now().month,datetime.now().day) # converts datetime object to date object for math below
                     dir_fetch=glob.glob('%s/[0-9]*_[A-Z]*XX'  % self.finalParent) # glob sequencing directories with regex
@@ -477,7 +477,7 @@ class IlluminaNextGen:
                         if (current_date-file_date).days > 30:
                             removes.append(dirtuple[-1])
                         
-                        print "removes_list_complete:", removes    
+                        
                         
                     ###### iterative remove and recheck fs status ############                  
                     try:  
