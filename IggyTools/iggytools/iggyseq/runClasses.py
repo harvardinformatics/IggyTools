@@ -400,7 +400,7 @@ class IlluminaNextGen:
         summary.append('\n')
 
         self.summary = '\n'.join(summary)
-
+        print("self summary is:\n %s" % self.summary)
         if self.verbose: 
             print self.summary
 
@@ -429,12 +429,7 @@ class IlluminaNextGen:
             self.notify('SeqPrep Warning for %s' % (self.runOutName), self.runOutName + '\n\n' + '\n'.join(warnings))
 
 
-    #def copyToFinal(self): #copy processing results to self.finalDir
-        #self.log('Copying data to ' + self.finalDir + '...')
-        #self.safeCopy(self.finishingDir, self.finalDir)
-        #self.log('Copy to ' + self.finalDir + ' finished.')
-
-    def copyToFinal(self,test=True): #copy processing results to self.finalDir
+    def copyToFinal(self,test=False): #copy processing results to self.finalDir
         if test==True:
             check_destination_size="du -s /n/home03/dderpiston/ngsdata_test" 
         else:    
@@ -456,72 +451,46 @@ class IlluminaNextGen:
             stdout2,stderr2=p2.communicate()
             if p2.returncode==0:
                 finishing_size=int(stdout2.strip().split()[0])
-                print("WHAT IS WRONG WITH THE MATH?")
-                print("fs used is %s\n" % fs_used)
-                print("finising_size is %s\n" % finishing_size)
-                print("filesystem size is %s\n" % fs_size)
                 
-                print("HERE IS THE MATH!!")
                 testcalc=str((fs_used+finishing_size)/float(fs_size))
-                print("testcalc is %s\n " % testcalc)
                 
                 # check how close destination filesystem is to being full
                 if (fs_used+finishing_size)/float(fs_size)>0.85:
                     month_convert={'Jan':1,'Feb':2,'Mar':3,'Apr':4,'May':5,'Jun':6,'Jul':7,'Aug':8,'Sep':9,'Oct':10,'Nov':11,'Dec':12}
-                    print("WARNING, approaching filesystem capacity on %s, trying to rm directories > 1 month old\n" % self.finalParent)
+                    #print("WARNING, approaching filesystem capacity on %s, trying to rm directories > 1 month old\n" % self.finalParent)
                     
-                    try:
-                        current_date=date(datetime.now().year,datetime.now().month,datetime.now().day) # converts datetime object to date object for math below
-                        print "current date is", current_date
-                        removes=[]
-                    
-                        #dir_fetch=glob.glob('/*/ngsdata/[0-9]*_[A-Z]*XX') # glob sequencing directories with regex
-                        dir_fetch=glob.glob('%s/[0-9]*_[A-Z]*XX'  % self.finalParent) # glob sequencing directories with regex
-                        print "length of dir_fetch is", len(dir_fetch)
-                        print "first entry of dir_fetch is", dir_fetch[0]
-                        dirtimes=[]
+                    current_date=date(datetime.now().year,datetime.now().month,datetime.now().day) # converts datetime object to date object for math below
+                    dir_fetch=glob.glob('%s/[0-9]*_[A-Z]*XX'  % self.finalParent) # glob sequencing directories with regex
+                    dirtimes=[]
+                    for illuminadir in dir_fetch:
+                        dirtimes.append((os.path.getmtime(illuminadir),time.ctime(os.path.getmtime(illuminadir)),illuminadir)) # parse to (decimal time,timestring,directory) tuples in list
                         
-                        for illuminadir in dir_fetch:
-                            dirtimes.append((os.path.getmtime(illuminadir),time.ctime(os.path.getmtime(illuminadir)),illuminadir)) # parse to (decimal time,timestring,directory) tuples in list
+                    dirtimes.sort() # sort (ascending) on the decimal time so its oldest first
                         
-                        dirtimes.sort() # sort (ascending) on the decimal time so its oldest first
-                        
-                        print "dirtimes"
-                        print dirtimes
-                    
-                        
-                    
-                    ##############################
-                      
-                        for dirtuple in dirtimes:
-                            #print "dirtuple is",dirtuple
-                            #if len(removes)<2: # extra precaution so that list of those to be removed doesn't exceed two directories
-                            dir_year=int(dirtuple[1].split()[-1])
-                            dir_month=month_convert[dirtuple[1].split()[1]]
-                            dir_day=int(dirtuple[1].split()[2])
-                                
-                                
-                            file_date=date(dir_year,dir_month,dir_day)
-                            print "file date is", file_date
-                            if (current_date-file_date).days > 30:
-                                removes.append(dirtuple[-1])
-                            #else:
-                                #break
+                    #### create list of old directories that can be removed ####
+                    removes=[]  
+                    for dirtuple in dirtimes:
+                        dir_year=int(dirtuple[1].split()[-1])
+                        dir_month=month_convert[dirtuple[1].split()[1]]
+                        dir_day=int(dirtuple[1].split()[2])
+                        file_date=date(dir_year,dir_month,dir_day)
+                        if (current_date-file_date).days > 30:
+                            removes.append(dirtuple[-1])
                         
                         print "removes_list_complete:", removes    
                         
-                    #############################                  
-                       
-                        #if len(removes)<=2: # precation again
+                    ###### iterative remove and recheck fs status ############                  
+                    try:  
                         for j in range(len(removes)):
-                                #try:
-                                    rmtree(removes[j]) 
-                                    #self.notify('seqPrep WARNING for %s' % (self.runOutName),'removing'+removes[j]+'to make space in'+ self.finalParent)
-                                #except:
-                                    #print "couldn't remove %s" % self.runOutName
-                        #else:
-                            #print "removes length not <= 2", removes
-                            
+                            if (fs_used+finishing_size)/float(fs_size)<0.85:
+                                break    
+                            else:
+                                rmtree(removes[j])
+                                p3=Popen(check_result_size,shell=True,stdout=PIPE,stderr=PIPE)
+                                stdout3,stderr3=p3.communicate()
+                                finishing_size=int(stdout2.strip().split()[0])
+                                #self.notify('seqPrep WARNING for %s' % (self.runOutName),'removing'+removes[j]+'to make space in'+ self.finalParent)
+                                   
                         ### try copying again after removing older directories ###
                         self.log('Copying data, post space clearing, to ' + self.finalDir + '...')
                         self.safeCopy(self.finishingDir, self.finalDir)
@@ -582,7 +551,8 @@ class IlluminaNextGen:
             mode = 'w'
         fh = open(outputFile, mode)
         fh.write(command + '\n') #write command to file 
-
+        
+        print "Command is '%s'" % command
         cmd = Command(command)
         for line in cmd.run():
             line = line.strip()
@@ -616,6 +586,7 @@ class IlluminaNextGen:
         for address in addresses:
             if address:
                 self.shell("echo '" + body.rstrip() + """' |  mail -s '""" + subject.rstrip() + """' '""" + address + """' """, outputFile = '/dev/null')
+                
 
         self.log('Notification:\n' + subject + '\n' + body + '\n\n')
 
