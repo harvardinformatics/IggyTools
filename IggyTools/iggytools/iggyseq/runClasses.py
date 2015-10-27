@@ -7,6 +7,7 @@ from iggytools.utils.util import touch, mkdir_p, intersect, deleteItem, copy, Co
 from iggytools.iggyseq.getSeqPref import getSeqPref
 from iggytools.iggyseq.seqUtil import parseRunName
 from subprocess import Popen,PIPE
+import sys
 import time
 from datetime import date,datetime
 import glob
@@ -452,7 +453,7 @@ class IlluminaNextGen:
             if p2.returncode==0:
                 finishing_size=int(stdout2.strip().split()[0])
                 
-                testcalc=str((fs_used+finishing_size)/float(fs_size))
+                #testcalc=str((fs_used+finishing_size)/float(fs_size))
                 
                 # check how close destination filesystem is to being full
                 if (fs_used+finishing_size)/float(fs_size)>0.85:
@@ -482,9 +483,11 @@ class IlluminaNextGen:
                     ###### iterative remove and recheck fs status ############                  
                     try:  
                         for j in range(len(removes)):
+                            print('available space = %s\n' % (fs_used+finishing_size)/float(fs_size))
                             if (fs_used+finishing_size)/float(fs_size)<0.85:
                                 break    
                             else:
+                                print('attempting to remove %s\n' % removes[j])
                                 rmtree(removes[j])
                                 p3=Popen(check_result_size,shell=True,stdout=PIPE,stderr=PIPE)
                                 stdout3,stderr3=p3.communicate()
@@ -496,7 +499,8 @@ class IlluminaNextGen:
                         self.safeCopy(self.finishingDir, self.finalDir)
                         self.log('Copy to ' + self.finalDir + ' finished.')
                     
-                    except:
+                    except Exception, e:
+                        sys.stderr.write('Error doing something: ' + str(e) + '\n' + traceback.format_exc())
                         except_string="EXCEPTION: failed querying timestamp,removing older runs and copying new run"
                         print("EXCEPTION: failed querying timestamp,removing older runs and copying new run")
                         self.notify('SeqPrep EXCEPTION for %s' % (self.runOutName), except_string + '\n\n' + '\n'.join([str(i) for i in [removes,len(dir_fetch),dir_fetch[0],dirtimes]]))       
