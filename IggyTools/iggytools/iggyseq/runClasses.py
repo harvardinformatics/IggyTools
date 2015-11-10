@@ -435,7 +435,7 @@ class IlluminaNextGen:
             check_destination_size="du -s /n/home03/dderpiston/ngsdata_test" 
         else:    
             check_destination_size="df -P |grep ngsdata"  #% self.finalParent.split("/")[-1]
-        
+        os.system('touch /n/ngsdata')  
         print "check destination size is: %s" %  check_destination_size
         p1=Popen(check_destination_size,shell=True,stdout=PIPE,stderr=PIPE)
         stdout1,stderr1=p1.communicate()
