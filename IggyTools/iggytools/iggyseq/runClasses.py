@@ -456,7 +456,7 @@ class IlluminaNextGen:
                 #testcalc=str((fs_used+finishing_size)/float(fs_size))
                 
                 # check how close destination filesystem is to being full
-                if (fs_used+finishing_size)/float(fs_size)>0.85:
+                if (fs_used+finishing_size)/float(fs_size)>0.80:
                     month_convert={'Jan':1,'Feb':2,'Mar':3,'Apr':4,'May':5,'Jun':6,'Jul':7,'Aug':8,'Sep':9,'Oct':10,'Nov':11,'Dec':12}
                     
                     
@@ -481,29 +481,43 @@ class IlluminaNextGen:
                         
                         
                     ###### iterative remove and recheck fs status ############                  
-                    try:  
-                        for j in range(len(removes)):
-                            print('available space = %s\n' % (fs_used+finishing_size)/float(fs_size))
-                            if (fs_used+finishing_size)/float(fs_size)<0.85:
-                                break    
-                            else:
-                                print('attempting to remove %s\n' % removes[j])
-                                rmtree(removes[j])
-                                p3=Popen(check_result_size,shell=True,stdout=PIPE,stderr=PIPE)
-                                stdout3,stderr3=p3.communicate()
-                                finishing_size=int(stdout2.strip().split()[0])
+                    #try:  
+                    for j in range(len(removes)):
+                        print('fs_used,type = %s,%s\n' % (fs_used,type(fs_used)))
+                        print('finishing_size,type = %s,%s\n' % (finishing_size,type(finishing_size)))
+                        print('fs_size,type = %s,%s\n' % (fs_size,type(fs_size)))
+                        capacity=(fs_used+finishing_size)/float(fs_size)
+                        print('capacity is %s\n' % capacity) 
+                        #print('available space = %s\n' % (fs_used+finishing_size)/float(fs_size))
+                        if capacity<0.80:
+                        #if (fs_used+finishing_size)/float(fs_size)<0.80:
+                            print("destination directory not near capacity, skipping removal of old files")
+                            break    
+                        
+                        else:
+                            print('attempting to remove %s\n' % removes[j])
+                            rmtree(removes[j])
+                            os.system('touch /n/ngsdata')      
+                            p3=Popen(check_destination_size,shell=True,stdout=PIPE,stderr=PIPE)
+                            stdout3,stderr3=p3.communicate()
+                                
+                                #fs_used=int(stdout3.strip().split()[0])
+                            fs_used=int(stdout3.strip().split()[2])
+                            print("updated destination usage is %s" % fs_used)
                                 #self.notify('seqPrep WARNING for %s' % (self.runOutName),'removing'+removes[j]+'to make space in'+ self.finalParent)
-                                   
+                    
+                    try:              
                         ### try copying again after removing older directories ###
                         self.log('Copying data, post space clearing, to ' + self.finalDir + '...')
                         self.safeCopy(self.finishingDir, self.finalDir)
                         self.log('Copy to ' + self.finalDir + ' finished.')
                     
                     except Exception, e:
-                        sys.stderr.write('Error doing something: ' + str(e) + '\n' + traceback.format_exc())
-                        except_string="EXCEPTION: failed querying timestamp,removing older runs and copying new run"
-                        print("EXCEPTION: failed querying timestamp,removing older runs and copying new run")
-                        self.notify('SeqPrep EXCEPTION for %s' % (self.runOutName), except_string + '\n\n' + '\n'.join([str(i) for i in [removes,len(dir_fetch),dir_fetch[0],dirtimes]]))       
+                        sys.stderr.write('Error copying to destiination directory: ' + str(e) + '\n' + traceback.format_exc())
+                        except_string="EXCEPTION: failed copying new run to destination"
+                        #except_string="EXCEPTION: failed querying timestamp,removing older runs and copying new run"
+                        print("EXCEPTION: failed copying new run")
+                        self.notify('SeqPrep EXCEPTION for %s' % (self.runOutName), str(e) + '\n\n' + '\n'.join([str(i) for i in [removes,len(dir_fetch),dir_fetch[0],dirtimes]]))       
                         
                 else:
                     self.log('Copying data to ' + self.finalDir + '...')
