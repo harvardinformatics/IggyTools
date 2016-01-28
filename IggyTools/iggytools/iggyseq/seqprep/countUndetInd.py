@@ -19,7 +19,7 @@ def count(gzFastqFile, outDir, threshold = 1000000):  # tally barcodes in a fast
 
     for line in gzip.open(gzFastqFile, 'rb'):
 
-        matchObj = re.match('@(ILLUMINA|NS|HISEQ).+:([ACGTN+]+)$', line) # matches from beginning of line
+        matchObj = re.match('@(HWI|ILLUMINA|NS|HISEQ).+:([ACGTN+]+)$', line) # matches from beginning of line
 
         if matchObj:
             index = matchObj.group(2)
