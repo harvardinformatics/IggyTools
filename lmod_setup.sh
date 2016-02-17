@@ -2,6 +2,9 @@
 #module --Silent load centos6/python-2.7.3
 #source /n/informatics/mclamp/iggy/iggy_ve2.7.3/bin/activate
 module load python
+
+module load libxml2/2.7.8-fasrc02
+
 source activate seqprep
 
 umask 002
