@@ -109,6 +109,7 @@ class IlluminaNextGen:
         self.finalDir         = path.join(self.finalParent, self.runOutName)
         self.samplesheetFile  = path.join(self.primaryDir, 'SampleSheet.csv')
         self.runinfoFile      = path.join(self.primaryDir, 'RunInfo.xml')
+        self.interOp          = path.join(self.primaryDir,'InterOp')
 
         self.optionsStr = '\nBase Parameters:\n' \
             + 'runName:                 ' + self.runName                   + '\n' \
@@ -265,7 +266,8 @@ class IlluminaNextGen:
         # Copy the run's SampleSheet.csv, RunInfo.xml, RunParameters.xml files to self.finishingDir
         filesToCopy = [self.samplesheetFile, 
                        self.runinfoFile, 
-                       self.runparametersFile ]
+                       self.runparametersFile,
+                       self.interOp]
 
         for item in filesToCopy:
             newItem = path.join(self.finishingDir, path.basename(item))
