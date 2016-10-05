@@ -474,7 +474,7 @@ class NextSeqAnalysis(IlluminaNextGenAnalysis):
             command += ' --minimum-trimmed-read-length ' + str(self.Run.minTrimmedReadLength)
 
         if self.Run.writeIndexFastq == True:
-            command += ' --writeIndexFastq \\\n'    
+            command += ' --create-fastq-for-index-reads \\\n'    
 
         command += '; '
 
