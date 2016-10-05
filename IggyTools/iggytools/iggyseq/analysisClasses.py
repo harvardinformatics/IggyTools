@@ -359,6 +359,9 @@ class HiSeqAnalysis(IlluminaNextGenAnalysis):
         #copy analysis samplesheet to analysis finishingDir
         self.Run.safeCopy( self.ssFile, path.join(self.finishingDir, path.basename(self.ssFile)) )
     
+        # copy InterOp directory from /n/illumina/primary_data to analysis_finished
+        #inter_op_dir=path.join(self.Run.primaryDir,'InterOp')
+        #self.Run.safeCopy( inter_op_dir, path.join(self.finishingDir,'InterOp'))        
 
     def summarizeDemuxResults(self): #hiseq analysis summary
 
@@ -470,6 +473,9 @@ class NextSeqAnalysis(IlluminaNextGenAnalysis):
         if self.Run.minTrimmedReadLength is not None:
             command += ' --minimum-trimmed-read-length ' + str(self.Run.minTrimmedReadLength)
 
+        if self.Run.writeIndexFastq == True:
+            command += ' --create-fastq-for-index-reads \\\n'    
+
         command += '; '
 
         self.Run.shell(command, self.Run.logFile)
@@ -521,7 +527,10 @@ class NextSeqAnalysis(IlluminaNextGenAnalysis):
 
         #copy analysis samplesheet to analysis finishingDir
         self.Run.safeCopy( self.ssFile, path.join(self.finishingDir, path.basename(self.ssFile)) )
-
+         
+        # copy InterOp directory from illumina/primary_data to analysis finished
+        #inter_op_dir=path.join(self.Run.primaryDir,'InterOp')
+        #self.Run.safeCopy( inter_op_dir, path.join(self.finishingDir,'InterOp'))  
 
     def summarizeDemuxResults(self):  #nextseq analysis summary
         self.Run.log('Summarizing demux results...')

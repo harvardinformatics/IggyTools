@@ -109,6 +109,7 @@ class IlluminaNextGen:
         self.finalDir         = path.join(self.finalParent, self.runOutName)
         self.samplesheetFile  = path.join(self.primaryDir, 'SampleSheet.csv')
         self.runinfoFile      = path.join(self.primaryDir, 'RunInfo.xml')
+        self.interOp          = path.join(self.primaryDir,'InterOp')
 
         self.optionsStr = '\nBase Parameters:\n' \
             + 'runName:                 ' + self.runName                   + '\n' \
@@ -265,7 +266,8 @@ class IlluminaNextGen:
         # Copy the run's SampleSheet.csv, RunInfo.xml, RunParameters.xml files to self.finishingDir
         filesToCopy = [self.samplesheetFile, 
                        self.runinfoFile, 
-                       self.runparametersFile ]
+                       self.runparametersFile,
+                       self.interOp]
 
         for item in filesToCopy:
             newItem = path.join(self.finishingDir, path.basename(item))
@@ -621,6 +623,9 @@ class NextSeq(IlluminaNextGen):
         self.suppressAdapterTrimming  = self.pref.NEXTSEQ_SUPPRESS_ADAPTER_TRIMMING
         self.minTrimmedReadLength     = self.pref.NEXTSEQ_MIN_TRIMMED_READ_LENGTH
         self.maskShortAdapterReads    = self.pref.NEXTSEQ_MASK_SHORT_ADAPTER_READS
+        # AHF added
+        self.writeIndexFastq          = self.pref.NEXTSEQ_WRITE_INDEX_FASTQ
+
 
         self.runType = 'NextSeq' 
 
@@ -631,13 +636,17 @@ class NextSeq(IlluminaNextGen):
                 self.minTrimmedReadLength = int(kwargs['minTrimmedReadLength'])
             if 'suppressAdapterTrimming' in kwargs.keys():
                 self.suppressAdapterTrimming = bool(kwargs['suppressAdapterTrimming'])
+            if 'writeIndexFastq' in kwargs.keys():
+                self.writeIndexFastq = bool(kwargs['writeIndexFastq'])
+     
 
         optionsStr = 'NextSeq Parameters:\n' \
             + 'runparametersFile:       '  + self.runparametersFile            + '\n' \
             + 'minTrimmedReadLength:    '  + str(self.minTrimmedReadLength)    + '\n' \
             + 'suppressAdapterTrimming: '  + str(self.suppressAdapterTrimming) + '\n' \
-            + 'maskShortAdapterReads:   '  + str(self.maskShortAdapterReads)   + '\n' 
-
+            + 'maskShortAdapterReads:   '  + str(self.maskShortAdapterReads)   + '\n' \
+            + 'writeIndexFastq:         '  + str(self.writeIndexFastq)         + '\n'       
+        
         self.log(optionsStr)  #log NextSeq options
 
 
