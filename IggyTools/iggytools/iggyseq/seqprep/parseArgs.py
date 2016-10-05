@@ -71,6 +71,9 @@ def parseArgs(argv, pref = None):
                         default = pref.NEXTSEQ_MIN_TRIMMED_READ_LENGTH, action = 'store', type = int, dest = 'minTrimmedReadLength', 
                         metavar = 'LENGTH')
 
+    parser.add_argument('-i','--writeIndexFastq', help = 'Write fastq files for index reads.. NextSeq/bcl2fastq2 only',
+                        default = False, action = 'store_true',dest='writeIndexFastq')
+    
     args = parser.parse_args(argv)
 
     if not re.match('[0-9]{6}_[0-9A-Za-z]+_', args['runName']): #matches from beg.

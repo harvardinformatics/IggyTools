@@ -473,6 +473,9 @@ class NextSeqAnalysis(IlluminaNextGenAnalysis):
         if self.Run.minTrimmedReadLength is not None:
             command += ' --minimum-trimmed-read-length ' + str(self.Run.minTrimmedReadLength)
 
+        if self.Run.writeIndexFastq == True:
+            command += ' --writeIndexFastq \\\n'    
+
         command += '; '
 
         self.Run.shell(command, self.Run.logFile)

@@ -99,6 +99,11 @@ class Iggyseq_PrefFile(BasePrefFile):
                                comment = 'For NextSeq, mask short adapter reads',
                                varType = int),
 
+                      PrefVar( name = 'NEXTSEQ_WRITE_INDEX_FASTQ',
+                               default = False,
+                               comment = 'For NextSeq, write index fastq files',
+                               varType = bool ),
+
                       PrefVar( name = 'NEXTSEQ_SUPPRESS_ADAPTER_TRIMMING',
                                default = False,
                                comment = 'For NextSeq, suppress adater trimming',
