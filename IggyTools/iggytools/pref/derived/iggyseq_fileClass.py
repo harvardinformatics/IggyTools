@@ -20,7 +20,7 @@ class Iggyseq_PrefFile(BasePrefFile):
                                varType = bool ),
 
                       PrefVar( name = 'PRIMARY_PARENT',
-                               default = '/n/illumina01/primary_data',
+                               default = '/n/boslfs/INSTRUMENTS/illumina/',
                                comment = 'Directory where run directories with BCL files are located',
                                varType = str ),
 
