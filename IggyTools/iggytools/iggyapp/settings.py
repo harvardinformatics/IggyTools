@@ -21,6 +21,8 @@ MACHINE_VERSION = { 'SN343'    : 'HiSeq 2000', #map machine id to human-readable
                     'D00365'   : 'HiSeq 2500',
                     'NS500305' : 'NextSeq',
                     'NS500422' : 'NextSeq',
+                    'NB501677' : 'NextSeq',
+                    'NB502063' : 'NextSeq',
                     'D00742'   : 'HiSeq' }
 
 # Quick-start development settings - unsuitable for production
