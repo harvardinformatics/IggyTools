@@ -459,6 +459,11 @@ class IlluminaNextGen:
                 
                 # check how close destination filesystem is to being full
                 if (fs_used+finishing_size)/float(fs_size)>0.80:
+                    print("warning, finishing directory near capacity")
+                    self.log('Copying data to ' + self.finalDir + '...')
+                    self.safeCopy(self.finishingDir, self.finalDir)
+                    self.log('Copy to ' + self.finalDir + ' finished.')
+                    """
                     month_convert={'Jan':1,'Feb':2,'Mar':3,'Apr':4,'May':5,'Jun':6,'Jul':7,'Aug':8,'Sep':9,'Oct':10,'Nov':11,'Dec':12}
                     
                     
@@ -520,7 +525,7 @@ class IlluminaNextGen:
                         #except_string="EXCEPTION: failed querying timestamp,removing older runs and copying new run"
                         print("EXCEPTION: failed copying new run")
                         self.notify('SeqPrep EXCEPTION for %s' % (self.runOutName), str(e) + '\n\n' + '\n'.join([str(i) for i in [removes,len(dir_fetch),dir_fetch[0],dirtimes]]))       
-                        
+                    """                        
                 else:
                     self.log('Copying data to ' + self.finalDir + '...')
                     self.safeCopy(self.finishingDir, self.finalDir)
